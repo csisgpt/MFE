@@ -7,6 +7,10 @@ import '@shared/styles';
 import { createRouter, createWebHistory } from 'vue-router';
 import AppOneMount from './AppOneMount.vue';
 
+if (import.meta.env.VITE_STANDALONE) {
+  import('@shared/ui/styles');
+}
+
 const app = createApp(App);
 const pinia = createPinia();
 const router = createRouter({

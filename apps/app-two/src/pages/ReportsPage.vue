@@ -1,47 +1,55 @@
 <template>
   <UiCard>
     <h3>Reports</h3>
-    <p v-if="!isAdmin" class="warning">Only admins can submit reports.</p>
+    <p v-if="!canCreate" class="warning">Only admins can submit reports.</p>
     <form class="form" @submit.prevent="submitReport">
       <label>
         Title
-        <input v-model="form.title" required />
+        <input v-model="appTwoStore.reportDraft.title" required />
       </label>
       <label>
         Date Range
-        <input v-model="form.dateRange" placeholder="2024-01-01 to 2024-01-31" required />
+        <input
+          v-model="appTwoStore.reportDraft.dateRange"
+          placeholder="2024-01-01 to 2024-01-31"
+          required
+        />
       </label>
       <label>
         Notes
-        <textarea v-model="form.notes" rows="3" />
+        <textarea v-model="appTwoStore.reportDraft.notes" rows="3" />
       </label>
-      <UiButton type="primary" html-type="submit" :disabled="!isAdmin">Submit</UiButton>
+      <UiButton type="primary" html-type="submit" :disabled="!canCreate">Submit</UiButton>
     </form>
   </UiCard>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { createReport } from '@shared/api-client';
-import { eventBus, useHostAuthStore } from '@shared/store';
+import { eventBus } from '@shared/store';
+import { can } from '@shared/permissions';
+import { useAppTwoStore } from '../stores/app-two.store';
 
-const authStore = useHostAuthStore();
-const isAdmin = computed(() => authStore.user?.role === 'admin');
-
-const form = ref({
-  title: '',
-  dateRange: '',
-  notes: ''
-});
+const appTwoStore = useAppTwoStore();
+const canCreate = computed(() => can('reports:create'));
 
 const submitReport = async () => {
-  if (!isAdmin.value) {
+  if (!canCreate.value) {
     return;
   }
   try {
-    await createReport(form.value);
+    await createReport(appTwoStore.reportDraft);
     eventBus.emit('TOAST', { type: 'success', message: 'Report submitted' });
-    form.value = { title: '', dateRange: '', notes: '' };
+    eventBus.emit('AUDIT_LOG', {
+      id: `audit_${Date.now()}`,
+      level: 'info',
+      message: 'Report submitted',
+      source: 'app-two',
+      timestamp: new Date().toISOString(),
+      context: { title: appTwoStore.reportDraft.title }
+    });
+    appTwoStore.resetReportDraft();
   } catch {
     eventBus.emit('TOAST', { type: 'error', message: 'Report submission failed' });
   }

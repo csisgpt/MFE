@@ -2,7 +2,7 @@
   <UiCard>
     <div class="header">
       <h3>Orders</h3>
-      <input v-model="query" placeholder="Search by id" />
+      <input v-model="appOneStore.orderQuery" placeholder="Search by id" />
     </div>
     <UiDataTable
       :value="filteredOrders"
@@ -15,11 +15,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { getOrders } from '@shared/api-client';
+import { useAppOneStore } from '../stores/app-one.store';
 
 const emit = defineEmits<{ (e: 'open-order', id: string): void }>();
 
 const orders = ref<{ id: string; status: string; total: number }[]>([]);
-const query = ref('');
+const appOneStore = useAppOneStore();
 
 const columns = [
   { field: 'id', header: 'Order ID' },
@@ -28,7 +29,7 @@ const columns = [
 ];
 
 const filteredOrders = computed(() =>
-  orders.value.filter((order) => order.id.includes(query.value))
+  orders.value.filter((order) => order.id.includes(appOneStore.orderQuery))
 );
 
 const handleRowClick = (event: { data: { id: string } }) => {

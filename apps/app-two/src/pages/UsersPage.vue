@@ -2,19 +2,19 @@
   <UiCard>
     <div class="header">
       <h3>Users</h3>
-      <UiButton type="primary" @click="showModal = true">Add User</UiButton>
+      <UiButton type="primary" @click="appTwoStore.showUserModal = true">Add User</UiButton>
     </div>
     <UiDataTable :value="users" :columns="columns" />
   </UiCard>
-  <UiModal v-model:open="showModal" title="Add User" @ok="addUser">
+  <UiModal v-model:open="appTwoStore.showUserModal" title="Add User" @ok="addUser">
     <div class="form">
       <label>
         Name
-        <input v-model="newUser.name" />
+        <input v-model="appTwoStore.newUser.name" />
       </label>
       <label>
         Role
-        <select v-model="newUser.role">
+        <select v-model="appTwoStore.newUser.role">
           <option value="admin">Admin</option>
           <option value="user">User</option>
         </select>
@@ -26,10 +26,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getUsers } from '@shared/api-client';
+import { useAppTwoStore } from '../stores/app-two.store';
 
 const users = ref<{ id: string; name: string; role: string }[]>([]);
-const showModal = ref(false);
-const newUser = ref({ name: '', role: 'user' });
+const appTwoStore = useAppTwoStore();
 
 const columns = [
   { field: 'id', header: 'ID' },
@@ -40,10 +40,14 @@ const columns = [
 const addUser = () => {
   users.value = [
     ...users.value,
-    { id: `u${users.value.length + 1}`, name: newUser.value.name, role: newUser.value.role }
+    {
+      id: `u${users.value.length + 1}`,
+      name: appTwoStore.newUser.name,
+      role: appTwoStore.newUser.role
+    }
   ];
-  newUser.value = { name: '', role: 'user' };
-  showModal.value = false;
+  appTwoStore.resetUserDraft();
+  appTwoStore.showUserModal = false;
 };
 
 onMounted(async () => {

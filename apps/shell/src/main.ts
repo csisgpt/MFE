@@ -2,10 +2,12 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import { loadRuntimeConfig } from '@shared/config';
+import { getConfig, loadRuntimeConfig } from '@shared/config';
 import { installUi } from '@shared/ui';
-import { eventBus, setHostPinia, useHostThemeStore } from '@shared/store';
+import '@shared/ui/styles';
+import { eventBus, setHostPinia, useHostAuditStore, useHostThemeStore } from '@shared/store';
 import '@shared/styles';
+import { useRemoteStatusStore } from './stores/remote-status.store';
 
 async function bootstrap() {
   await loadRuntimeConfig();
@@ -17,12 +19,43 @@ async function bootstrap() {
   installUi(app);
 
   const themeStore = useHostThemeStore();
+  const auditStore = useHostAuditStore();
+  const remoteStore = useRemoteStatusStore();
   themeStore.setMode(themeStore.mode);
+  const config = getConfig();
+  remoteStore.setDisabled('insurance', config.featureFlags.disableInsurance);
+  remoteStore.setDisabled('admission', config.featureFlags.disableAdmission);
+  remoteStore.setDisabled('ops', config.featureFlags.disableOps);
   eventBus.on('NAVIGATE', ({ path }) => {
     router.push(path);
   });
   eventBus.on('AUTH_LOGOUT', () => {
     router.push('/login');
+  });
+  eventBus.on('AUDIT_LOG', (entry) => {
+    auditStore.add(entry);
+  });
+
+  window.addEventListener('error', (event) => {
+    auditStore.add({
+      id: `err_${Date.now()}`,
+      level: 'error',
+      message: event.message,
+      source: 'shell',
+      timestamp: new Date().toISOString(),
+      context: { filename: event.filename, lineno: event.lineno }
+    });
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    auditStore.add({
+      id: `rej_${Date.now()}`,
+      level: 'error',
+      message: 'Unhandled promise rejection',
+      source: 'shell',
+      timestamp: new Date().toISOString(),
+      context: { reason: String(event.reason) }
+    });
   });
 
   app.mount('#app');
