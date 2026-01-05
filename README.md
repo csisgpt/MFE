@@ -72,9 +72,14 @@ pnpm nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,she
 ### Optional: Remote standalone dev
 Remotes default to same-origin proxying (base `/remotes/...`). To run a remote standalone at its root:
 ```bash
-VITE_STANDALONE=true pnpm nx serve insurance
-VITE_STANDALONE=true pnpm nx serve admission
-VITE_STANDALONE=true pnpm nx serve ops
+pnpm nx serve insurance --configuration=standalone
+pnpm nx serve admission --configuration=standalone
+pnpm nx serve ops --configuration=standalone
+```
+
+Windows-friendly alternative:
+```bash
+pnpm nx run insurance:serve --configuration=standalone
 ```
 
 ## Build + Preview
@@ -92,6 +97,17 @@ pnpm nx preview insurance
 pnpm nx preview admission
 pnpm nx preview ops
 pnpm nx preview shell
+```
+
+### Integrated preview with same-origin proxies
+Vite preview does not apply dev proxies, so use the integrated preview server for the shell:
+```bash
+pnpm nx preview app-one
+pnpm nx preview app-two
+pnpm nx preview insurance
+pnpm nx preview admission
+pnpm nx preview ops
+pnpm nx preview:integrated shell
 ```
 
 ### Prod-like dev

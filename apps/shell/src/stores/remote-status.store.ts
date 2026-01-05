@@ -10,8 +10,14 @@ export type RemoteStatus = {
   lastLoadedAt?: string;
   lastError?: string;
   lastPrefetchAt?: string;
+  prefetched?: boolean;
+  lastValidatedAt?: string;
+  lastValidationStatus?: 'ok' | 'failed';
+  lastValidationError?: string;
   meta?: RemoteMeta;
 };
+
+const storageKey = 'mfe.disabledRemotes';
 
 const defaultRemotes: Record<RemoteKey, RemoteStatus> = {
   appOne: {
@@ -47,6 +53,38 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
     disabled: new Set<RemoteKey>()
   }),
   actions: {
+    loadDisabledFromStorage() {
+      const stored = localStorage.getItem(storageKey);
+      if (!stored) {
+        return;
+      }
+      try {
+        const parsed = JSON.parse(stored) as RemoteKey[];
+        this.disabled = new Set(parsed);
+        Object.keys(this.remotes).forEach((key) => {
+          const name = key as RemoteKey;
+          this.remotes[name].status = this.disabled.has(name) ? 'disabled' : 'idle';
+        });
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
+    },
+    persistDisabledToStorage() {
+      localStorage.setItem(storageKey, JSON.stringify(Array.from(this.disabled)));
+    },
+    seedFromRuntimeConfig(disabledFlags: Partial<Record<RemoteKey, boolean>>) {
+      this.disabled = new Set();
+      Object.keys(this.remotes).forEach((key) => {
+        const name = key as RemoteKey;
+        const disabled = disabledFlags[name];
+        if (disabled) {
+          this.disabled.add(name);
+          this.remotes[name].status = 'disabled';
+        } else if (this.remotes[name].status === 'disabled') {
+          this.remotes[name].status = 'idle';
+        }
+      });
+    },
     markLoading(name: RemoteKey) {
       const remote = this.remotes[name];
       if (!remote || this.disabled.has(name)) {
@@ -78,6 +116,16 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
         return;
       }
       remote.lastPrefetchAt = new Date().toISOString();
+      remote.prefetched = true;
+    },
+    markValidated(name: RemoteKey, status: 'ok' | 'failed', error?: string) {
+      const remote = this.remotes[name];
+      if (!remote) {
+        return;
+      }
+      remote.lastValidatedAt = new Date().toISOString();
+      remote.lastValidationStatus = status;
+      remote.lastValidationError = error;
     },
     toggleDisabled(name: RemoteKey) {
       if (this.disabled.has(name)) {
@@ -85,21 +133,25 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
         if (this.remotes[name].status === 'disabled') {
           this.remotes[name].status = 'idle';
         }
+        this.persistDisabledToStorage();
         return;
       }
       this.disabled.add(name);
       this.remotes[name].status = 'disabled';
+      this.persistDisabledToStorage();
     },
     setDisabled(name: RemoteKey, disabled: boolean) {
       if (disabled) {
         this.disabled.add(name);
         this.remotes[name].status = 'disabled';
+        this.persistDisabledToStorage();
         return;
       }
       this.disabled.delete(name);
       if (this.remotes[name].status === 'disabled') {
         this.remotes[name].status = 'idle';
       }
+      this.persistDisabledToStorage();
     }
   }
 });

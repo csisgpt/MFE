@@ -1,6 +1,10 @@
 <template>
   <UiPage>
-    <UiPageHeader title="System / MFE Status" subtitle="Live module federation health and controls" />
+    <UiPageHeader title="System / MFE Status" subtitle="Live module federation health and controls">
+      <template #actions>
+        <UiButton type="primary" size="small" @click="validateAll">Validate remotes</UiButton>
+      </template>
+    </UiPageHeader>
     <UiSection title="Remote status" subtitle="Load, disable, and inspect remotes in real time">
       <div class="table-wrap">
         <table>
@@ -12,6 +16,7 @@
               <th>Status</th>
               <th>Last Loaded</th>
               <th>Prefetched</th>
+              <th>Validated</th>
               <th>Last Error</th>
               <th>Actions</th>
             </tr>
@@ -25,8 +30,15 @@
                 <UiTag :color="statusColor(remote.status)">{{ remote.status }}</UiTag>
               </td>
               <td>{{ remote.lastLoadedAt || '—' }}</td>
-              <td>{{ remote.lastPrefetchAt || '—' }}</td>
-              <td>{{ remote.lastError || '—' }}</td>
+              <td>{{ remote.prefetched ? remote.lastPrefetchAt : 'No' }}</td>
+              <td>
+                <UiTag v-if="remote.lastValidationStatus" :color="validationColor(remote.lastValidationStatus)">
+                  {{ remote.lastValidationStatus }}
+                </UiTag>
+                <span v-else>—</span>
+                <div class="validation-time">{{ remote.lastValidatedAt || '' }}</div>
+              </td>
+              <td>{{ remote.lastValidationError || remote.lastError || '—' }}</td>
               <td>
                 <div class="row-actions">
                   <UiButton size="small" @click="retry(remote.name)">Retry load</UiButton>
@@ -47,6 +59,7 @@
 import { computed } from 'vue';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
 import { loadRemoteMount } from '../utils/remotes';
+import { eventBus } from '@shared/store';
 
 const statusStore = useRemoteStatusStore();
 
@@ -74,6 +87,40 @@ const statusColor = (status: string) => {
       return 'default';
   }
 };
+
+const validationColor = (status: 'ok' | 'failed') => (status === 'ok' ? 'green' : 'red');
+
+const validateAll = async () => {
+  for (const remote of remoteRows.value) {
+    if (statusStore.disabled.has(remote.name)) {
+      continue;
+    }
+    try {
+      await loadRemoteMount(remote.name);
+      statusStore.markValidated(remote.name, 'ok');
+      eventBus.emit('AUDIT_LOG', {
+        id: `audit_${Date.now()}_${remote.name}`,
+        level: 'info',
+        message: `Validated remote ${remote.label}`,
+        source: 'system',
+        timestamp: new Date().toISOString(),
+        context: { remote: remote.name }
+      });
+    } catch (error) {
+      const message = (error as Error).message || 'Validation failed';
+      statusStore.markFailed(remote.name, message);
+      statusStore.markValidated(remote.name, 'failed', message);
+      eventBus.emit('AUDIT_LOG', {
+        id: `audit_${Date.now()}_${remote.name}`,
+        level: 'error',
+        message: `Remote validation failed: ${remote.label}`,
+        source: 'system',
+        timestamp: new Date().toISOString(),
+        context: { remote: remote.name, error: message }
+      });
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -81,6 +128,11 @@ const statusColor = (status: string) => {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.validation-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .table-wrap {

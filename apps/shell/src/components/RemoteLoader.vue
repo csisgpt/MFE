@@ -23,6 +23,7 @@
 import { computed, onMounted, shallowRef, ref, watch } from 'vue';
 import { eventBus } from '@shared/store';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
+import { loadRemoteMeta } from '../utils/remotes';
 
 interface Props {
   remote: RemoteKey;
@@ -64,7 +65,8 @@ async function loadRemote() {
     const component = (module as { default?: unknown }).default ?? module;
     remoteComponent.value = component;
     state.value = 'loaded';
-    statusStore.markLoaded(props.remote);
+    const meta = await loadRemoteMeta(props.remote);
+    statusStore.markLoaded(props.remote, meta ?? undefined);
   } catch (error) {
     const message = (error as Error).message || 'Remote failed to load';
     errorMessage.value = message;

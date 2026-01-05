@@ -1,5 +1,6 @@
 import { getRemoteEntryUrl, type RemoteName } from '@shared/config';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
+import type { RemoteMeta } from '@shared/contracts';
 
 const inflight = new Map<RemoteName, Promise<void>>();
 
@@ -60,8 +61,36 @@ export async function loadRemoteMount(name: RemoteKey): Promise<void> {
       default:
         break;
     }
-    store.markLoaded(name);
+    const meta = await loadRemoteMeta(name);
+    store.markLoaded(name, meta ?? undefined);
   } catch (error) {
     store.markFailed(name, (error as Error).message || 'Failed to load remote');
+  }
+}
+
+export async function loadRemoteMeta(name: RemoteKey): Promise<RemoteMeta | null> {
+  switch (name) {
+    case 'appOne': {
+      const mod = await import('appOne/meta');
+      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
+    }
+    case 'appTwo': {
+      const mod = await import('appTwo/meta');
+      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
+    }
+    case 'insurance': {
+      const mod = await import('insurance/meta');
+      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
+    }
+    case 'admission': {
+      const mod = await import('admission/meta');
+      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
+    }
+    case 'ops': {
+      const mod = await import('ops/meta');
+      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
+    }
+    default:
+      return null;
   }
 }

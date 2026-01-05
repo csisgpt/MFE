@@ -9,6 +9,11 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "vite --config apps/app-one/vite.config.ts"
+      },
+      "configurations": {
+        "standalone": {
+          "command": "cross-env VITE_STANDALONE=true vite --config apps/app-one/vite.config.ts"
+        }
       }
     },
     "build": {

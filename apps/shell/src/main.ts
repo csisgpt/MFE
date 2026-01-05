@@ -23,9 +23,12 @@ async function bootstrap() {
   const remoteStore = useRemoteStatusStore();
   themeStore.setMode(themeStore.mode);
   const config = getConfig();
-  remoteStore.setDisabled('insurance', config.featureFlags.disableInsurance);
-  remoteStore.setDisabled('admission', config.featureFlags.disableAdmission);
-  remoteStore.setDisabled('ops', config.featureFlags.disableOps);
+  remoteStore.seedFromRuntimeConfig({
+    insurance: config.featureFlags.disableInsurance,
+    admission: config.featureFlags.disableAdmission,
+    ops: config.featureFlags.disableOps
+  });
+  remoteStore.loadDisabledFromStorage();
   eventBus.on('NAVIGATE', ({ path }) => {
     router.push(path);
   });

@@ -25,6 +25,13 @@
         "command": "vite preview --config apps/shell/vite.config.ts"
       }
     },
+    "preview:integrated": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node apps/shell/tools/preview-server.mjs"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
