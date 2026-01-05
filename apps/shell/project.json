@@ -1,0 +1,47 @@
+{
+  "name": "shell",
+  "root": "apps/shell",
+  "sourceRoot": "apps/shell/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite --config apps/shell/vite.config.ts"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/shell"],
+      "options": {
+        "command": "vite build --config apps/shell/vite.config.ts",
+        "cwd": "apps/shell"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite preview --config apps/shell/vite.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint apps/shell"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/shell/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

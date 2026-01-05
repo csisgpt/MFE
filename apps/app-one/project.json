@@ -1,0 +1,46 @@
+{
+  "name": "app-one",
+  "root": "apps/app-one",
+  "sourceRoot": "apps/app-one/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite --config apps/app-one/vite.config.ts"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/app-one"],
+      "options": {
+        "command": "vite build --config apps/app-one/vite.config.ts"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite preview --config apps/app-one/vite.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint apps/app-one"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/app-one/tsconfig.json --noEmit"
+      }
+    }
+  }
+}
