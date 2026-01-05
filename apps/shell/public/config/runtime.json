@@ -1,0 +1,10 @@
+{
+  "apiBaseUrl": "/api",
+  "featureFlags": {
+    "enableReports": true
+  },
+  "remotePrefixes": {
+    "appOne": "/remotes/app-one",
+    "appTwo": "/remotes/app-two"
+  }
+}
