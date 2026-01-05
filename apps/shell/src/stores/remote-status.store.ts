@@ -53,6 +53,13 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
     disabled: new Set<RemoteKey>()
   }),
   actions: {
+    setMeta(name: RemoteKey, meta: RemoteMeta) {
+      const remote = this.remotes[name];
+      if (!remote) {
+        return;
+      }
+      remote.meta = meta;
+    },
     loadDisabledFromStorage() {
       const stored = localStorage.getItem(storageKey);
       if (!stored) {

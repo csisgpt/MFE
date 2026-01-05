@@ -35,36 +35,49 @@ export function prefetchRemoteEntry(name: RemoteKey): void {
   inflight.set(remoteName, promise);
 }
 
-export async function loadRemoteMount(name: RemoteKey): Promise<void> {
+export type RemoteLoadResult = {
+  ok: boolean;
+  error?: string;
+  meta?: RemoteMeta;
+};
+
+async function importRemoteMount(name: RemoteKey): Promise<void> {
+  switch (name) {
+    case 'appOne':
+      await import('appOne/AppOneMount');
+      return;
+    case 'appTwo':
+      await import('appTwo/AppTwoMount');
+      return;
+    case 'insurance':
+      await import('insurance/InsuranceMount');
+      return;
+    case 'admission':
+      await import('admission/AdmissionMount');
+      return;
+    case 'ops':
+      await import('ops/OpsMount');
+      return;
+    default:
+      return;
+  }
+}
+
+export async function loadRemoteMount(name: RemoteKey): Promise<RemoteLoadResult> {
   const store = useRemoteStatusStore();
   if (store.disabled.has(name)) {
-    return;
+    return { ok: false, error: 'Remote disabled' };
   }
   store.markLoading(name);
   try {
-    switch (name) {
-      case 'appOne':
-        await import('appOne/AppOneMount');
-        break;
-      case 'appTwo':
-        await import('appTwo/AppTwoMount');
-        break;
-      case 'insurance':
-        await import('insurance/InsuranceMount');
-        break;
-      case 'admission':
-        await import('admission/AdmissionMount');
-        break;
-      case 'ops':
-        await import('ops/OpsMount');
-        break;
-      default:
-        break;
-    }
+    await importRemoteMount(name);
     const meta = await loadRemoteMeta(name);
     store.markLoaded(name, meta ?? undefined);
+    return { ok: true, meta: meta ?? undefined };
   } catch (error) {
-    store.markFailed(name, (error as Error).message || 'Failed to load remote');
+    const message = (error as Error).message || 'Failed to load remote';
+    store.markFailed(name, message);
+    return { ok: false, error: message };
   }
 }
 
@@ -92,5 +105,27 @@ export async function loadRemoteMeta(name: RemoteKey): Promise<RemoteMeta | null
     }
     default:
       return null;
+  }
+}
+
+export async function validateRemote(
+  name: RemoteKey,
+  mode: 'light' | 'deep'
+): Promise<RemoteLoadResult> {
+  try {
+    const response = await fetch(getRemoteEntryUrl(nameMap[name]), { cache: 'no-store' });
+    if (!response.ok) {
+      return { ok: false, error: `remoteEntry ${response.status}` };
+    }
+    const meta = await loadRemoteMeta(name);
+    if (!meta) {
+      return { ok: false, error: 'Missing remote metadata' };
+    }
+    if (mode === 'deep') {
+      await importRemoteMount(name);
+    }
+    return { ok: true, meta };
+  } catch (error) {
+    return { ok: false, error: (error as Error).message || 'Validation failed' };
   }
 }

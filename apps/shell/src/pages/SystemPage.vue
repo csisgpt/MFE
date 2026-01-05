@@ -2,6 +2,7 @@
   <UiPage>
     <UiPageHeader title="System / MFE Status" subtitle="Live module federation health and controls">
       <template #actions>
+        <UiSelect v-model:value="validationMode" :options="modeOptions" size="small" />
         <UiButton type="primary" size="small" @click="validateAll">Validate remotes</UiButton>
       </template>
     </UiPageHeader>
@@ -56,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
-import { loadRemoteMount } from '../utils/remotes';
+import { loadRemoteMount, validateRemote } from '../utils/remotes';
 import { eventBus } from '@shared/store';
 
 const statusStore = useRemoteStatusStore();
@@ -90,18 +91,30 @@ const statusColor = (status: string) => {
 
 const validationColor = (status: 'ok' | 'failed') => (status === 'ok' ? 'green' : 'red');
 
+const validationMode = ref<'light' | 'deep'>('light');
+const modeOptions = [
+  { label: 'Light validation', value: 'light' },
+  { label: 'Deep validation', value: 'deep' }
+];
+
 const validateAll = async () => {
   for (const remote of remoteRows.value) {
     if (statusStore.disabled.has(remote.name)) {
       continue;
     }
     try {
-      await loadRemoteMount(remote.name);
+      const result = await validateRemote(remote.name, validationMode.value);
+      if (!result.ok) {
+        throw new Error(result.error || 'Validation failed');
+      }
+      if (result.meta) {
+        statusStore.setMeta(remote.name, result.meta);
+      }
       statusStore.markValidated(remote.name, 'ok');
       eventBus.emit('AUDIT_LOG', {
         id: `audit_${Date.now()}_${remote.name}`,
         level: 'info',
-        message: `Validated remote ${remote.label}`,
+        message: `Validated remote ${remote.label} (${validationMode.value})`,
         source: 'system',
         timestamp: new Date().toISOString(),
         context: { remote: remote.name }
@@ -116,7 +129,7 @@ const validateAll = async () => {
         message: `Remote validation failed: ${remote.label}`,
         source: 'system',
         timestamp: new Date().toISOString(),
-        context: { remote: remote.name, error: message }
+        context: { remote: remote.name, error: message, mode: validationMode.value }
       });
     }
   }
