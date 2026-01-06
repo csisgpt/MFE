@@ -2,10 +2,10 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'path';
+import path from 'node:path';
 import { getRemoteEntryUrl } from '../../libs/shared/config/src/remotes';
 import { createMockApi } from './tools/mock-api.mjs';
-import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
+import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
 
 export default defineConfig({
   plugins: [
@@ -40,37 +40,40 @@ export default defineConfig({
     }
   ],
   resolve: {
-    alias: getSharedAliases()
+    alias: getSharedAliases(__dirname)
   },
   server: {
     host: 'csis.ir',
     port: 4990,
     strictPort: true,
+    fs: {
+      allow: [getWorkspaceRoot(__dirname)]
+    },
     proxy: {
       '/remotes/app-one': {
         target: 'http://csis.ir:4991',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/remotes/app-one', '')
+        ws: true
       },
       '/remotes/app-two': {
         target: 'http://csis.ir:4992',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/remotes/app-two', '')
+        ws: true
       },
       '/remotes/insurance': {
         target: 'http://csis.ir:4993',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/remotes/insurance', '')
+        ws: true
       },
       '/remotes/admission': {
         target: 'http://csis.ir:4994',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/remotes/admission', '')
+        ws: true
       },
       '/remotes/ops': {
         target: 'http://csis.ir:4995',
         changeOrigin: true,
-        rewrite: (path) => path.replace('/remotes/ops', '')
+        ws: true
       }
     }
   },
