@@ -9,7 +9,9 @@
       <div class="skeleton" />
     </UiSection>
     <UiSection v-else-if="state === 'disabled'" title="Remote disabled">
-      <p>This remote is currently disabled via feature flags. Toggle it back on in System settings.</p>
+      <p>
+        This remote is currently disabled via feature flags. Toggle it back on in System settings.
+      </p>
     </UiSection>
     <UiSection v-else-if="state === 'error'" title="Remote failed">
       <p>{{ errorMessage }}</p>
@@ -38,8 +40,8 @@ const errorMessage = ref('');
 const statusStore = useRemoteStatusStore();
 
 const loaders: Record<RemoteKey, () => Promise<unknown>> = {
-  appOne: () => import('appOne/AppOneMount'),
-  appTwo: () => import('appTwo/AppTwoMount'),
+  appOne: () => import('app-one/AppOneMount'),
+  appTwo: () => import('app-two/AppTwoMount'),
   insurance: () => import('insurance/InsuranceMount'),
   admission: () => import('admission/AdmissionMount'),
   ops: () => import('ops/OpsMount')

@@ -2,9 +2,10 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'path';
+import path from 'node:path';
 import { createRequire } from 'module';
-import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
+import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
+import { resolve } from 'node:path'
 
 const isStandalone = process.env.VITE_STANDALONE === 'true';
 const base = isStandalone ? '/' : '/remotes/app-one/';
@@ -14,6 +15,7 @@ const buildTime = new Date().toISOString();
 
 export default defineConfig({
   base,
+  cacheDir: resolve(__dirname, '../../node_modules/.vite/app-one'),
   plugins: [
     tsconfigPaths({
       projects: [
@@ -37,13 +39,16 @@ export default defineConfig({
     })
   ],
   resolve: {
-    alias: getSharedAliases()
+    alias: getSharedAliases(__dirname)
   },
   server: {
     host: 'csis.ir',
     port: 4991,
     strictPort: true,
-    origin: isStandalone ? 'http://csis.ir:4991' : 'http://csis.ir:4990'
+    origin: isStandalone ? 'http://csis.ir:4991' : 'http://csis.ir:4990',
+    fs: {
+      allow: [getWorkspaceRoot(__dirname)]
+    }
   },
   build: {
     target: 'chrome89',
