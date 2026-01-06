@@ -1,10 +1,12 @@
 <template>
-  <UiCard>
-    <h2>Profile</h2>
-    <p>Name: {{ authStore.user?.name }}</p>
-    <p>Role: {{ authStore.user?.role }}</p>
-    <UiButton type="primary" @click="handleLogout">Logout</UiButton>
-  </UiCard>
+  <UiPage>
+    <UiPageHeader title="Profile" subtitle="User session details" />
+    <UiSection>
+      <p>Name: {{ authStore.user?.name }}</p>
+      <p>Role: {{ authStore.user?.role }}</p>
+      <UiButton type="primary" @click="handleLogout">Logout</UiButton>
+    </UiSection>
+  </UiPage>
 </template>
 
 <script setup lang="ts">

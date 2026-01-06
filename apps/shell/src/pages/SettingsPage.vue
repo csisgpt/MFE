@@ -1,21 +1,23 @@
 <template>
-  <UiCard>
-    <h2>Settings</h2>
-    <div class="row">
-      <span>Theme: {{ themeStore.mode }}</span>
-      <UiButton @click="toggleTheme">Toggle Theme</UiButton>
-    </div>
-    <div class="row">
-      <label>
-        Language
-        <select v-model="appStore.language" @change="handleLanguage">
-          <option value="en">English</option>
-          <option value="fr">French</option>
-          <option value="es">Spanish</option>
-        </select>
-      </label>
-    </div>
-  </UiCard>
+  <UiPage>
+    <UiPageHeader title="Settings" subtitle="Shell preferences" />
+    <UiSection>
+      <div class="row">
+        <span>Theme: {{ themeStore.mode }}</span>
+        <UiButton @click="toggleTheme">Toggle Theme</UiButton>
+      </div>
+      <div class="row">
+        <label>
+          Language
+          <select v-model="appStore.language" @change="handleLanguage">
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+          </select>
+        </label>
+      </div>
+    </UiSection>
+  </UiPage>
 </template>
 
 <script setup lang="ts">

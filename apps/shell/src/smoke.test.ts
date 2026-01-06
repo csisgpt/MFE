@@ -28,7 +28,12 @@ describe('shell routing', () => {
         plugins: [router, pinia],
         stubs: {
           UiButton: { template: '<button><slot /></button>' },
-          UiToastHost: { template: '<div />' }
+          UiToastHost: { template: '<div />' },
+          UiSelect: { template: '<select />' },
+          UiPage: { template: '<div><slot /></div>' },
+          UiPageHeader: { template: '<div><slot /></div>' },
+          UiSection: { template: '<div><slot /></div>' },
+          UiTag: { template: '<span><slot /></span>' }
         }
       }
     });

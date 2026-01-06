@@ -8,21 +8,30 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite --config apps/shell/vite.config.ts"
+        "cwd": "apps/shell",
+        "command": "vite --config vite.config.ts"
       }
     },
     "build": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/apps/shell"],
       "options": {
-        "command": "vite build --config apps/shell/vite.config.ts",
-        "cwd": "apps/shell"
+        "cwd": "apps/shell",
+        "command": "vite build --config vite.config.ts"
       }
     },
     "preview": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite preview --config apps/shell/vite.config.ts"
+        "cwd": "apps/shell",
+        "command": "vite preview --config vite.config.ts"
+      }
+    },
+    "preview:integrated": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node apps/shell/tools/preview-server.mjs"
       }
     },
     "lint": {

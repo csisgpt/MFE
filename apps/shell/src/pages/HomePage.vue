@@ -1,17 +1,17 @@
 <template>
-  <div class="page">
-    <UiCard>
-      <h1>Shell Host</h1>
-      <p>Welcome to the CSIS micro-frontend shell.</p>
-      <div class="links">
-        <RouterLink to="/app-one">Go to App One</RouterLink>
-        <RouterLink to="/app-two">Go to App Two</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/settings">Settings</RouterLink>
-        <RouterLink to="/profile">Profile</RouterLink>
-      </div>
-    </UiCard>
+  <UiPage>
+    <UiPageHeader title="Shell Dashboard" subtitle="Enterprise MFE command center" />
     <div class="grid">
+      <UiCard>
+        <h3>Quick Links</h3>
+        <div class="links">
+          <RouterLink to="/insurance">Insurance</RouterLink>
+          <RouterLink to="/admission">Admission</RouterLink>
+          <RouterLink to="/ops">Ops</RouterLink>
+          <RouterLink to="/system">System</RouterLink>
+          <RouterLink to="/audit">Audit</RouterLink>
+        </div>
+      </UiCard>
       <UiCard>
         <h3>Auth Status</h3>
         <p v-if="authStore.isAuthenticated">Logged in as {{ authStore.user?.name }}</p>
@@ -26,7 +26,7 @@
         </ul>
       </UiCard>
     </div>
-  </div>
+  </UiPage>
 </template>
 
 <script setup lang="ts">
@@ -38,12 +38,6 @@ const config = getConfig();
 </script>
 
 <style scoped>
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .links {
   display: flex;
   flex-wrap: wrap;

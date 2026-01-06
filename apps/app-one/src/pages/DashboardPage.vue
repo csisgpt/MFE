@@ -3,23 +3,24 @@
     <UiCard>
       <h3>Welcome, {{ authStore.user?.name }}</h3>
       <p>Here is your app-one dashboard.</p>
-      <UiButton type="primary" @click="counter++">Local Count: {{ counter }}</UiButton>
+      <UiButton type="primary" @click="appOneStore.incrementCounter">
+        Local Count: {{ appOneStore.dashboardCounter }}
+      </UiButton>
     </UiCard>
     <UiCard>
       <h3>Summary</h3>
-      <p>Active orders: {{ summary.activeOrders }}</p>
-      <p>Region: {{ summary.region }}</p>
+      <p>Active orders: {{ appOneStore.summary.activeOrders }}</p>
+      <p>Region: {{ appOneStore.summary.region }}</p>
     </UiCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useHostAuthStore } from '@shared/store';
+import { useAppOneStore } from '../stores/app-one.store';
 
 const authStore = useHostAuthStore();
-const counter = ref(0);
-const summary = ref({ activeOrders: 3, region: 'US-East' });
+const appOneStore = useAppOneStore();
 </script>
 
 <style scoped>

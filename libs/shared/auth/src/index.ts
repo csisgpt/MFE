@@ -10,12 +10,12 @@ export const useAuth = () => {
   };
 };
 
-export async function login(username: string, _password: string) {
+export async function login(username: string, role: string) {
   const authStore = useHostAuthStore();
   authStore.setAuth('mock-token', {
     id: 'user-1',
     name: username,
-    role: username === 'admin' ? 'admin' : 'user'
+    role: role === 'admin' || role === 'employee' || role === 'reviewer' || role === 'ops' ? role : 'user'
   });
 }
 

@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { getHostPinia } from './host-pinia';
+import type { AuditEvent } from '@shared/contracts';
 
 export interface UserProfile {
   id: string;
   name: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | 'employee' | 'reviewer' | 'ops';
 }
 
 const storedToken = localStorage.getItem('auth-token') || '';
@@ -24,6 +25,13 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       localStorage.setItem('auth-token', token);
       localStorage.setItem('auth-user', JSON.stringify(user));
+    },
+    setRole(role: UserProfile['role']) {
+      if (!this.user) {
+        return;
+      }
+      this.user = { ...this.user, role };
+      localStorage.setItem('auth-user', JSON.stringify(this.user));
     },
     clearAuth() {
       this.token = '';
@@ -68,6 +76,21 @@ export const useAppStore = defineStore('app', {
   }
 });
 
+export const useAuditStore = defineStore('audit', {
+  state: () => ({
+    entries: [] as AuditEvent[]
+  }),
+  actions: {
+    add(entry: AuditEvent) {
+      this.entries = [entry, ...this.entries].slice(0, 200);
+    },
+    clear() {
+      this.entries = [];
+    }
+  }
+});
+
 export const useHostAuthStore = () => useAuthStore(getHostPinia());
 export const useHostThemeStore = () => useThemeStore(getHostPinia());
 export const useHostAppStore = () => useAppStore(getHostPinia());
+export const useHostAuditStore = () => useAuditStore(getHostPinia());

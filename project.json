@@ -21,6 +21,12 @@
         "command": "nx run-many -t test --all --exclude=workspace"
       }
     },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {
