@@ -14,15 +14,15 @@
       </UiCard>
       <UiCard>
         <h3>Auth Status</h3>
-        <p v-if="authStore.token?.length > 0">Logged in as {{ authStore.user?.name }}</p>
+        <p v-if="authStore.isAuthenticated">Logged in as {{ authStore.user?.name }}</p>
         <p v-else>Not authenticated</p>
       </UiCard>
-      <UiCard >
-        <h3 class="bg-primary!">Runtime Config</h3>
+      <UiCard>
+        <h3>Runtime Config</h3>
         <ul>
           <li>apiBaseUrl: {{ config.apiBaseUrl }}</li>
-          <li class="!break-all">featureFlags: {{ JSON.stringify(config.featureFlags) }}</li>
-          <li class="!break-all">remotePrefixes: {{ JSON.stringify(config.remotePrefixes) }}</li>
+          <li>featureFlags: {{ JSON.stringify(config.featureFlags) }}</li>
+          <li>remotePrefixes: {{ JSON.stringify(config.remotePrefixes) }}</li>
         </ul>
       </UiCard>
     </div>

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { RemoteMeta } from '@shared/contracts';
 
-export type RemoteKey = 'app-one' | 'app-two' | 'insurance' | 'admission' | 'ops';
+export type RemoteKey = 'appOne' | 'appTwo' | 'insurance' | 'admission' | 'ops';
 
 export type RemoteStatus = {
   name: RemoteKey;

@@ -69,22 +69,6 @@ Or run all in parallel:
 pnpm nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,shell --parallel
 ```
 
-## Dev Diagnostics
-- Hosts entry required: `127.0.0.1 csis.ir`
-- Commands:
-  - `pnpm install`
-  - `pnpm serve:all`
-- Expected URLs (remotes are proxied through their own dev servers):
-  - Shell: http://csis.ir:4990/
-  - App One: http://csis.ir:4991/remotes/app-one/
-  - App Two: http://csis.ir:4992/remotes/app-two/
-  - Insurance: http://csis.ir:4993/remotes/insurance/
-  - Admission: http://csis.ir:4994/remotes/admission/
-  - Ops: http://csis.ir:4995/remotes/ops/
-- Troubleshooting:
-  - `pnpm exec nx reset`
-  - Remove Vite caches: `.vite`
-
 ### Optional: Remote standalone dev
 Remotes default to same-origin proxying (base `/remotes/...`). To run a remote standalone at its root:
 ```bash
