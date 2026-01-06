@@ -2,16 +2,15 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'node:path';
+import path from 'path';
 import { createRequire } from 'module';
-import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
 
 const isStandalone = process.env.VITE_STANDALONE === 'true';
 const base = isStandalone ? '/' : '/remotes/insurance/';
 const require = createRequire(import.meta.url);
 const appVersion = require('../../package.json').version;
 const buildTime = new Date().toISOString();
-import { resolve } from 'node:path';
+import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
 
 export default defineConfig({
   base,
@@ -37,19 +36,14 @@ export default defineConfig({
       }
     })
   ],
-  cacheDir: resolve(__dirname, '../../node_modules/.vite/insurance'),
-
   resolve: {
-    alias: getSharedAliases(__dirname)
+    alias: getSharedAliases()
   },
   server: {
     host: 'csis.ir',
     port: 4993,
     strictPort: true,
-    origin: isStandalone ? 'http://csis.ir:4993' : 'http://csis.ir:4990',
-    fs: {
-      allow: [getWorkspaceRoot(__dirname)]
-    }
+    origin: isStandalone ? 'http://csis.ir:4993' : 'http://csis.ir:4990'
   },
   build: {
     target: 'chrome89',

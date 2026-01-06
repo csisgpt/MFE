@@ -5,7 +5,7 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "nx": "nx",
-    "serve:all": "nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,shell --parallel=10",
+    "serve:all": "nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,shell --parallel",
     "format:check": "prettier --check ."
   },
   "devDependencies": {

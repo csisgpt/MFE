@@ -1,13 +1,11 @@
-// apps/shell/vite.config.ts
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import path from 'node:path';
+import path from 'path';
 import { getRemoteEntryUrl } from '../../libs/shared/config/src/remotes';
-import { createMockApi } from './tools/mock-api';
-import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
-import { resolve } from 'node:path';
+import { createMockApi } from './tools/mock-api.mjs';
+import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
 
 export default defineConfig({
   plugins: [
@@ -21,31 +19,11 @@ export default defineConfig({
     federation({
       name: 'shell',
       remotes: {
-        'app-one': {
-          type: 'module',
-          name: 'app-one',
-          entry: getRemoteEntryUrl('appOne')
-        },
-        'app-two': {
-          type: 'module',
-          name: 'app-two',
-          entry: getRemoteEntryUrl('appTwo')
-        },
-        insurance: {
-          type: 'module',
-          name: 'insurance',
-          entry: getRemoteEntryUrl('insurance')
-        },
-        admission: {
-          type: 'module',
-          name: 'admission',
-          entry: getRemoteEntryUrl('admission')
-        },
-        ops: {
-          type: 'module',
-          name: 'ops',
-          entry: getRemoteEntryUrl('ops')
-        }
+        appOne: `appOne@${getRemoteEntryUrl('appOne')}`,
+        appTwo: `appTwo@${getRemoteEntryUrl('appTwo')}`,
+        insurance: `insurance@${getRemoteEntryUrl('insurance')}`,
+        admission: `admission@${getRemoteEntryUrl('admission')}`,
+        ops: `ops@${getRemoteEntryUrl('ops')}`
       },
       shared: {
         vue: { singleton: true },
@@ -53,65 +31,54 @@ export default defineConfig({
         'vue-router': { singleton: true }
       }
     }),
-
-    // ✅ Mock API as Vite/Connect middleware (no Express)
     {
       name: 'mock-api',
       configureServer(server) {
-        const { middleware } = createMockApi();
-        server.middlewares.use(middleware);
+        const { router } = createMockApi();
+        server.middlewares.use(router);
       }
     }
   ],
-
-  cacheDir: resolve(__dirname, '../../node_modules/.vite/shell'),
-
   resolve: {
-    alias: getSharedAliases(__dirname)
+    alias: getSharedAliases()
   },
-
   server: {
     host: 'csis.ir',
     port: 4990,
     strictPort: true,
-    fs: {
-      allow: [getWorkspaceRoot(__dirname)]
-    },
     proxy: {
       '/remotes/app-one': {
         target: 'http://csis.ir:4991',
         changeOrigin: true,
-        ws: true
+        rewrite: (path) => path.replace('/remotes/app-one', '')
       },
       '/remotes/app-two': {
         target: 'http://csis.ir:4992',
         changeOrigin: true,
-        ws: true
+        rewrite: (path) => path.replace('/remotes/app-two', '')
       },
       '/remotes/insurance': {
         target: 'http://csis.ir:4993',
         changeOrigin: true,
-        ws: true
+        rewrite: (path) => path.replace('/remotes/insurance', '')
       },
       '/remotes/admission': {
         target: 'http://csis.ir:4994',
         changeOrigin: true,
-        ws: true
+        rewrite: (path) => path.replace('/remotes/admission', '')
       },
       '/remotes/ops': {
         target: 'http://csis.ir:4995',
         changeOrigin: true,
-        ws: true
+        rewrite: (path) => path.replace('/remotes/ops', '')
       }
     }
   },
-
   build: {
     target: 'chrome89',
     outDir: path.resolve(__dirname, '../../dist/apps/shell'),
     emptyOutDir: true
   },
-
   preview: {
     host: 'csis.ir',
     port: 4990,
