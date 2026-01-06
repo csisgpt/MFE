@@ -1,0 +1,37 @@
+{
+  "name": "workspace",
+  "root": ".",
+  "projectType": "application",
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t lint --all --exclude=workspace"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t typecheck --all --exclude=workspace"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t test --all --exclude=workspace"
+      }
+    },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "playwright test"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t build --all --exclude=workspace"
+      }
+    }
+  }
+}

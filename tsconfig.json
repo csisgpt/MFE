@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./apps/shell" },
+    { "path": "./apps/app-one" },
+    { "path": "./apps/app-two" },
+    { "path": "./libs/shared" }
+  ]
+}

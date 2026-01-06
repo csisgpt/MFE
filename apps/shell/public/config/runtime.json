@@ -1,0 +1,16 @@
+{
+  "apiBaseUrl": "/api",
+  "featureFlags": {
+    "enableReports": true,
+    "disableInsurance": false,
+    "disableAdmission": false,
+    "disableOps": false
+  },
+  "remotePrefixes": {
+    "appOne": "/remotes/app-one",
+    "appTwo": "/remotes/app-two",
+    "insurance": "/remotes/insurance",
+    "admission": "/remotes/admission",
+    "ops": "/remotes/ops"
+  }
+}

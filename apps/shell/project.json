@@ -1,0 +1,56 @@
+{
+  "name": "shell",
+  "root": "apps/shell",
+  "sourceRoot": "apps/shell/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/shell",
+        "command": "vite --config vite.config.ts"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/shell"],
+      "options": {
+        "cwd": "apps/shell",
+        "command": "vite build --config vite.config.ts"
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/shell",
+        "command": "vite preview --config vite.config.ts"
+      }
+    },
+    "preview:integrated": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node apps/shell/tools/preview-server.mjs"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint apps/shell"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/shell/tsconfig.json --noEmit"
+      }
+    }
+  }
+}
