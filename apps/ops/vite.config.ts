@@ -5,7 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'node:path';
 import { createRequire } from 'module';
 import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
-
+import { resolve } from 'node:path';
 const isStandalone = process.env.VITE_STANDALONE === 'true';
 const base = isStandalone ? '/' : '/remotes/ops/';
 const require = createRequire(import.meta.url);
@@ -36,6 +36,8 @@ export default defineConfig({
       }
     })
   ],
+  cacheDir: resolve(__dirname, '../../node_modules/.vite/ops'),
+
   resolve: {
     alias: getSharedAliases(__dirname)
   },

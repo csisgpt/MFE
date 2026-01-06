@@ -5,6 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'node:path';
 import { createRequire } from 'module';
 import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
+import { resolve } from 'node:path'
 
 const isStandalone = process.env.VITE_STANDALONE === 'true';
 const base = isStandalone ? '/' : '/remotes/app-one/';
@@ -14,6 +15,7 @@ const buildTime = new Date().toISOString();
 
 export default defineConfig({
   base,
+  cacheDir: resolve(__dirname, '../../node_modules/.vite/app-one'),
   plugins: [
     tsconfigPaths({
       projects: [

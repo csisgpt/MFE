@@ -11,6 +11,7 @@ const base = isStandalone ? '/' : '/remotes/insurance/';
 const require = createRequire(import.meta.url);
 const appVersion = require('../../package.json').version;
 const buildTime = new Date().toISOString();
+import { resolve } from 'node:path';
 
 export default defineConfig({
   base,
@@ -36,6 +37,8 @@ export default defineConfig({
       }
     })
   ],
+  cacheDir: resolve(__dirname, '../../node_modules/.vite/insurance'),
+
   resolve: {
     alias: getSharedAliases(__dirname)
   },

@@ -22,14 +22,14 @@
         <RouterLink
           to="/app-one"
           class="nav-link"
-          @mouseenter="prefetchRemoteEntry('appOne')"
+          @mouseenter="prefetchRemoteEntry('app-one')"
         >
           App One
         </RouterLink>
         <RouterLink
           to="/app-two"
           class="nav-link"
-          @mouseenter="prefetchRemoteEntry('appTwo')"
+          @mouseenter="prefetchRemoteEntry('app-two')"
         >
           App Two
         </RouterLink>
@@ -62,7 +62,7 @@
         </div>
       </header>
       <main class="content">
-        <RouterView />
+        <RouterView :key="route.fullPath" />
       </main>
       <UiToastHost />
     </div>
@@ -74,11 +74,12 @@ import { ref, watch } from 'vue';
 import { useHostAuthStore, useHostThemeStore } from '@shared/store';
 import { logout } from '@shared/auth';
 import { prefetchRemoteEntry } from './utils/remotes';
+import { useRoute } from 'vue-router';
 
 const authStore = useHostAuthStore();
 const themeStore = useHostThemeStore();
 const sidebarOpen = ref(false);
-
+const route = useRoute()
 const roleOptions = [
   { label: 'Admin', value: 'admin' },
   { label: 'Employee', value: 'employee' },

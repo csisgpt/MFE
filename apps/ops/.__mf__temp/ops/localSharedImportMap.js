@@ -5,17 +5,17 @@
     const importMap = {
       
         "pinia": async () => {
-          let pkg = await import("__mf__virtual/appOne__prebuild__pinia__prebuild__.js");
+          let pkg = await import("__mf__virtual/ops__prebuild__pinia__prebuild__.js");
             return pkg;
         }
       ,
         "vue": async () => {
-          let pkg = await import("__mf__virtual/appOne__prebuild__vue__prebuild__.js");
+          let pkg = await import("__mf__virtual/ops__prebuild__vue__prebuild__.js");
             return pkg;
         }
       ,
         "vue-router": async () => {
-          let pkg = await import("__mf__virtual/appOne__prebuild__vue_mf_2_router__prebuild__.js");
+          let pkg = await import("__mf__virtual/ops__prebuild__vue_mf_2_router__prebuild__.js");
             return pkg;
         }
       
@@ -27,7 +27,7 @@
             version: "2.3.1",
             scope: ["default"],
             loaded: false,
-            from: "appOne",
+            from: "ops",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"pinia"}' must be provided by host`);
@@ -57,7 +57,7 @@
             version: "3.5.26",
             scope: ["default"],
             loaded: false,
-            from: "appOne",
+            from: "ops",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"vue"}' must be provided by host`);
@@ -87,7 +87,7 @@
             version: "4.6.4",
             scope: ["default"],
             loaded: false,
-            from: "appOne",
+            from: "ops",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"vue-router"}' must be provided by host`);
