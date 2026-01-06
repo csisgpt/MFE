@@ -1,12 +1,14 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Ops Admin" subtitle="Feature flags and remote controls" />
+    <UiPageHeader title="مدیریت عملیات" subtitle="فلگ‌های ویژگی و کنترل ریموت‌ها" />
     <UiSection>
-      <p v-if="!isAdmin" class="warning">Admin permissions required.</p>
+      <p v-if="!isAdmin" class="warning">مجوز مدیر لازم است.</p>
       <div v-else>
-        <h4>Feature flags</h4>
+        <h4>فلگ‌های ویژگی</h4>
         <ul>
-          <li v-for="(value, key) in flags" :key="key">{{ key }}: {{ value ? 'on' : 'off' }}</li>
+          <li v-for="(value, key) in flags" :key="key">
+            {{ flagLabels[key] ?? 'نامشخص' }}: {{ value ? 'روشن' : 'خاموش' }}
+          </li>
         </ul>
       </div>
     </UiSection>
@@ -20,6 +22,12 @@ import { can } from '@shared/permissions';
 
 const flags = getConfig().featureFlags;
 const isAdmin = computed(() => can('ops:admin'));
+const flagLabels: Record<string, string> = {
+  enableReports: 'فعال‌سازی گزارش‌ها',
+  disableInsurance: 'غیرفعال‌سازی بیمه',
+  disableAdmission: 'غیرفعال‌سازی پذیرش',
+  disableOps: 'غیرفعال‌سازی عملیات'
+};
 </script>
 
 <style scoped>

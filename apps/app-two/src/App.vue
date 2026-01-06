@@ -1,6 +1,6 @@
 <template>
   <div class="standalone">
-    <header class="header">App Two Standalone</header>
+    <header class="header">اپلیکیشن دو (حالت مستقل)</header>
     <AppTwoMount />
   </div>
 </template>

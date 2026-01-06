@@ -1,16 +1,16 @@
 <template>
   <div class="grid">
     <UiCard>
-      <h3>Welcome, {{ authStore.user?.name }}</h3>
-      <p>Here is your app-one dashboard.</p>
+      <h3>خوش آمدید، {{ authStore.user?.name }}</h3>
+      <p>این داشبورد اپلیکیشن یک شماست.</p>
       <UiButton type="primary" @click="appOneStore.incrementCounter">
-        Local Count: {{ appOneStore.dashboardCounter }}
+        شمارنده محلی: {{ appOneStore.dashboardCounter }}
       </UiButton>
     </UiCard>
     <UiCard>
-      <h3>Summary</h3>
-      <p>Active orders: {{ appOneStore.summary.activeOrders }}</p>
-      <p>Region: {{ appOneStore.summary.region }}</p>
+      <h3>خلاصه</h3>
+      <p>سفارش‌های فعال: {{ appOneStore.summary.activeOrders }}</p>
+      <p>منطقه: {{ appOneStore.summary.region }}</p>
     </UiCard>
   </div>
 </template>

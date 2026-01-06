@@ -1,21 +1,21 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Admission Dashboard" subtitle="Application flow overview" />
+    <UiPageHeader title="داشبورد پذیرش" subtitle="نمای کلی جریان پذیرش" />
     <div class="kpi-grid">
       <UiCard>
-        <h3>New</h3>
+        <h3>جدید</h3>
         <p class="kpi">{{ kpis.new }}</p>
       </UiCard>
       <UiCard>
-        <h3>In review</h3>
+        <h3>در بررسی</h3>
         <p class="kpi">{{ kpis.inReview }}</p>
       </UiCard>
       <UiCard>
-        <h3>Accepted</h3>
+        <h3>پذیرفته‌شده</h3>
         <p class="kpi">{{ kpis.accepted }}</p>
       </UiCard>
       <UiCard>
-        <h3>Rejected</h3>
+        <h3>رد شده</h3>
         <p class="kpi">{{ kpis.rejected }}</p>
       </UiCard>
     </div>
@@ -31,10 +31,10 @@ const kpis = ref({ new: 0, inReview: 0, accepted: 0, rejected: 0 });
 onMounted(async () => {
   const apps = await getAdmissionApplications();
   kpis.value = {
-    new: apps.filter((item) => item.status === 'new').length,
-    inReview: apps.filter((item) => item.status === 'in_review').length,
-    accepted: apps.filter((item) => item.status === 'accepted').length,
-    rejected: apps.filter((item) => item.status === 'rejected').length
+    new: apps.filter((item) => item.status === 'جدید').length,
+    inReview: apps.filter((item) => item.status === 'در بررسی').length,
+    accepted: apps.filter((item) => item.status === 'پذیرفته‌شده').length,
+    rejected: apps.filter((item) => item.status === 'رد شده').length
   };
 });
 </script>

@@ -13,7 +13,7 @@ export const setHostPinia = (pinia: Pinia) => {
 export const getHostPinia = (): Pinia => {
   const pinia = (globalThis as GlobalWithHostPinia)[KEY];
   if (!pinia) {
-    throw new Error('Host Pinia has not been set. Call setHostPinia() in the shell app.');
+    throw new Error('پینیا‌ی میزبان تنظیم نشده است. setHostPinia() را در شِل فراخوانی کنید.');
   }
   return pinia;
 };

@@ -20,6 +20,18 @@
         "command": "vite build --config vite.config.ts"
       }
     },
+    "package": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": ["shell", "app-one", "app-two", "insurance", "admission", "ops"],
+          "target": "build"
+        }
+      ],
+      "options": {
+        "command": "node tools/package-mfe.mjs"
+      }
+    },
     "preview": {
       "executor": "nx:run-commands",
       "options": {

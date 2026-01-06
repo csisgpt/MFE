@@ -1,17 +1,17 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Request Detail" subtitle="Review and finalize" />
+    <UiPageHeader title="جزئیات درخواست" subtitle="بررسی و نهایی‌سازی" />
     <UiSection>
-      <div v-if="loading">Loading...</div>
+      <div v-if="loading">در حال بارگذاری...</div>
       <div v-else>
-        <p><strong>ID:</strong> {{ request?.id }}</p>
-        <p><strong>Employee:</strong> {{ request?.employeeName }}</p>
-        <p><strong>Status:</strong> {{ request?.status }}</p>
-        <p><strong>Amount:</strong> {{ request?.amount }}</p>
+        <p><strong>شناسه:</strong> {{ request?.id }}</p>
+        <p><strong>کارمند:</strong> {{ request?.employeeName }}</p>
+        <p><strong>وضعیت:</strong> {{ request?.status }}</p>
+        <p><strong>مبلغ:</strong> {{ request?.amount }}</p>
         <div class="actions">
-          <UiButton type="primary" :disabled="!canApprove" @click="approve">Approve</UiButton>
-          <UiButton :disabled="!canReject" @click="reject">Reject</UiButton>
-          <UiButton @click="emit('back-to-requests')">Back</UiButton>
+          <UiButton type="primary" :disabled="!canApprove" @click="approve">تایید</UiButton>
+          <UiButton :disabled="!canReject" @click="reject">رد</UiButton>
+          <UiButton @click="emit('back-to-requests')">بازگشت</UiButton>
         </div>
       </div>
     </UiSection>
@@ -50,11 +50,11 @@ const fetchRequest = async () => {
 const approve = async () => {
   if (!canApprove.value || !props.requestId) return;
   await approveInsuranceRequest(props.requestId);
-  eventBus.emit('TOAST', { type: 'success', message: 'Request approved' });
+  eventBus.emit('TOAST', { type: 'success', message: 'درخواست تایید شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Insurance request approved',
+    message: 'درخواست بیمه تایید شد',
     source: 'insurance-admin',
     timestamp: new Date().toISOString(),
     context: { id: props.requestId }
@@ -65,11 +65,11 @@ const approve = async () => {
 const reject = async () => {
   if (!canReject.value || !props.requestId) return;
   await rejectInsuranceRequest(props.requestId);
-  eventBus.emit('TOAST', { type: 'info', message: 'Request rejected' });
+  eventBus.emit('TOAST', { type: 'info', message: 'درخواست رد شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Insurance request rejected',
+    message: 'درخواست بیمه رد شد',
     source: 'insurance-admin',
     timestamp: new Date().toISOString(),
     context: { id: props.requestId }

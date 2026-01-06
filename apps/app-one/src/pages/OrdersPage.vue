@@ -1,8 +1,8 @@
 <template>
   <UiCard>
     <div class="header">
-      <h3>Orders</h3>
-      <input v-model="appOneStore.orderQuery" placeholder="Search by id" />
+      <h3>سفارش‌ها</h3>
+      <input v-model="appOneStore.orderQuery" placeholder="جستجو بر اساس شناسه" />
     </div>
     <UiDataTable
       :value="filteredOrders"
@@ -23,9 +23,9 @@ const orders = ref<{ id: string; status: string; total: number }[]>([]);
 const appOneStore = useAppOneStore();
 
 const columns = [
-  { field: 'id', header: 'Order ID' },
-  { field: 'status', header: 'Status' },
-  { field: 'total', header: 'Total' }
+  { field: 'id', header: 'شناسه سفارش' },
+  { field: 'status', header: 'وضعیت' },
+  { field: 'total', header: 'مبلغ کل' }
 ];
 
 const filteredOrders = computed(() =>

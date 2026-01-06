@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'node:path';
-import { getRemoteEntryUrl } from '../../libs/shared/config/src/remotes';
+import { REMOTE_REGISTRY, getRemoteEntryUrl } from '../../libs/shared/config/src/registry';
 import { createMockApi } from './tools/mock-api';
 import { getSharedAliases, getWorkspaceRoot } from '../../tools/vite/shared-aliases';
 import { resolve } from 'node:path';
@@ -20,33 +20,16 @@ export default defineConfig({
     vue(),
     federation({
       name: 'shell',
-      remotes: {
-        'app-one': {
-          type: 'module',
-          name: 'app-one',
-          entry: getRemoteEntryUrl('appOne')
-        },
-        'app-two': {
-          type: 'module',
-          name: 'app-two',
-          entry: getRemoteEntryUrl('appTwo')
-        },
-        insurance: {
-          type: 'module',
-          name: 'insurance',
-          entry: getRemoteEntryUrl('insurance')
-        },
-        admission: {
-          type: 'module',
-          name: 'admission',
-          entry: getRemoteEntryUrl('admission')
-        },
-        ops: {
-          type: 'module',
-          name: 'ops',
-          entry: getRemoteEntryUrl('ops')
-        }
-      },
+      remotes: Object.fromEntries(
+        REMOTE_REGISTRY.map((remote) => [
+          remote.importKey,
+          {
+            type: 'module',
+            name: remote.federationName,
+            entry: getRemoteEntryUrl(remote.id)
+          }
+        ])
+      ),
       shared: {
         vue: { singleton: true },
         pinia: { singleton: true },

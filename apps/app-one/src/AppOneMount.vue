@@ -1,8 +1,8 @@
 <template>
   <div class="app-one">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">Dashboard</UiButton>
-      <UiButton type="link" @click="navigate('orders')">Orders</UiButton>
+      <UiButton type="link" @click="navigate('')">داشبورد</UiButton>
+      <UiButton type="link" @click="navigate('orders')">سفارش‌ها</UiButton>
     </nav>
     <component
       :is="currentView"

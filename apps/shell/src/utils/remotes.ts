@@ -1,27 +1,22 @@
-import { getRemoteEntryUrl, type RemoteName } from '@shared/config';
+import { REMOTE_REGISTRY, REMOTE_REGISTRY_BY_ID, getRemoteEntryUrl } from '@shared/config';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
 import type { RemoteMeta } from '@shared/contracts';
 
-// ✅ اسم containerهایی که در federation.name ریموت‌هاست
-type RemoteContainerName = 'app-one' | 'app-two' | 'insurance' | 'admission' | 'ops';
+const remoteLoaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
+  (acc, remote) => {
+    acc[remote.id] = () => import(/* @vite-ignore */ remote.mountExport);
+    return acc;
+  },
+  {} as Record<RemoteKey, () => Promise<unknown>>
+);
 
-// ✅ برای fetch کردن remoteEntry باید از RemoteName (camelCase) استفاده کنیم
-const configKeyMap: Record<RemoteKey, RemoteName> = {
-  appOne: 'appOne',
-  appTwo: 'appTwo',
-  insurance: 'insurance',
-  admission: 'admission',
-  ops: 'ops'
-};
-
-// ✅ برای import کردن باید از container name (kebab-case) استفاده کنیم
-const containerMap: Record<RemoteKey, RemoteContainerName> = {
-  appOne: 'app-one',
-  appTwo: 'app-two',
-  insurance: 'insurance',
-  admission: 'admission',
-  ops: 'ops'
-};
+const remoteMetaLoaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
+  (acc, remote) => {
+    acc[remote.id] = () => import(/* @vite-ignore */ remote.metaExport);
+    return acc;
+  },
+  {} as Record<RemoteKey, () => Promise<unknown>>
+);
 
 const inflight = new Map<RemoteKey, Promise<void>>();
 
@@ -30,73 +25,46 @@ export function prefetchRemoteEntry(name: RemoteKey): void {
   if (store.disabled.has(name)) return;
   if (inflight.has(name)) return;
 
-  const url = getRemoteEntryUrl(configKeyMap[name]);
+  const url = getRemoteEntryUrl(name);
   const p = fetch(url, { cache: 'force-cache' })
     .then(() => store.markPrefetched(name))
-    .catch(() => store.markFailed(name, 'Prefetch failed'))
+    .catch(() => store.markFailed(name, 'پیش‌بارگذاری ناموفق بود'))
     .finally(() => inflight.delete(name)) as Promise<void>;
 
   inflight.set(name, p);
 }
 
 export async function loadRemoteMount(name: RemoteKey): Promise<void> {
-  switch (name) {
-    case 'appOne':
-      await import('app-one/AppOneMount');
-      return;
-    case 'appTwo':
-      await import('app-two/AppTwoMount');
-      return;
-    case 'insurance':
-      await import('insurance/InsuranceMount');
-      return;
-    case 'admission':
-      await import('admission/AdmissionMount');
-      return;
-    case 'ops':
-      await import('ops/OpsMount');
-      return;
+  const loader = remoteLoaders[name];
+  if (loader) {
+    await loader();
   }
 }
 
 export async function loadRemoteMeta(name: RemoteKey): Promise<RemoteMeta | null> {
-  switch (name) {
-    case 'appOne': {
-      const mod = await import('app-one/meta');
-      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
-    }
-    case 'appTwo': {
-      const mod = await import('app-two/meta');
-      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
-    }
-    case 'insurance': {
-      const mod = await import('insurance/meta');
-      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
-    }
-    case 'admission': {
-      const mod = await import('admission/meta');
-      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
-    }
-    case 'ops': {
-      const mod = await import('ops/meta');
-      return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
-    }
-    default:
-      return null;
-  }
+  const loader = remoteMetaLoaders[name];
+  if (!loader) return null;
+  const mod = await loader();
+  return (mod as { remoteMeta: RemoteMeta }).remoteMeta;
 }
 
 export async function validateRemote(name: RemoteKey, mode: 'light' | 'deep') {
   try {
-    const response = await fetch(getRemoteEntryUrl(configKeyMap[name]), { cache: 'no-store' });
-    if (!response.ok) return { ok: false, error: `remoteEntry ${response.status}` };
+    const response = await fetch(getRemoteEntryUrl(name), { cache: 'no-store' });
+    if (!response.ok) return { ok: false, error: `ورودی ریموت با کد ${response.status}` };
 
     const meta = await loadRemoteMeta(name);
-    if (!meta) return { ok: false, error: 'Missing remote metadata' };
+    if (!meta) return { ok: false, error: 'متادیتای ریموت یافت نشد' };
 
     if (mode === 'deep') await importRemoteMount(name);
     return { ok: true, meta };
   } catch (error) {
-    return { ok: false, error: (error as Error).message || 'Validation failed' };
+    return { ok: false, error: (error as Error).message || 'اعتبارسنجی ناموفق بود' };
   }
+}
+
+function importRemoteMount(name: RemoteKey) {
+  const remote = REMOTE_REGISTRY_BY_ID.get(name);
+  if (!remote) return Promise.resolve();
+  return import(/* @vite-ignore */ remote.mountExport);
 }

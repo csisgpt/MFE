@@ -2,20 +2,18 @@
   <UiPage>
     <UiPageHeader :title="title" :subtitle="subtitle">
       <template #actions>
-        <UiButton size="small" @click="loadRemote">Retry load</UiButton>
+        <UiButton size="small" @click="loadRemote">تلاش دوباره</UiButton>
       </template>
     </UiPageHeader>
-    <UiSection v-if="state === 'loading'" title="Loading">
+    <UiSection v-if="state === 'loading'" title="در حال بارگذاری">
       <div class="skeleton" />
     </UiSection>
-    <UiSection v-else-if="state === 'disabled'" title="Remote disabled">
-      <p>
-        This remote is currently disabled via feature flags. Toggle it back on in System settings.
-      </p>
+    <UiSection v-else-if="state === 'disabled'" title="ریموت غیرفعال است">
+      <p>این ریموت با فلگ‌های ویژگی غیرفعال شده است. آن را در بخش تنظیمات سیستم فعال کنید.</p>
     </UiSection>
-    <UiSection v-else-if="state === 'error'" title="Remote failed">
+    <UiSection v-else-if="state === 'error'" title="بارگذاری ناموفق">
       <p>{{ errorMessage }}</p>
-      <UiButton size="small" type="primary" @click="loadRemote">Retry</UiButton>
+      <UiButton size="small" type="primary" @click="loadRemote">تلاش دوباره</UiButton>
     </UiSection>
     <component v-else :is="remoteComponent" />
   </UiPage>
@@ -23,13 +21,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted, shallowRef, ref, watch } from 'vue';
+import { REMOTE_REGISTRY } from '@shared/config';
 import { eventBus } from '@shared/store';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
 import { loadRemoteMeta } from '../utils/remotes';
 
 interface Props {
   remote: RemoteKey;
-  title: string;
   subtitle?: string;
 }
 
@@ -39,13 +37,19 @@ const state = ref<'loading' | 'error' | 'loaded' | 'disabled'>('loading');
 const errorMessage = ref('');
 const statusStore = useRemoteStatusStore();
 
-const loaders: Record<RemoteKey, () => Promise<unknown>> = {
-  appOne: () => import('app-one/AppOneMount'),
-  appTwo: () => import('app-two/AppTwoMount'),
-  insurance: () => import('insurance/InsuranceMount'),
-  admission: () => import('admission/AdmissionMount'),
-  ops: () => import('ops/OpsMount')
-};
+const loaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
+  (acc, remote) => {
+    acc[remote.id] = () => import(/* @vite-ignore */ remote.mountExport);
+    return acc;
+  },
+  {} as Record<RemoteKey, () => Promise<unknown>>
+);
+
+const title = computed(() => {
+  const match = REMOTE_REGISTRY.find((item) => item.id === props.remote);
+  return match?.titleFa ?? 'ماژول';
+});
+const subtitle = computed(() => props.subtitle);
 
 const isDisabled = computed(() => statusStore.disabled.has(props.remote));
 
@@ -61,7 +65,7 @@ async function loadRemote() {
     const module = await Promise.race([
       loader(),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Remote load timed out after 10s')), 10000)
+        setTimeout(() => reject(new Error('بارگذاری ریموت پس از ۱۰ ثانیه متوقف شد')), 10000)
       )
     ]);
     const component = (module as { default?: unknown }).default ?? module;
@@ -70,18 +74,19 @@ async function loadRemote() {
     const meta = await loadRemoteMeta(props.remote);
     statusStore.markLoaded(props.remote, meta ?? undefined);
   } catch (error) {
-    const message = (error as Error).message || 'Remote failed to load';
+    const rawMessage = (error as Error).message;
+    const message = 'بارگذاری ریموت ناموفق بود';
     errorMessage.value = message;
     state.value = 'error';
     statusStore.markFailed(props.remote, message);
-    eventBus.emit('TOAST', { type: 'error', message: `${props.title} failed to load` });
+    eventBus.emit('TOAST', { type: 'error', message: `بارگذاری ${title.value} ناموفق بود` });
     eventBus.emit('AUDIT_LOG', {
       id: `audit_${Date.now()}`,
       level: 'error',
-      message: `${props.title} failed to load`,
+      message: `بارگذاری ${title.value} ناموفق بود`,
       source: 'shell',
       timestamp: new Date().toISOString(),
-      context: { remote: props.remote, error: message }
+      context: { remote: props.remote, error: rawMessage }
     });
   }
 }

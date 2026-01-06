@@ -44,11 +44,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
     if (!response.ok) {
       const message = await response.text();
-      logger.warn(`Request failed: ${path}`, { status: response.status, requestId });
+      logger.warn(`درخواست ناموفق بود: ${path}`, { status: response.status, requestId });
       eventBus.emit('AUDIT_LOG', {
         id: requestId,
         level: 'error',
-        message: `API ${path} failed`,
+        message: 'درخواست رابط برنامه‌نویسی ناموفق بود',
         source: 'api-client',
         timestamp: new Date().toISOString(),
         context: { status: response.status }
@@ -57,16 +57,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
 
     if (response.status === 204) {
-      logger.info(`Request ${path} completed`, { requestId, durationMs: Date.now() - startedAt });
+      logger.info(`درخواست ${path} انجام شد`, { requestId, durationMs: Date.now() - startedAt });
       return {} as T;
     }
 
     const data = (await response.json()) as T;
-    logger.info(`Request ${path} completed`, { requestId, durationMs: Date.now() - startedAt });
+    logger.info(`درخواست ${path} انجام شد`, { requestId, durationMs: Date.now() - startedAt });
     eventBus.emit('AUDIT_LOG', {
       id: requestId,
       level: 'info',
-      message: `API ${path} completed`,
+      message: 'درخواست رابط برنامه‌نویسی انجام شد',
       source: 'api-client',
       timestamp: new Date().toISOString(),
       context: { durationMs: Date.now() - startedAt }
@@ -77,11 +77,11 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       throw error;
     }
 
-    logger.error(`Request ${path} error`, { requestId, error });
+    logger.error(`خطا در درخواست ${path}`, { requestId, error });
     eventBus.emit('AUDIT_LOG', {
       id: requestId,
       level: 'error',
-      message: `API ${path} error`,
+      message: 'خطا در درخواست رابط برنامه‌نویسی',
       source: 'api-client',
       timestamp: new Date().toISOString(),
       context: { error: (error as Error).message }
@@ -96,7 +96,7 @@ export function normalizeError(status: number, message: string, details?: unknow
   return {
     status,
     code: status === 0 ? 'NETWORK_ERROR' : `HTTP_${status}`,
-    message: message || 'Unexpected error',
+    message: message || 'خطای غیرمنتظره',
     details
   };
 }

@@ -1,10 +1,10 @@
 <template>
   <div class="insurance">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">Dashboard</UiButton>
-      <UiButton type="link" @click="navigate('requests')">Requests</UiButton>
-      <UiButton type="link" @click="navigate('claims')">Claims</UiButton>
-      <UiButton type="link" @click="navigate('admin')">Admin</UiButton>
+      <UiButton type="link" @click="navigate('')">داشبورد</UiButton>
+      <UiButton type="link" @click="navigate('requests')">درخواست‌ها</UiButton>
+      <UiButton type="link" @click="navigate('claims')">خسارت‌ها</UiButton>
+      <UiButton type="link" @click="navigate('admin')">مدیریت</UiButton>
     </nav>
     <component
       :is="currentView"

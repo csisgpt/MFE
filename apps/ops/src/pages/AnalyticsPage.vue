@@ -1,6 +1,6 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Analytics" subtitle="Segment performance overview" />
+    <UiPageHeader title="تحلیل‌ها" subtitle="نمای کلی عملکرد بخش‌ها" />
     <UiSection>
       <UiDataTable :value="rows" :columns="columns" />
     </UiSection>
@@ -13,9 +13,9 @@ import { getOpsAnalytics } from '@shared/api-client';
 
 const rows = ref([]);
 const columns = [
-  { field: 'id', header: 'ID' },
-  { field: 'segment', header: 'Segment' },
-  { field: 'value', header: 'Value' }
+  { field: 'id', header: 'شناسه' },
+  { field: 'segment', header: 'بخش' },
+  { field: 'value', header: 'مقدار' }
 ];
 
 onMounted(async () => {

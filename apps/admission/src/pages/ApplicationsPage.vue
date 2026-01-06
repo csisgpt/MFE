@@ -1,9 +1,9 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Applications" subtitle="Manage applicant pipeline" />
+    <UiPageHeader title="درخواست‌ها" subtitle="مدیریت فرایند متقاضیان" />
     <UiSection>
       <div class="filters">
-        <UiInput v-model:value="store.filter" placeholder="Filter by status" />
+        <UiInput v-model:value="store.filter" placeholder="فیلتر بر اساس وضعیت" />
       </div>
       <UiDataTable :value="filtered" :columns="columns" @row-click="handleRowClick" />
     </UiSection>
@@ -21,10 +21,10 @@ const store = useAdmissionStore();
 const applications = ref([]);
 
 const columns = [
-  { field: 'id', header: 'ID' },
-  { field: 'applicantName', header: 'Applicant' },
-  { field: 'program', header: 'Program' },
-  { field: 'status', header: 'Status' }
+  { field: 'id', header: 'شناسه' },
+  { field: 'applicantName', header: 'متقاضی' },
+  { field: 'program', header: 'رشته' },
+  { field: 'status', header: 'وضعیت' }
 ];
 
 const filtered = computed(() =>

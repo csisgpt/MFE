@@ -1,12 +1,11 @@
 import { getConfig } from './index';
+import type { RemoteId } from './registry';
 
-export type RemoteName = 'appOne' | 'appTwo' | 'insurance' | 'admission' | 'ops';
-
-export function getRemotePrefix(name: RemoteName): string {
+export function getRemotePrefix(name: RemoteId): string {
   const { remotePrefixes } = getConfig();
   return remotePrefixes[name] ?? `/remotes/${name}`;
 }
 
-export function getRemoteEntryUrl(name: RemoteName): string {
+export function getRemoteEntryUrl(name: RemoteId): string {
   return `${getRemotePrefix(name)}/remoteEntry.js`;
 }

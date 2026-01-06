@@ -1,6 +1,6 @@
 <template>
   <div class="standalone">
-    <header class="header">Insurance Standalone</header>
+    <header class="header">بیمه (حالت مستقل)</header>
     <InsuranceMount />
   </div>
 </template>

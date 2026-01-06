@@ -1,14 +1,14 @@
 <template>
   <div class="grid">
     <UiCard>
-      <h3>Overview</h3>
-      <p>Active users: {{ stats.activeUsers }}</p>
-      <p>Reports generated: {{ stats.reports }}</p>
-      <UiButton @click="toggleTheme">Toggle Global Theme</UiButton>
+      <h3>نمای کلی</h3>
+      <p>کاربران فعال: {{ stats.activeUsers }}</p>
+      <p>گزارش‌های تولیدشده: {{ stats.reports }}</p>
+      <UiButton @click="toggleTheme">تغییر پوسته سراسری</UiButton>
     </UiCard>
     <UiCard>
-      <h3>Quick Links</h3>
-      <UiButton type="primary" @click="emit('open-users')">Manage Users</UiButton>
+      <h3>دسترسی سریع</h3>
+      <UiButton type="primary" @click="emit('open-users')">مدیریت کاربران</UiButton>
     </UiCard>
   </div>
 </template>

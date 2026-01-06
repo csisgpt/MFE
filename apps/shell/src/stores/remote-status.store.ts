@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import type { RemoteMeta } from '@shared/contracts';
+import { REMOTE_REGISTRY, type RemoteId } from '@shared/config';
 
-export type RemoteKey = 'app-one' | 'app-two' | 'insurance' | 'admission' | 'ops';
+export type RemoteKey = RemoteId;
 
 export type RemoteStatus = {
   name: RemoteKey;
@@ -19,33 +20,14 @@ export type RemoteStatus = {
 
 const storageKey = 'mfe.disabledRemotes';
 
-const defaultRemotes: Record<RemoteKey, RemoteStatus> = {
-  appOne: {
-    name: 'appOne',
-    label: 'App One',
+const defaultRemotes = REMOTE_REGISTRY.reduce<Record<RemoteKey, RemoteStatus>>((acc, remote) => {
+  acc[remote.id] = {
+    name: remote.id,
+    label: remote.titleFa,
     status: 'idle'
-  },
-  appTwo: {
-    name: 'appTwo',
-    label: 'App Two',
-    status: 'idle'
-  },
-  insurance: {
-    name: 'insurance',
-    label: 'Insurance',
-    status: 'idle'
-  },
-  admission: {
-    name: 'admission',
-    label: 'Admission',
-    status: 'idle'
-  },
-  ops: {
-    name: 'ops',
-    label: 'Ops',
-    status: 'idle'
-  }
-};
+  };
+  return acc;
+}, {} as Record<RemoteKey, RemoteStatus>);
 
 export const useRemoteStatusStore = defineStore('remoteStatus', {
   state: () => ({

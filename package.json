@@ -6,7 +6,10 @@
   "scripts": {
     "nx": "nx",
     "serve:all": "nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,shell --parallel=10",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "build:mfe": "nx run-many -t build --projects=shell,app-one,app-two,insurance,admission,ops",
+    "package:mfe": "pnpm build:mfe && node tools/package-mfe.mjs",
+    "check:fa-ui": "node tools/check-fa-ui.mjs"
   },
   "devDependencies": {
     "@module-federation/vite": "^1.5.0",

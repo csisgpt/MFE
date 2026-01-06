@@ -1,23 +1,23 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Create Claim" subtitle="Report a new claim" />
+    <UiPageHeader title="ثبت خسارت" subtitle="اعلام خسارت جدید" />
     <UiSection>
       <UiForm layout="vertical" :model="store.newClaim" @finish="submit">
-        <UiFormItem label="Policy ID">
+        <UiFormItem label="شناسه بیمه‌نامه">
           <UiInput v-model:value="store.newClaim.policyId" />
         </UiFormItem>
-        <UiFormItem label="Claimant">
+        <UiFormItem label="زیان‌دیده">
           <UiInput v-model:value="store.newClaim.claimant" />
         </UiFormItem>
-        <UiFormItem label="Amount">
+        <UiFormItem label="مبلغ">
           <UiInput v-model:value="store.newClaim.amount" type="number" />
         </UiFormItem>
-        <UiFormItem label="Attachment">
-          <UiInput placeholder="Upload receipt (mock)" />
+        <UiFormItem label="ضمیمه">
+          <UiInput placeholder="بارگذاری رسید (نمونه)" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">Submit</UiButton>
-          <UiButton @click="navigate('claims')">Cancel</UiButton>
+          <UiButton type="primary" html-type="submit">ارسال</UiButton>
+          <UiButton @click="navigate('claims')">انصراف</UiButton>
         </div>
       </UiForm>
     </UiSection>
@@ -35,11 +35,11 @@ const store = useInsuranceStore();
 
 const submit = async () => {
   await createClaim(store.newClaim);
-  eventBus.emit('TOAST', { type: 'success', message: 'Claim submitted' });
+  eventBus.emit('TOAST', { type: 'success', message: 'خسارت ثبت شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Insurance claim created',
+    message: 'خسارت بیمه ایجاد شد',
     source: 'insurance',
     timestamp: new Date().toISOString(),
     context: { policyId: store.newClaim.policyId }

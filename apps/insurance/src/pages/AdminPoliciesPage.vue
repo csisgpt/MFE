@@ -1,19 +1,19 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Policy Admin" subtitle="Manage active policies">
+    <UiPageHeader title="مدیریت بیمه‌نامه‌ها" subtitle="مدیریت بیمه‌نامه‌های فعال">
       <template #actions>
-        <UiButton type="primary" @click="showModal = true">Add policy</UiButton>
+        <UiButton type="primary" @click="showModal = true">افزودن بیمه‌نامه</UiButton>
       </template>
     </UiPageHeader>
     <UiSection>
       <UiDataTable :value="policies" :columns="columns" />
     </UiSection>
-    <UiModal v-model:open="showModal" title="New policy" @ok="create">
+    <UiModal v-model:open="showModal" title="بیمه‌نامه جدید" @ok="create">
       <div class="form">
-        <label>Holder <UiInput v-model:value="store.policyDraft.holder" /></label>
-        <label>Plan <UiInput v-model:value="store.policyDraft.plan" /></label>
-        <label>Status <UiSelect v-model:value="store.policyDraft.status" :options="statusOptions" /></label>
-        <label>Renewal date <UiInput v-model:value="store.policyDraft.renewalDate" /></label>
+        <label>دارنده <UiInput v-model:value="store.policyDraft.holder" /></label>
+        <label>طرح <UiInput v-model:value="store.policyDraft.plan" /></label>
+        <label>وضعیت <UiSelect v-model:value="store.policyDraft.status" :options="statusOptions" /></label>
+        <label>تاریخ تمدید <UiInput v-model:value="store.policyDraft.renewalDate" /></label>
       </div>
     </UiModal>
   </UiPage>
@@ -30,25 +30,25 @@ const policies = ref([]);
 const showModal = ref(false);
 
 const columns = [
-  { field: 'id', header: 'Policy' },
-  { field: 'holder', header: 'Holder' },
-  { field: 'plan', header: 'Plan' },
-  { field: 'status', header: 'Status' }
+  { field: 'id', header: 'بیمه‌نامه' },
+  { field: 'holder', header: 'دارنده' },
+  { field: 'plan', header: 'طرح' },
+  { field: 'status', header: 'وضعیت' }
 ];
 
 const statusOptions = [
-  { label: 'Active', value: 'active' },
-  { label: 'Expired', value: 'expired' }
+  { label: 'فعال', value: 'فعال' },
+  { label: 'منقضی', value: 'منقضی' }
 ];
 
 const create = async () => {
   const created = await createPolicy(store.policyDraft);
   policies.value = [created, ...policies.value];
-  eventBus.emit('TOAST', { type: 'success', message: 'Policy created' });
+  eventBus.emit('TOAST', { type: 'success', message: 'بیمه‌نامه ایجاد شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Policy created',
+    message: 'بیمه‌نامه ایجاد شد',
     source: 'insurance-admin',
     timestamp: new Date().toISOString(),
     context: { id: created.id }

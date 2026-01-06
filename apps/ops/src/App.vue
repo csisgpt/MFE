@@ -1,6 +1,6 @@
 <template>
   <div class="standalone">
-    <header class="header">Ops Standalone</header>
+    <header class="header">عملیات (حالت مستقل)</header>
     <OpsMount />
   </div>
 </template>

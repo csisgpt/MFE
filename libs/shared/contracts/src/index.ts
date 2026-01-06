@@ -4,10 +4,10 @@ export type RemoteMeta = {
   buildTime: string;
 };
 
-export type InsuranceRequestStatus = 'pending' | 'approved' | 'rejected';
-export type ClaimStatus = 'open' | 'investigating' | 'closed';
-export type AdmissionStatus = 'new' | 'in_review' | 'accepted' | 'rejected';
-export type ReportStatus = 'draft' | 'published';
+export type InsuranceRequestStatus = 'در انتظار' | 'تایید شده' | 'رد شده';
+export type ClaimStatus = 'باز' | 'در حال بررسی' | 'بسته';
+export type AdmissionStatus = 'جدید' | 'در بررسی' | 'پذیرفته‌شده' | 'رد شده';
+export type ReportStatus = 'پیش‌نویس' | 'منتشرشده';
 
 export interface InsuranceRequest {
   id: string;
@@ -31,7 +31,7 @@ export interface Policy {
   id: string;
   holder: string;
   plan: string;
-  status: 'active' | 'expired';
+  status: 'فعال' | 'منقضی';
   renewalDate: string;
 }
 
