@@ -8,11 +8,12 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite --config apps/admission/vite.config.ts"
+        "cwd": "apps/admission",
+        "command": "vite --config vite.config.ts"
       },
       "configurations": {
         "standalone": {
-          "command": "cross-env VITE_STANDALONE=true vite --config apps/admission/vite.config.ts"
+          "command": "cross-env VITE_STANDALONE=true vite --config vite.config.ts"
         }
       }
     },
@@ -20,13 +21,15 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/apps/admission"],
       "options": {
-        "command": "vite build --config apps/admission/vite.config.ts"
+        "cwd": "apps/admission",
+        "command": "vite build --config vite.config.ts"
       }
     },
     "preview": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite preview --config apps/admission/vite.config.ts"
+        "cwd": "apps/admission",
+        "command": "vite preview --config vite.config.ts"
       }
     },
     "lint": {

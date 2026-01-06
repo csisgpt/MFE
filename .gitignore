@@ -1,4 +1,6 @@
 node_modules
+nx
+.nx
 pnpm-lock.yaml
 .dist
 /dist

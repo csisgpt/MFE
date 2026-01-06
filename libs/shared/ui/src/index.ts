@@ -1,6 +1,8 @@
 import type { App } from 'vue';
 import Antd from 'ant-design-vue';
 import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
+
 import ToastService from 'primevue/toastservice';
 
 import UiButton from './components/UiButton.vue';
@@ -19,7 +21,16 @@ import UiTag from './components/UiTag.vue';
 
 export function installUi(app: App) {
   app.use(Antd);
-  app.use(PrimeVue, { ripple: true });
+  app.use(PrimeVue, {
+    ripple: true,
+    theme: {
+      preset: Aura,
+      options: {
+        darkModeSelector: 'system',
+        cssLayer: false
+      }
+    }
+  });
   app.use(ToastService);
   app.component('UiButton', UiButton);
   app.component('UiCard', UiCard);

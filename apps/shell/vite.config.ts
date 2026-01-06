@@ -1,14 +1,20 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import federation from '@module-federation/vite';
+import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { getRemoteEntryUrl } from '../../libs/shared/config/src/remotes';
 import { createMockApi } from './tools/mock-api.mjs';
+import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
 
 export default defineConfig({
   plugins: [
-    tsconfigPaths(),
+    tsconfigPaths({
+      projects: [
+        path.resolve(__dirname, '../../tsconfig.json'),
+        path.resolve(__dirname, '../../tsconfig.base.json')
+      ]
+    }),
     vue(),
     federation({
       name: 'shell',
@@ -33,6 +39,9 @@ export default defineConfig({
       }
     }
   ],
+  resolve: {
+    alias: getSharedAliases()
+  },
   server: {
     host: 'csis.ir',
     port: 4990,
@@ -63,11 +72,6 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace('/remotes/ops', '')
       }
-    }
-  },
-  resolve: {
-    alias: {
-      '@shared': path.resolve(__dirname, '../../libs/shared')
     }
   },
   build: {

@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import federation from '@module-federation/vite';
+import { federation } from '@module-federation/vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { createRequire } from 'module';
@@ -10,11 +10,17 @@ const base = isStandalone ? '/' : '/remotes/insurance/';
 const require = createRequire(import.meta.url);
 const appVersion = require('../../package.json').version;
 const buildTime = new Date().toISOString();
+import { getSharedAliases } from '../../tools/vite/shared-aliases.mjs';
 
 export default defineConfig({
   base,
   plugins: [
-    tsconfigPaths(),
+    tsconfigPaths({
+      projects: [
+        path.resolve(__dirname, '../../tsconfig.json'),
+        path.resolve(__dirname, '../../tsconfig.base.json')
+      ]
+    }),
     vue(),
     federation({
       name: 'insurance',
@@ -30,16 +36,14 @@ export default defineConfig({
       }
     })
   ],
+  resolve: {
+    alias: getSharedAliases()
+  },
   server: {
     host: 'csis.ir',
     port: 4993,
     strictPort: true,
     origin: isStandalone ? 'http://csis.ir:4993' : 'http://csis.ir:4990'
-  },
-  resolve: {
-    alias: {
-      '@shared': path.resolve(__dirname, '../../libs/shared')
-    }
   },
   build: {
     target: 'chrome89',

@@ -1,38 +1,41 @@
 {
-  "name": "ops",
-  "root": "apps/ops",
-  "sourceRoot": "apps/ops/src",
+  "name": "insurance",
+  "root": "apps/insurance",
+  "sourceRoot": "apps/insurance/src",
   "projectType": "application",
   "tags": ["type:app"],
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite --config apps/ops/vite.config.ts"
+        "cwd": "apps/insurance",
+        "command": "vite --config vite.config.ts"
       },
       "configurations": {
         "standalone": {
-          "command": "cross-env VITE_STANDALONE=true vite --config apps/ops/vite.config.ts"
+          "command": "cross-env VITE_STANDALONE=true vite --config vite.config.ts"
         }
       }
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/apps/ops"],
+      "outputs": ["{workspaceRoot}/dist/apps/insurance"],
       "options": {
-        "command": "vite build --config apps/ops/vite.config.ts"
+        "cwd": "apps/insurance",
+        "command": "vite build --config vite.config.ts"
       }
     },
     "preview": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vite preview --config apps/ops/vite.config.ts"
+        "cwd": "apps/insurance",
+        "command": "vite preview --config vite.config.ts"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint apps/ops"
+        "command": "eslint apps/insurance"
       }
     },
     "test": {
@@ -44,7 +47,7 @@
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p apps/ops/tsconfig.json --noEmit"
+        "command": "tsc -p apps/insurance/tsconfig.json --noEmit"
       }
     }
   }
