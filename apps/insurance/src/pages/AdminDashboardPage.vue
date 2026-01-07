@@ -1,13 +1,13 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Insurance Admin" subtitle="Approvals and governance" />
+    <UiPageHeader title="مدیریت بیمه" subtitle="تاییدیه‌ها و حاکمیت" />
     <div class="kpi-grid">
       <UiCard>
-        <h3>Pending approvals</h3>
+        <h3>تاییدیه‌های در انتظار</h3>
         <p class="kpi">{{ pendingApprovals }}</p>
       </UiCard>
       <UiCard>
-        <h3>Total policies</h3>
+        <h3>تعداد کل بیمه‌نامه‌ها</h3>
         <p class="kpi">{{ policyCount }}</p>
       </UiCard>
     </div>
@@ -22,7 +22,7 @@ const requests = ref([]);
 const policies = ref([]);
 
 const pendingApprovals = computed(
-  () => requests.value.filter((item: { status: string }) => item.status === 'pending').length
+  () => requests.value.filter((item: { status: string }) => item.status === 'در انتظار').length
 );
 const policyCount = computed(() => policies.value.length);
 

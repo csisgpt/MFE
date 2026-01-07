@@ -60,3 +60,4 @@ export function getConfig(): RuntimeConfig {
 }
 
 export * from './remotes';
+export * from './registry';

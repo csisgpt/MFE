@@ -1,18 +1,19 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Settings" subtitle="Shell preferences" />
+    <UiPageHeader title="تنظیمات" subtitle="ترجیحات شِل" />
     <UiSection>
       <div class="row">
-        <span>Theme: {{ themeStore.mode }}</span>
-        <UiButton @click="toggleTheme">Toggle Theme</UiButton>
+        <span>پوسته: {{ themeLabel }}</span>
+        <UiButton @click="toggleTheme">تغییر پوسته</UiButton>
       </div>
       <div class="row">
         <label>
-          Language
+          زبان
           <select v-model="appStore.language" @change="handleLanguage">
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
+            <option value="fa">فارسی</option>
+            <option value="en">انگلیسی</option>
+            <option value="fr">فرانسوی</option>
+            <option value="es">اسپانیایی</option>
           </select>
         </label>
       </div>
@@ -23,9 +24,11 @@
 <script setup lang="ts">
 import { useHostThemeStore, useHostAppStore } from '@shared/store';
 import { eventBus } from '@shared/store';
+import { computed } from 'vue';
 
 const themeStore = useHostThemeStore();
 const appStore = useHostAppStore();
+const themeLabel = computed(() => (themeStore.mode === 'dark' ? 'تاریک' : 'روشن'));
 
 const toggleTheme = () => {
   themeStore.toggle();

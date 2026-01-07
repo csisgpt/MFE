@@ -1,28 +1,42 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Shell Dashboard" subtitle="Enterprise MFE command center" />
+    <UiPageHeader title="داشبورد شِل" subtitle="مرکز مدیریت ماژول‌های سازمانی" />
     <div class="grid">
       <UiCard>
-        <h3>Quick Links</h3>
+        <h3>دسترسی سریع</h3>
         <div class="links">
-          <RouterLink to="/insurance">Insurance</RouterLink>
-          <RouterLink to="/admission">Admission</RouterLink>
-          <RouterLink to="/ops">Ops</RouterLink>
-          <RouterLink to="/system">System</RouterLink>
-          <RouterLink to="/audit">Audit</RouterLink>
+          <RouterLink to="/insurance">بیمه</RouterLink>
+          <RouterLink to="/admission">پذیرش</RouterLink>
+          <RouterLink to="/ops">عملیات</RouterLink>
+          <RouterLink to="/system">سامانه</RouterLink>
+          <RouterLink to="/audit">ممیزی</RouterLink>
         </div>
       </UiCard>
       <UiCard>
-        <h3>Auth Status</h3>
-        <p v-if="authStore.token?.length > 0">Logged in as {{ authStore.user?.name }}</p>
-        <p v-else>Not authenticated</p>
+        <h3>وضعیت احراز هویت</h3>
+        <p v-if="authStore.token?.length > 0">وارد شده با نام {{ authStore.user?.name }}</p>
+        <p v-else>احراز هویت نشده</p>
       </UiCard>
       <UiCard >
-        <h3 class="bg-primary!">Runtime Config</h3>
+        <h3 class="!bg-primary">پیکربندی زمان اجرا</h3>
         <ul>
-          <li>apiBaseUrl: {{ config.apiBaseUrl }}</li>
-          <li class="!break-all">featureFlags: {{ JSON.stringify(config.featureFlags) }}</li>
-          <li class="!break-all">remotePrefixes: {{ JSON.stringify(config.remotePrefixes) }}</li>
+          <li>نشانی رابط برنامه‌نویسی: تنظیم‌شده</li>
+          <li class="!break-all">
+            فلگ‌های ویژگی:
+            <ul>
+              <li v-for="flag in featureFlags" :key="flag.key">
+                {{ flag.label }}: {{ flag.value ? 'فعال' : 'غیرفعال' }}
+              </li>
+            </ul>
+          </li>
+          <li class="!break-all">
+            پیشوند ریموت‌ها:
+            <ul>
+              <li v-for="remote in remotePrefixes" :key="remote.id">
+                {{ remote.title }}: {{ remote.prefixDisplay }}
+              </li>
+            </ul>
+          </li>
         </ul>
       </UiCard>
     </div>
@@ -30,11 +44,22 @@
 </template>
 
 <script setup lang="ts">
-import { getConfig } from '@shared/config';
+import { getConfig, REMOTE_REGISTRY } from '@shared/config';
 import { useHostAuthStore } from '@shared/store';
 
 const authStore = useHostAuthStore();
 const config = getConfig();
+const featureFlags = [
+  { key: 'enableReports', label: 'فعال‌سازی گزارش‌ها', value: config.featureFlags.enableReports },
+  { key: 'disableInsurance', label: 'غیرفعال‌سازی بیمه', value: config.featureFlags.disableInsurance },
+  { key: 'disableAdmission', label: 'غیرفعال‌سازی پذیرش', value: config.featureFlags.disableAdmission },
+  { key: 'disableOps', label: 'غیرفعال‌سازی عملیات', value: config.featureFlags.disableOps }
+];
+const remotePrefixes = REMOTE_REGISTRY.map((remote) => ({
+  id: remote.id,
+  title: remote.titleFa,
+  prefixDisplay: `/ریموت‌ها/${remote.titleFa}`
+}));
 </script>
 
 <style scoped>

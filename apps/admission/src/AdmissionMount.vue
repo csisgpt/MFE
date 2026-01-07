@@ -1,9 +1,9 @@
 <template>
   <div class="admission">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">Dashboard</UiButton>
-      <UiButton type="link" @click="navigate('applications')">Applications</UiButton>
-      <UiButton type="link" @click="navigate('config')">Config</UiButton>
+      <UiButton type="link" @click="navigate('')">داشبورد</UiButton>
+      <UiButton type="link" @click="navigate('applications')">درخواست‌ها</UiButton>
+      <UiButton type="link" @click="navigate('config')">پیکربندی</UiButton>
     </nav>
     <component :is="currentView" :application-id="applicationId" />
   </div>

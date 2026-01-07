@@ -1,23 +1,23 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Login" subtitle="Select a role to enter the demo" />
+    <UiPageHeader title="ورود" subtitle="برای ورود نقش را انتخاب کنید" />
     <UiSection>
       <form class="form" @submit.prevent="handleLogin">
         <label>
-          Username
-          <input v-model="username" type="text" placeholder="admin or user" />
+          نام کاربری
+          <input v-model="username" type="text" placeholder="برای نمونه: مدیر" />
         </label>
         <label>
-          Role
+          نقش
           <select v-model="role">
-            <option value="admin">Admin</option>
-            <option value="employee">Employee</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="ops">Ops</option>
-            <option value="user">User</option>
+            <option value="admin">مدیر</option>
+            <option value="employee">کارمند</option>
+            <option value="reviewer">بازبین</option>
+            <option value="ops">عملیات</option>
+            <option value="user">کاربر</option>
           </select>
         </label>
-        <UiButton type="primary" html-type="submit">Sign in</UiButton>
+        <UiButton type="primary" html-type="submit">ورود</UiButton>
       </form>
     </UiSection>
   </UiPage>
@@ -29,7 +29,7 @@ import { useRouter } from 'vue-router';
 import { login } from '@shared/auth';
 
 const router = useRouter();
-const username = ref('admin');
+const username = ref('مدیر');
 const role = ref('admin');
 
 const handleLogin = async () => {

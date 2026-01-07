@@ -63,15 +63,15 @@ export function createMockApi(): {
   // In-memory DB (same as before)
   // -----------------------------
   const orders = [
-    { id: '1001', status: 'Pending', total: 240 },
-    { id: '1002', status: 'Approved', total: 120 },
-    { id: '1003', status: 'Pending', total: 560 }
+    { id: '1001', status: 'در انتظار', total: 240 },
+    { id: '1002', status: 'تایید شده', total: 120 },
+    { id: '1003', status: 'در انتظار', total: 560 }
   ];
 
   const users = [
-    { id: 'u1', name: 'Ava Stone', role: 'admin' },
-    { id: 'u2', name: 'Miles Ray', role: 'user' },
-    { id: 'u3', name: 'Priya Singh', role: 'user' }
+    { id: 'کاربر-۱', name: 'آوا سنگی', role: 'مدیر' },
+    { id: 'کاربر-۲', name: 'میلاد رای', role: 'کاربر' },
+    { id: 'کاربر-۳', name: 'پریا سینگ', role: 'کاربر' }
   ];
 
   let insuranceRequestId = 3;
@@ -82,72 +82,74 @@ export function createMockApi(): {
 
   const insuranceRequests = [
     {
-      id: 'ir-1',
-      employeeName: 'Ava Stone',
-      type: 'New Policy',
+      id: 'درخواست-۱',
+      employeeName: 'آوا سنگی',
+      type: 'بیمه جدید',
       amount: 1200,
-      status: 'pending',
-      createdAt: '2024-02-10'
+      status: 'در انتظار',
+      createdAt: '۱۴۰۲/۱۱/۲۱'
     },
     {
-      id: 'ir-2',
-      employeeName: 'Miles Ray',
-      type: 'Coverage Update',
+      id: 'درخواست-۲',
+      employeeName: 'میلاد رای',
+      type: 'به‌روزرسانی پوشش',
       amount: 900,
-      status: 'approved',
-      createdAt: '2024-02-14'
+      status: 'تایید شده',
+      createdAt: '۱۴۰۲/۱۱/۲۵'
     }
   ];
 
   const claims = [
     {
-      id: 'cl-1',
-      policyId: 'p-1',
-      claimant: 'Ava Stone',
+      id: 'خسارت-۱',
+      policyId: 'بیمه-۱',
+      claimant: 'آوا سنگی',
       amount: 400,
-      status: 'open',
-      createdAt: '2024-02-01'
+      status: 'باز',
+      createdAt: '۱۴۰۲/۱۱/۱۲'
     }
   ];
 
   const policies = [
-    { id: 'p-1', holder: 'Ava Stone', plan: 'Gold', status: 'active', renewalDate: '2025-01-01' },
-    { id: 'p-2', holder: 'Miles Ray', plan: 'Silver', status: 'active', renewalDate: '2025-03-10' }
+    { id: 'بیمه-۱', holder: 'آوا سنگی', plan: 'طلایی', status: 'فعال', renewalDate: '۱۴۰۴/۱۰/۱۱' },
+    { id: 'بیمه-۲', holder: 'میلاد رای', plan: 'نقره‌ای', status: 'فعال', renewalDate: '۱۴۰۴/۱۲/۲۰' }
   ];
 
   const admissionApplications = [
     {
-      id: 'ad-1',
-      applicantName: 'Jordan Lee',
-      program: 'Business',
-      status: 'new',
-      createdAt: '2024-03-01'
+      id: 'پذیرش-۱',
+      applicantName: 'جردن لی',
+      program: 'مدیریت',
+      status: 'جدید',
+      createdAt: '۱۴۰۲/۱۲/۱۰'
     },
     {
-      id: 'ad-2',
-      applicantName: 'Sam Patel',
-      program: 'Engineering',
-      status: 'in_review',
+      id: 'پذیرش-۲',
+      applicantName: 'سام پاتل',
+      program: 'مهندسی',
+      status: 'در بررسی',
       score: 85,
-      createdAt: '2024-03-02'
+      createdAt: '۱۴۰۲/۱۲/۱۱'
     }
   ];
 
   const admissionConfig = {
-    workflow: 'Standard Review',
-    reviewers: ['Dean', 'Registrar']
+    workflow: 'بازبینی استاندارد',
+    reviewers: ['رئیس دانشکده', 'ثبت‌نام']
   };
 
   const opsAlerts = [
-    { id: 'op-1', message: 'Claims backlog above threshold', severity: 'high' },
-    { id: 'op-2', message: 'Admissions decision SLA warning', severity: 'medium' }
+    { id: 'هشدار-۱', message: 'عقب‌افتادگی خسارت‌ها از آستانه گذشت', severity: 'بالا' },
+    { id: 'هشدار-۲', message: 'هشدار سطح خدمت تصمیم‌گیری پذیرش', severity: 'متوسط' }
   ];
 
-  const opsReports = [{ id: 'op-r1', title: 'Weekly Ops Summary', status: 'published', createdAt: '2024-03-03' }];
+  const opsReports = [
+    { id: 'گزارش-۱', title: 'خلاصه هفتگی عملیات', status: 'منتشرشده', createdAt: '۱۴۰۲/۱۲/۱۲' }
+  ];
 
   const opsAnalytics = [
-    { id: 'an-1', segment: 'Region East', value: 72 },
-    { id: 'an-2', segment: 'Region West', value: 61 }
+    { id: 'تحلیل-۱', segment: 'منطقه شرق', value: 72 },
+    { id: 'تحلیل-۲', segment: 'منطقه غرب', value: 61 }
   ];
 
   // -----------------------------
@@ -176,7 +178,7 @@ export function createMockApi(): {
 
   const requireAuth = (req: Connect.IncomingMessage, res: Connect.ServerResponse): boolean => {
     if (!req.headers.authorization) {
-      sendJson(res, 401, { message: 'Missing token' });
+      sendJson(res, 401, { message: 'توکن موجود نیست' });
       return false;
     }
     return true;
@@ -189,7 +191,7 @@ export function createMockApi(): {
   ): boolean => {
     const role = getRole(req);
     if (!role || !roles.includes(role)) {
-      sendJson(res, 403, { message: 'Forbidden' });
+      sendJson(res, 403, { message: 'دسترسی غیرمجاز' });
       return false;
     }
     return true;
@@ -214,7 +216,7 @@ export function createMockApi(): {
     try {
       body = await readJsonBody(req);
     } catch {
-      return sendJson(res, 400, { message: 'Invalid JSON body' });
+      return sendJson(res, 400, { message: 'بدنه جی‌سون نامعتبر است' });
     }
 
     // ---- Orders
@@ -229,7 +231,7 @@ export function createMockApi(): {
         if (!requireAuth(req, res)) return;
         const id = m[1];
         const order = orders.find((x) => x.id === id);
-        if (!order) return sendJson(res, 404, { message: 'Not found' });
+        if (!order) return sendJson(res, 404, { message: 'یافت نشد' });
         return sendJson(res, 200, order);
       }
       if (method === 'POST' && match(pathname, /^\/api\/mock\/orders\/([^/]+)\/approve$/)) {
@@ -260,12 +262,12 @@ export function createMockApi(): {
       if (!requireAuth(req, res)) return;
       const payload = body ?? {};
       const created = {
-        id: `ir-${(insuranceRequestId += 1)}`,
-        employeeName: payload.employeeName ?? 'Employee',
-        type: payload.type ?? 'New Policy',
+        id: `درخواست-${(insuranceRequestId += 1)}`,
+        employeeName: payload.employeeName ?? 'کارمند نمونه',
+        type: payload.type ?? 'بیمه جدید',
         amount: payload.amount ?? 500,
-        status: 'pending',
-        createdAt: new Date().toISOString().slice(0, 10)
+        status: 'در انتظار',
+        createdAt: '۱۴۰۲/۱۲/۲۰'
       };
       insuranceRequests.unshift(created);
       return sendJson(res, 200, created);
@@ -277,7 +279,7 @@ export function createMockApi(): {
         if (!requireAuth(req, res)) return;
         const id = m[1];
         const request = insuranceRequests.find((x) => x.id === id);
-        if (!request) return sendJson(res, 404, { message: 'Not found' });
+        if (!request) return sendJson(res, 404, { message: 'یافت نشد' });
         return sendJson(res, 200, request);
       }
 
@@ -285,7 +287,7 @@ export function createMockApi(): {
         if (!requireAuth(req, res)) return;
         const id = m[1];
         const index = insuranceRequests.findIndex((x) => x.id === id);
-        if (index === -1) return sendJson(res, 404, { message: 'Not found' });
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
         insuranceRequests[index] = { ...insuranceRequests[index], ...(body ?? {}) };
         return sendJson(res, 200, insuranceRequests[index]);
       }
@@ -297,8 +299,8 @@ export function createMockApi(): {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
         const id = mApprove[1];
         const request = insuranceRequests.find((x) => x.id === id);
-        if (!request) return sendJson(res, 404, { message: 'Not found' });
-        request.status = 'approved';
+        if (!request) return sendJson(res, 404, { message: 'یافت نشد' });
+        request.status = 'تایید شده';
         return sendJson(res, 200, request);
       }
 
@@ -307,8 +309,8 @@ export function createMockApi(): {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
         const id = mReject[1];
         const request = insuranceRequests.find((x) => x.id === id);
-        if (!request) return sendJson(res, 404, { message: 'Not found' });
-        request.status = 'rejected';
+        if (!request) return sendJson(res, 404, { message: 'یافت نشد' });
+        request.status = 'رد شده';
         return sendJson(res, 200, request);
       }
     }
@@ -323,12 +325,12 @@ export function createMockApi(): {
       if (!requireAuth(req, res)) return;
       const payload = body ?? {};
       const created = {
-        id: `cl-${(claimId += 1)}`,
-        policyId: payload.policyId ?? 'p-1',
-        claimant: payload.claimant ?? 'Employee',
+        id: `خسارت-${(claimId += 1)}`,
+        policyId: payload.policyId ?? 'بیمه-۱',
+        claimant: payload.claimant ?? 'کارمند نمونه',
         amount: payload.amount ?? 200,
-        status: 'open',
-        createdAt: new Date().toISOString().slice(0, 10)
+        status: 'باز',
+        createdAt: '۱۴۰۲/۱۲/۲۰'
       };
       claims.unshift(created);
       return sendJson(res, 200, created);
@@ -344,11 +346,11 @@ export function createMockApi(): {
       if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
       const payload = body ?? {};
       const created = {
-        id: `p-${(policyId += 1)}`,
-        holder: payload.holder ?? 'Employee',
-        plan: payload.plan ?? 'Standard',
-        status: payload.status ?? 'active',
-        renewalDate: payload.renewalDate ?? '2025-06-01'
+        id: `بیمه-${(policyId += 1)}`,
+        holder: payload.holder ?? 'کارمند نمونه',
+        plan: payload.plan ?? 'استاندارد',
+        status: payload.status ?? 'فعال',
+        renewalDate: payload.renewalDate ?? '۱۴۰۳/۰۳/۱۱'
       };
       policies.unshift(created);
       return sendJson(res, 200, created);
@@ -360,7 +362,7 @@ export function createMockApi(): {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
         const id = m[1];
         const index = policies.findIndex((x) => x.id === id);
-        if (index === -1) return sendJson(res, 404, { message: 'Not found' });
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
         policies[index] = { ...policies[index], ...(body ?? {}) };
         return sendJson(res, 200, policies[index]);
       }
@@ -376,11 +378,11 @@ export function createMockApi(): {
       if (!requireAuth(req, res)) return;
       const payload = body ?? {};
       const created = {
-        id: `ad-${(admissionId += 1)}`,
-        applicantName: payload.applicantName ?? 'Applicant',
-        program: payload.program ?? 'Business',
-        status: 'new',
-        createdAt: new Date().toISOString().slice(0, 10)
+        id: `پذیرش-${(admissionId += 1)}`,
+        applicantName: payload.applicantName ?? 'متقاضی نمونه',
+        program: payload.program ?? 'مدیریت',
+        status: 'جدید',
+        createdAt: '۱۴۰۲/۱۲/۲۰'
       };
       admissionApplications.unshift(created);
       return sendJson(res, 200, created);
@@ -392,7 +394,7 @@ export function createMockApi(): {
         if (!requireAuth(req, res)) return;
         const id = m[1];
         const record = admissionApplications.find((x) => x.id === id);
-        if (!record) return sendJson(res, 404, { message: 'Not found' });
+        if (!record) return sendJson(res, 404, { message: 'یافت نشد' });
         return sendJson(res, 200, record);
       }
     }
@@ -403,11 +405,11 @@ export function createMockApi(): {
         if (!requireAuth(req, res)) return;
         const id = m[1];
         const index = admissionApplications.findIndex((x) => x.id === id);
-        if (index === -1) return sendJson(res, 404, { message: 'Not found' });
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
 
         admissionApplications[index] = {
           ...admissionApplications[index],
-          status: 'in_review',
+          status: 'در بررسی',
           score: body?.score,
           decisionReason: body?.notes
         };
@@ -421,11 +423,11 @@ export function createMockApi(): {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin', 'reviewer'])) return;
         const id = m[1];
         const index = admissionApplications.findIndex((x) => x.id === id);
-        if (index === -1) return sendJson(res, 404, { message: 'Not found' });
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
 
         admissionApplications[index] = {
           ...admissionApplications[index],
-          status: body?.decision === 'accept' ? 'accepted' : 'rejected',
+          status: body?.decision === 'پذیرش' ? 'پذیرفته‌شده' : 'رد شده',
           decisionReason: body?.reason
         };
         return sendJson(res, 200, admissionApplications[index]);
@@ -449,16 +451,16 @@ export function createMockApi(): {
     if (method === 'GET' && pathname === '/api/mock/ops/kpis') {
       if (!requireAuth(req, res)) return;
 
-      const pendingInsurance = insuranceRequests.filter((x) => x.status === 'pending').length;
-      const approvedInsurance = insuranceRequests.filter((x) => x.status === 'approved').length;
-      const acceptedAdmissions = admissionApplications.filter((x) => x.status === 'accepted').length;
-      const rejectedAdmissions = admissionApplications.filter((x) => x.status === 'rejected').length;
+      const pendingInsurance = insuranceRequests.filter((x) => x.status === 'در انتظار').length;
+      const approvedInsurance = insuranceRequests.filter((x) => x.status === 'تایید شده').length;
+      const acceptedAdmissions = admissionApplications.filter((x) => x.status === 'پذیرفته‌شده').length;
+      const rejectedAdmissions = admissionApplications.filter((x) => x.status === 'رد شده').length;
 
       return sendJson(res, 200, [
-        { label: 'Pending insurance', value: pendingInsurance },
-        { label: 'Approved insurance', value: approvedInsurance },
-        { label: 'Accepted admissions', value: acceptedAdmissions },
-        { label: 'Rejected admissions', value: rejectedAdmissions }
+        { label: 'بیمه‌های در انتظار', value: pendingInsurance },
+        { label: 'بیمه‌های تایید شده', value: approvedInsurance },
+        { label: 'پذیرش‌های تایید شده', value: acceptedAdmissions },
+        { label: 'پذیرش‌های رد شده', value: rejectedAdmissions }
       ]);
     }
 
@@ -486,10 +488,10 @@ export function createMockApi(): {
       if (!requireAuth(req, res)) return;
       const payload = body ?? {};
       const created = {
-        id: `op-r${(reportId += 1)}`,
-        title: payload.title ?? 'New report',
-        status: 'draft',
-        createdAt: new Date().toISOString().slice(0, 10)
+        id: `گزارش-${(reportId += 1)}`,
+        title: payload.title ?? 'گزارش جدید',
+        status: 'پیش‌نویس',
+        createdAt: '۱۴۰۲/۱۲/۲۰'
       };
       opsReports.unshift(created);
       return sendJson(res, 200, created);
@@ -502,7 +504,7 @@ export function createMockApi(): {
     }
 
     // fallback
-    return sendJson(res, 404, { message: 'Not found' });
+    return sendJson(res, 404, { message: 'یافت نشد' });
   };
 
   return {

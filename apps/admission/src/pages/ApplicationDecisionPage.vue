@@ -1,18 +1,18 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Decision" subtitle="Finalize the application" />
+    <UiPageHeader title="تصمیم نهایی" subtitle="نهایی‌سازی درخواست" />
     <UiSection>
-      <p v-if="!canDecide" class="warning">You do not have permission to submit decisions.</p>
+      <p v-if="!canDecide" class="warning">اجازه ثبت تصمیم را ندارید.</p>
       <UiForm layout="vertical" :model="store.decisionDraft" @finish="submit">
-        <UiFormItem label="Decision">
+        <UiFormItem label="تصمیم">
           <UiSelect v-model:value="store.decisionDraft.decision" :options="decisionOptions" />
         </UiFormItem>
-        <UiFormItem label="Reason">
+        <UiFormItem label="دلیل">
           <UiInput v-model:value="store.decisionDraft.reason" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit" :disabled="!canDecide">Submit decision</UiButton>
-          <UiButton @click="back">Back</UiButton>
+          <UiButton type="primary" html-type="submit" :disabled="!canDecide">ثبت تصمیم</UiButton>
+          <UiButton @click="back">بازگشت</UiButton>
         </div>
       </UiForm>
     </UiSection>
@@ -38,18 +38,18 @@ const store = useAdmissionStore();
 const canDecide = computed(() => can('admission:decision'));
 
 const decisionOptions = [
-  { label: 'Accept', value: 'accept' },
-  { label: 'Reject', value: 'reject' }
+  { label: 'پذیرش', value: 'پذیرش' },
+  { label: 'رد', value: 'رد' }
 ];
 
 const submit = async () => {
   if (!canDecide.value) return;
   await decideAdmissionApplication(props.applicationId, store.decisionDraft);
-  eventBus.emit('TOAST', { type: 'success', message: 'Decision recorded' });
+  eventBus.emit('TOAST', { type: 'success', message: 'تصمیم ثبت شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Admission decision submitted',
+    message: 'تصمیم پذیرش ثبت شد',
     source: 'admission',
     timestamp: new Date().toISOString(),
     context: { id: props.applicationId, decision: store.decisionDraft.decision }

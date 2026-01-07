@@ -11,9 +11,14 @@ import { useToast } from 'primevue/usetoast';
 const toast = useToast();
 
 const handler = (payload: { type: 'success' | 'error' | 'info'; message: string }) => {
+  const summaryMap = {
+    success: 'موفقیت',
+    error: 'خطا',
+    info: 'اطلاع'
+  } as const;
   toast.add({
     severity: payload.type,
-    summary: payload.type.toUpperCase(),
+    summary: summaryMap[payload.type],
     detail: payload.message,
     life: 3000
   });

@@ -1,11 +1,11 @@
 <template>
   <div class="ops">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">Overview</UiButton>
-      <UiButton type="link" @click="navigate('reports')">Reports</UiButton>
-      <UiButton type="link" @click="navigate('analytics')">Analytics</UiButton>
-      <UiButton type="link" @click="navigate('alerts')">Alerts</UiButton>
-      <UiButton type="link" @click="navigate('admin')">Admin</UiButton>
+      <UiButton type="link" @click="navigate('')">نمای کلی</UiButton>
+      <UiButton type="link" @click="navigate('reports')">گزارش‌ها</UiButton>
+      <UiButton type="link" @click="navigate('analytics')">تحلیل‌ها</UiButton>
+      <UiButton type="link" @click="navigate('alerts')">هشدارها</UiButton>
+      <UiButton type="link" @click="navigate('admin')">مدیریت</UiButton>
     </nav>
     <component :is="currentView" />
   </div>

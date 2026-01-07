@@ -1,22 +1,22 @@
 <template>
   <UiCard>
     <div class="header">
-      <h3>Users</h3>
-      <UiButton type="primary" @click="appTwoStore.showUserModal = true">Add User</UiButton>
+      <h3>کاربران</h3>
+      <UiButton type="primary" @click="appTwoStore.showUserModal = true">افزودن کاربر</UiButton>
     </div>
     <UiDataTable :value="users" :columns="columns" />
   </UiCard>
-  <UiModal v-model:open="appTwoStore.showUserModal" title="Add User" @ok="addUser">
+  <UiModal v-model:open="appTwoStore.showUserModal" title="افزودن کاربر" @ok="addUser">
     <div class="form">
       <label>
-        Name
+        نام
         <input v-model="appTwoStore.newUser.name" />
       </label>
       <label>
-        Role
+        نقش
         <select v-model="appTwoStore.newUser.role">
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
+          <option value="مدیر">مدیر</option>
+          <option value="کاربر">کاربر</option>
         </select>
       </label>
     </div>
@@ -32,16 +32,16 @@ const users = ref<{ id: string; name: string; role: string }[]>([]);
 const appTwoStore = useAppTwoStore();
 
 const columns = [
-  { field: 'id', header: 'ID' },
-  { field: 'name', header: 'Name' },
-  { field: 'role', header: 'Role' }
+  { field: 'id', header: 'شناسه' },
+  { field: 'name', header: 'نام' },
+  { field: 'role', header: 'نقش' }
 ];
 
 const addUser = () => {
   users.value = [
     ...users.value,
     {
-      id: `u${users.value.length + 1}`,
+      id: `کاربر-${users.value.length + 1}`,
       name: appTwoStore.newUser.name,
       role: appTwoStore.newUser.role
     }

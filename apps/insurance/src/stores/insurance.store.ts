@@ -6,30 +6,30 @@ export const useInsuranceStore = defineStore('insurance', {
     claimFilter: '',
     newRequest: {
       employeeName: '',
-      type: 'New Policy',
+      type: 'بیمه جدید',
       amount: 500
     },
     newClaim: {
-      policyId: 'p-1',
+      policyId: 'بیمه-۱',
       claimant: '',
       amount: 200
     },
     policyDraft: {
       holder: '',
-      plan: 'Standard',
-      status: 'active',
+      plan: 'استاندارد',
+      status: 'فعال',
       renewalDate: ''
     }
   }),
   actions: {
     resetRequest() {
-      this.newRequest = { employeeName: '', type: 'New Policy', amount: 500 };
+      this.newRequest = { employeeName: '', type: 'بیمه جدید', amount: 500 };
     },
     resetClaim() {
-      this.newClaim = { policyId: 'p-1', claimant: '', amount: 200 };
+      this.newClaim = { policyId: 'بیمه-۱', claimant: '', amount: 200 };
     },
     resetPolicy() {
-      this.policyDraft = { holder: '', plan: 'Standard', status: 'active', renewalDate: '' };
+      this.policyDraft = { holder: '', plan: 'استاندارد', status: 'فعال', renewalDate: '' };
     }
   }
 });

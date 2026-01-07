@@ -21,6 +21,6 @@ export function can(permission: PermissionKey): boolean {
 
 export function requirePermission(permission: PermissionKey): void {
   if (!can(permission)) {
-    throw new Error(`Missing permission: ${permission}`);
+    throw new Error(`مجوز لازم موجود نیست: ${permission}`);
   }
 }

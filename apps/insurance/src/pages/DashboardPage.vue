@@ -1,17 +1,17 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Insurance Dashboard" subtitle="Employee overview" />
+    <UiPageHeader title="داشبورد بیمه" subtitle="نمای کلی کارکنان" />
     <div class="kpi-grid">
       <UiCard>
-        <h3>Active policies</h3>
+        <h3>بیمه‌های فعال</h3>
         <p class="kpi">{{ policiesCount }}</p>
       </UiCard>
       <UiCard>
-        <h3>Pending requests</h3>
+        <h3>درخواست‌های در انتظار</h3>
         <p class="kpi">{{ pendingRequests }}</p>
       </UiCard>
       <UiCard>
-        <h3>Open claims</h3>
+        <h3>خسارت‌های باز</h3>
         <p class="kpi">{{ openClaims }}</p>
       </UiCard>
     </div>
@@ -27,10 +27,10 @@ const claims = ref([]);
 const policies = ref([]);
 
 const pendingRequests = computed(
-  () => requests.value.filter((item: { status: string }) => item.status === 'pending').length
+  () => requests.value.filter((item: { status: string }) => item.status === 'در انتظار').length
 );
 const openClaims = computed(
-  () => claims.value.filter((item: { status: string }) => item.status === 'open').length
+  () => claims.value.filter((item: { status: string }) => item.status === 'باز').length
 );
 const policiesCount = computed(() => policies.value.length);
 

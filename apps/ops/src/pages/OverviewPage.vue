@@ -1,6 +1,6 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Ops Overview" subtitle="Cross-domain KPIs" />
+    <UiPageHeader title="نمای کلی عملیات" subtitle="شاخص‌های کلیدی میان‌حوزه‌ای" />
     <div class="kpi-grid">
       <UiCard v-for="kpi in kpis" :key="kpi.label">
         <h3>{{ kpi.label }}</h3>

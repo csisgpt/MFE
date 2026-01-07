@@ -1,25 +1,25 @@
 <template>
   <UiCard>
-    <h3>Reports</h3>
-    <p v-if="!canCreate" class="warning">Only admins can submit reports.</p>
+    <h3>گزارش‌ها</h3>
+    <p v-if="!canCreate" class="warning">فقط مدیران می‌توانند گزارش ارسال کنند.</p>
     <form class="form" @submit.prevent="submitReport">
       <label>
-        Title
+        عنوان
         <input v-model="appTwoStore.reportDraft.title" required />
       </label>
       <label>
-        Date Range
+        بازه تاریخ
         <input
           v-model="appTwoStore.reportDraft.dateRange"
-          placeholder="2024-01-01 to 2024-01-31"
+          placeholder="۱۴۰۲/۱۰/۱۱ تا ۱۴۰۲/۱۱/۱۱"
           required
         />
       </label>
       <label>
-        Notes
+        توضیحات
         <textarea v-model="appTwoStore.reportDraft.notes" rows="3" />
       </label>
-      <UiButton type="primary" html-type="submit" :disabled="!canCreate">Submit</UiButton>
+      <UiButton type="primary" html-type="submit" :disabled="!canCreate">ثبت</UiButton>
     </form>
   </UiCard>
 </template>
@@ -40,18 +40,18 @@ const submitReport = async () => {
   }
   try {
     await createReport(appTwoStore.reportDraft);
-    eventBus.emit('TOAST', { type: 'success', message: 'Report submitted' });
+    eventBus.emit('TOAST', { type: 'success', message: 'گزارش ثبت شد' });
     eventBus.emit('AUDIT_LOG', {
       id: `audit_${Date.now()}`,
       level: 'info',
-      message: 'Report submitted',
+      message: 'گزارش ثبت شد',
       source: 'app-two',
       timestamp: new Date().toISOString(),
       context: { title: appTwoStore.reportDraft.title }
     });
     appTwoStore.resetReportDraft();
   } catch {
-    eventBus.emit('TOAST', { type: 'error', message: 'Report submission failed' });
+    eventBus.emit('TOAST', { type: 'error', message: 'ثبت گزارش ناموفق بود' });
   }
 };
 </script>

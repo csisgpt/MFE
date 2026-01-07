@@ -1,13 +1,13 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Insurance Requests" subtitle="Track your submitted requests">
+    <UiPageHeader title="درخواست‌های بیمه" subtitle="پیگیری درخواست‌های ثبت‌شده">
       <template #actions>
-        <UiButton type="primary" @click="navigate('requests/create')">New request</UiButton>
+        <UiButton type="primary" @click="navigate('requests/create')">درخواست جدید</UiButton>
       </template>
     </UiPageHeader>
-    <UiSection title="Requests">
+    <UiSection title="درخواست‌ها">
       <div class="filters">
-        <UiInput v-model:value="store.requestFilter" placeholder="Filter by status" />
+        <UiInput v-model:value="store.requestFilter" placeholder="فیلتر بر اساس وضعیت" />
       </div>
       <UiDataTable :value="filtered" :columns="columns" />
     </UiSection>
@@ -27,11 +27,11 @@ const requests = ref<{ id: string; status: string; type: string; amount: number;
 );
 
 const columns = [
-  { field: 'id', header: 'Request ID' },
-  { field: 'employeeName', header: 'Employee' },
-  { field: 'type', header: 'Type' },
-  { field: 'status', header: 'Status' },
-  { field: 'amount', header: 'Amount' }
+  { field: 'id', header: 'شناسه درخواست' },
+  { field: 'employeeName', header: 'کارمند' },
+  { field: 'type', header: 'نوع' },
+  { field: 'status', header: 'وضعیت' },
+  { field: 'amount', header: 'مبلغ' }
 ];
 
 const filtered = computed(() =>

@@ -1,6 +1,6 @@
 <template>
   <div class="standalone">
-    <header class="header">Admission Standalone</header>
+    <header class="header">پذیرش (حالت مستقل)</header>
     <AdmissionMount />
   </div>
 </template>

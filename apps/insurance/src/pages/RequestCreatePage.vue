@@ -1,20 +1,20 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Create Request" subtitle="Submit a new insurance request" />
+    <UiPageHeader title="ایجاد درخواست" subtitle="ثبت درخواست جدید بیمه" />
     <UiSection>
       <UiForm layout="vertical" :model="store.newRequest" @finish="submit">
-        <UiFormItem label="Employee name">
-          <UiInput v-model:value="store.newRequest.employeeName" placeholder="Employee" />
+        <UiFormItem label="نام کارمند">
+          <UiInput v-model:value="store.newRequest.employeeName" placeholder="نام کارمند" />
         </UiFormItem>
-        <UiFormItem label="Request type">
+        <UiFormItem label="نوع درخواست">
           <UiSelect v-model:value="store.newRequest.type" :options="typeOptions" />
         </UiFormItem>
-        <UiFormItem label="Estimated amount">
+        <UiFormItem label="مبلغ برآوردی">
           <UiInput v-model:value="store.newRequest.amount" type="number" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">Submit</UiButton>
-          <UiButton @click="navigate('requests')">Cancel</UiButton>
+          <UiButton type="primary" html-type="submit">ثبت</UiButton>
+          <UiButton @click="navigate('requests')">انصراف</UiButton>
         </div>
       </UiForm>
     </UiSection>
@@ -30,18 +30,18 @@ import { useInsuranceStore } from '../stores/insurance.store';
 const router = useRouter();
 const store = useInsuranceStore();
 const typeOptions = [
-  { label: 'New Policy', value: 'New Policy' },
-  { label: 'Coverage Update', value: 'Coverage Update' },
-  { label: 'Cancellation', value: 'Cancellation' }
+  { label: 'بیمه جدید', value: 'بیمه جدید' },
+  { label: 'به‌روزرسانی پوشش', value: 'به‌روزرسانی پوشش' },
+  { label: 'لغو بیمه', value: 'لغو بیمه' }
 ];
 
 const submit = async () => {
   await createInsuranceRequest(store.newRequest);
-  eventBus.emit('TOAST', { type: 'success', message: 'Request submitted' });
+  eventBus.emit('TOAST', { type: 'success', message: 'درخواست ثبت شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Insurance request created',
+    message: 'درخواست بیمه ایجاد شد',
     source: 'insurance',
     timestamp: new Date().toISOString(),
     context: { employeeName: store.newRequest.employeeName }

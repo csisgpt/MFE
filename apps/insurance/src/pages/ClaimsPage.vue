@@ -1,8 +1,8 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Claims" subtitle="Claims submitted by your team">
+    <UiPageHeader title="خسارت‌ها" subtitle="خسارت‌های ثبت‌شده توسط تیم شما">
       <template #actions>
-        <UiButton type="primary" @click="navigate('claims/create')">New claim</UiButton>
+        <UiButton type="primary" @click="navigate('claims/create')">خسارت جدید</UiButton>
       </template>
     </UiPageHeader>
     <UiSection>
@@ -19,10 +19,10 @@ import { getClaims } from '@shared/api-client';
 const router = useRouter();
 const claims = ref([]);
 const columns = [
-  { field: 'id', header: 'Claim ID' },
-  { field: 'policyId', header: 'Policy' },
-  { field: 'status', header: 'Status' },
-  { field: 'amount', header: 'Amount' }
+  { field: 'id', header: 'شناسه خسارت' },
+  { field: 'policyId', header: 'بیمه‌نامه' },
+  { field: 'status', header: 'وضعیت' },
+  { field: 'amount', header: 'مبلغ' }
 ];
 
 const navigate = (target: string) => {

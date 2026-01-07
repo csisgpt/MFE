@@ -1,8 +1,8 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Reports" subtitle="Operational reporting">
+    <UiPageHeader title="گزارش‌ها" subtitle="گزارش‌دهی عملیاتی">
       <template #actions>
-        <UiButton type="primary" @click="navigate('reports/create')">Create report</UiButton>
+        <UiButton type="primary" @click="navigate('reports/create')">ایجاد گزارش</UiButton>
       </template>
     </UiPageHeader>
     <UiSection>
@@ -19,10 +19,10 @@ import { getOpsReports } from '@shared/api-client';
 const router = useRouter();
 const reports = ref([]);
 const columns = [
-  { field: 'id', header: 'ID' },
-  { field: 'title', header: 'Title' },
-  { field: 'status', header: 'Status' },
-  { field: 'createdAt', header: 'Created' }
+  { field: 'id', header: 'شناسه' },
+  { field: 'title', header: 'عنوان' },
+  { field: 'status', header: 'وضعیت' },
+  { field: 'createdAt', header: 'تاریخ ایجاد' }
 ];
 
 const navigate = (target: string) => {

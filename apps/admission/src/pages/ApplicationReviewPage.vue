@@ -1,17 +1,17 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Review Application" subtitle="Score and notes" />
+    <UiPageHeader title="بازبینی درخواست" subtitle="امتیاز و یادداشت‌ها" />
     <UiSection>
       <UiForm layout="vertical" :model="store.reviewDraft" @finish="submit">
-        <UiFormItem label="Score">
+        <UiFormItem label="امتیاز">
           <UiInput v-model:value="store.reviewDraft.score" type="number" />
         </UiFormItem>
-        <UiFormItem label="Notes">
+        <UiFormItem label="یادداشت‌ها">
           <UiInput v-model:value="store.reviewDraft.notes" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">Save review</UiButton>
-          <UiButton @click="back">Back</UiButton>
+          <UiButton type="primary" html-type="submit">ذخیره بازبینی</UiButton>
+          <UiButton @click="back">بازگشت</UiButton>
         </div>
       </UiForm>
     </UiSection>
@@ -34,11 +34,11 @@ const store = useAdmissionStore();
 
 const submit = async () => {
   await reviewAdmissionApplication(props.applicationId, store.reviewDraft);
-  eventBus.emit('TOAST', { type: 'success', message: 'Review saved' });
+  eventBus.emit('TOAST', { type: 'success', message: 'بازبینی ذخیره شد' });
   eventBus.emit('AUDIT_LOG', {
     id: `audit_${Date.now()}`,
     level: 'info',
-    message: 'Admission review submitted',
+    message: 'بازبینی پذیرش ثبت شد',
     source: 'admission',
     timestamp: new Date().toISOString(),
     context: { id: props.applicationId }

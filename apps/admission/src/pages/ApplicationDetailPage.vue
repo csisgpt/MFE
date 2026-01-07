@@ -1,16 +1,16 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Application Detail" subtitle="Timeline and attachments" />
+    <UiPageHeader title="جزئیات درخواست" subtitle="زمان‌بندی و پیوست‌ها" />
     <UiSection>
-      <div v-if="loading">Loading...</div>
+      <div v-if="loading">در حال بارگذاری...</div>
       <div v-else>
-        <p><strong>ID:</strong> {{ application?.id }}</p>
-        <p><strong>Applicant:</strong> {{ application?.applicantName }}</p>
-        <p><strong>Program:</strong> {{ application?.program }}</p>
-        <p><strong>Status:</strong> {{ application?.status }}</p>
+        <p><strong>شناسه:</strong> {{ application?.id }}</p>
+        <p><strong>متقاضی:</strong> {{ application?.applicantName }}</p>
+        <p><strong>رشته:</strong> {{ application?.program }}</p>
+        <p><strong>وضعیت:</strong> {{ application?.status }}</p>
         <div class="actions">
-          <UiButton type="primary" @click="navigate('review')">Review</UiButton>
-          <UiButton @click="navigate('decision')">Decision</UiButton>
+          <UiButton type="primary" @click="navigate('review')">بازبینی</UiButton>
+          <UiButton @click="navigate('decision')">تصمیم</UiButton>
         </div>
       </div>
     </UiSection>

@@ -4,7 +4,7 @@ export const useAppOneStore = defineStore('appOne', {
   state: () => ({
     orderQuery: '',
     dashboardCounter: 0,
-    summary: { activeOrders: 3, region: 'US-East' }
+    summary: { activeOrders: 3, region: 'شرق کشور' }
   }),
   actions: {
     setOrderQuery(query: string) {

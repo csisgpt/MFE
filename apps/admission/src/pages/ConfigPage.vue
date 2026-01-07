@@ -1,16 +1,16 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Workflow Config" subtitle="Configure admission workflow" />
+    <UiPageHeader title="پیکربندی گردش کار" subtitle="تنظیم گردش کار پذیرش" />
     <UiSection>
       <UiForm layout="vertical" :model="form" @finish="save">
-        <UiFormItem label="Workflow">
+        <UiFormItem label="گردش کار">
           <UiInput v-model:value="form.workflow" />
         </UiFormItem>
-        <UiFormItem label="Reviewers">
-          <UiInput v-model:value="reviewers" placeholder="Comma-separated" />
+        <UiFormItem label="بازبین‌ها">
+          <UiInput v-model:value="reviewers" placeholder="با ویرگول جدا کنید" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">Save</UiButton>
+          <UiButton type="primary" html-type="submit">ذخیره</UiButton>
         </div>
       </UiForm>
     </UiSection>
@@ -36,7 +36,7 @@ const save = async () => {
     workflow: form.value.workflow,
     reviewers: reviewers.value.split(',').map((item) => item.trim())
   });
-  eventBus.emit('TOAST', { type: 'success', message: 'Config updated' });
+  eventBus.emit('TOAST', { type: 'success', message: 'پیکربندی به‌روزرسانی شد' });
 };
 
 onMounted(load);

@@ -1,9 +1,9 @@
 <template>
   <div class="app-two">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">Overview</UiButton>
-      <UiButton type="link" @click="navigate('users')">Users</UiButton>
-      <UiButton type="link" @click="navigate('reports')">Reports</UiButton>
+      <UiButton type="link" @click="navigate('')">نمای کلی</UiButton>
+      <UiButton type="link" @click="navigate('users')">کاربران</UiButton>
+      <UiButton type="link" @click="navigate('reports')">گزارش‌ها</UiButton>
     </nav>
     <component :is="currentView" @open-users="navigate('users')" />
   </div>

@@ -1,6 +1,6 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Requests Review" subtitle="Approve or reject requests" />
+    <UiPageHeader title="بررسی درخواست‌ها" subtitle="تایید یا رد درخواست‌ها" />
     <UiSection>
       <UiDataTable :value="requests" :columns="columns" @row-click="handleRowClick" />
     </UiSection>
@@ -15,10 +15,10 @@ const emit = defineEmits<{ (e: 'open-request', id: string): void }>();
 
 const requests = ref([]);
 const columns = [
-  { field: 'id', header: 'Request ID' },
-  { field: 'employeeName', header: 'Employee' },
-  { field: 'status', header: 'Status' },
-  { field: 'amount', header: 'Amount' }
+  { field: 'id', header: 'شناسه درخواست' },
+  { field: 'employeeName', header: 'کارمند' },
+  { field: 'status', header: 'وضعیت' },
+  { field: 'amount', header: 'مبلغ' }
 ];
 
 const handleRowClick = (event: { data: { id: string } }) => {

@@ -1,42 +1,22 @@
 <template>
   <div class="shell">
     <aside :class="['sidebar', { open: sidebarOpen }]">
-      <div class="brand">CSIS MFE</div>
+      <div class="brand">داشبورد یکپارچه</div>
       <nav class="nav">
-        <RouterLink to="/" class="nav-link">Dashboard</RouterLink>
+        <RouterLink to="/" class="nav-link">خانه</RouterLink>
         <RouterLink
-          to="/insurance"
+          v-for="remote in enabledRemotes"
+          :key="remote.id"
+          :to="remote.basePath"
           class="nav-link"
-          @mouseenter="prefetchRemoteEntry('insurance')"
+          @mouseenter="prefetchRemoteEntry(remote.id)"
         >
-          Insurance
+          {{ remote.titleFa }}
         </RouterLink>
-        <RouterLink
-          to="/admission"
-          class="nav-link"
-          @mouseenter="prefetchRemoteEntry('admission')"
-        >
-          Admission
-        </RouterLink>
-        <RouterLink to="/ops" class="nav-link" @mouseenter="prefetchRemoteEntry('ops')">Ops</RouterLink>
-        <RouterLink
-          to="/app-one"
-          class="nav-link"
-          @mouseenter="prefetchRemoteEntry('app-one')"
-        >
-          App One
-        </RouterLink>
-        <RouterLink
-          to="/app-two"
-          class="nav-link"
-          @mouseenter="prefetchRemoteEntry('app-two')"
-        >
-          App Two
-        </RouterLink>
-        <RouterLink to="/settings" class="nav-link">Settings</RouterLink>
-        <RouterLink to="/profile" class="nav-link">Profile</RouterLink>
-        <RouterLink to="/system" class="nav-link">System</RouterLink>
-        <RouterLink to="/audit" class="nav-link">Audit</RouterLink>
+        <RouterLink to="/settings" class="nav-link">تنظیمات</RouterLink>
+        <RouterLink to="/profile" class="nav-link">پروفایل</RouterLink>
+        <RouterLink to="/system" class="nav-link">سامانه</RouterLink>
+        <RouterLink to="/audit" class="nav-link">ممیزی</RouterLink>
       </nav>
     </aside>
     <div class="main">
@@ -53,12 +33,12 @@
             />
           </div>
           <UiButton size="small" @click="themeStore.toggle">
-            Theme: {{ themeStore.mode }}
+            پوسته: {{ themeLabel }}
           </UiButton>
           <UiButton v-if="authStore.isAuthenticated" type="primary" size="small" @click="handleLogout">
-            Logout
+            خروج
           </UiButton>
-          <RouterLink v-else to="/login">Login</RouterLink>
+          <RouterLink v-else to="/login">ورود</RouterLink>
         </div>
       </header>
       <main class="content">
@@ -70,22 +50,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useHostAuthStore, useHostThemeStore } from '@shared/store';
 import { logout } from '@shared/auth';
 import { prefetchRemoteEntry } from './utils/remotes';
 import { useRoute } from 'vue-router';
+import { getConfig, getEnabledRemotes } from '@shared/config';
 
 const authStore = useHostAuthStore();
 const themeStore = useHostThemeStore();
 const sidebarOpen = ref(false);
-const route = useRoute()
+const route = useRoute();
+const enabledRemotes = computed(() => getEnabledRemotes(getConfig()));
+const themeLabel = computed(() => (themeStore.mode === 'dark' ? 'تاریک' : 'روشن'));
 const roleOptions = [
-  { label: 'Admin', value: 'admin' },
-  { label: 'Employee', value: 'employee' },
-  { label: 'Reviewer', value: 'reviewer' },
-  { label: 'Ops', value: 'ops' },
-  { label: 'User', value: 'user' }
+  { label: 'مدیر', value: 'admin' },
+  { label: 'کارمند', value: 'employee' },
+  { label: 'بازبین', value: 'reviewer' },
+  { label: 'عملیات', value: 'ops' },
+  { label: 'کاربر', value: 'user' }
 ];
 
 const selectedRole = ref(authStore.user?.role ?? 'user');

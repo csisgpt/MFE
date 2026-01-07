@@ -1,19 +1,19 @@
 <template>
   <UiCard>
-    <h3>Order Details</h3>
-    <p v-if="loading">Loading...</p>
+    <h3>جزئیات سفارش</h3>
+    <p v-if="loading">در حال بارگذاری...</p>
     <div v-else>
-      <p>ID: {{ order?.id }}</p>
-      <p>Status: {{ order?.status }}</p>
-      <p>Total: ${{ order?.total }}</p>
+      <p>شناسه: {{ order?.id }}</p>
+      <p>وضعیت: {{ order?.status }}</p>
+      <p>مبلغ کل: {{ order?.total }} تومان</p>
       <div class="actions">
-        <UiButton type="primary" @click="openConfirm">Approve</UiButton>
-        <UiButton @click="emitBack">Back to orders</UiButton>
+        <UiButton type="primary" @click="openConfirm">تایید</UiButton>
+        <UiButton @click="emitBack">بازگشت به سفارش‌ها</UiButton>
       </div>
     </div>
   </UiCard>
-  <UiModal v-model:open="showConfirm" title="Approve order" @ok="handleApprove">
-    Are you sure you want to approve this order?
+  <UiModal v-model:open="showConfirm" title="تایید سفارش" @ok="handleApprove">
+    آیا از تایید این سفارش اطمینان دارید؟
   </UiModal>
 </template>
 
@@ -56,9 +56,9 @@ const handleApprove = async () => {
   showConfirm.value = false;
   try {
     await approveOrder(props.orderId);
-    eventBus.emit('TOAST', { type: 'success', message: 'Order approved' });
+    eventBus.emit('TOAST', { type: 'success', message: 'سفارش تایید شد' });
   } catch {
-    eventBus.emit('TOAST', { type: 'error', message: 'Approval failed' });
+    eventBus.emit('TOAST', { type: 'error', message: 'تایید سفارش ناموفق بود' });
   }
 };
 

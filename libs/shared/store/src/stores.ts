@@ -61,8 +61,8 @@ export const useThemeStore = defineStore('theme', {
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    selectedOrg: localStorage.getItem('selected-org') || 'Acme HQ',
-    language: localStorage.getItem('language') || 'en'
+    selectedOrg: localStorage.getItem('selected-org') || 'ستاد مرکزی',
+    language: localStorage.getItem('language') || 'fa'
   }),
   actions: {
     setSelectedOrg(org: string) {

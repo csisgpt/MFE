@@ -1,15 +1,15 @@
 <template>
   <UiPage>
-    <UiPageHeader title="Alerts" subtitle="Operational alerts and acknowledgements" />
+    <UiPageHeader title="هشدارها" subtitle="هشدارهای عملیاتی و تایید دریافت" />
     <UiSection>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Message</th>
-              <th>Severity</th>
-              <th>Actions</th>
+              <th>شناسه</th>
+              <th>پیام</th>
+              <th>شدت</th>
+              <th>عملیات</th>
             </tr>
           </thead>
           <tbody>
@@ -17,7 +17,7 @@
               <td>{{ alert.id }}</td>
               <td>{{ alert.message }}</td>
               <td>{{ alert.severity }}</td>
-              <td><UiButton size="small" @click="ack(alert.id)">Acknowledge</UiButton></td>
+              <td><UiButton size="small" @click="ack(alert.id)">تایید دریافت</UiButton></td>
             </tr>
           </tbody>
         </table>
@@ -35,7 +35,7 @@ const alerts = ref([]);
 
 const ack = async (id: string) => {
   await ackOpsAlert(id);
-  eventBus.emit('TOAST', { type: 'success', message: 'Alert acknowledged' });
+  eventBus.emit('TOAST', { type: 'success', message: 'هشدار تایید شد' });
 };
 
 onMounted(async () => {

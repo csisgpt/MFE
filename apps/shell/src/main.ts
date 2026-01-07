@@ -2,12 +2,12 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import { getConfig, loadRuntimeConfig } from '@shared/config';
+import { getConfig, loadRuntimeConfig, REMOTE_REGISTRY } from '@shared/config';
 import { installUi } from '@shared/ui';
 import '@shared/ui/styles';
 import { eventBus, setHostPinia, useHostAuditStore, useHostThemeStore } from '@shared/store';
 import '@shared/styles';
-import { useRemoteStatusStore } from './stores/remote-status.store';
+import { useRemoteStatusStore, type RemoteKey } from './stores/remote-status.store';
 
 async function bootstrap() {
   await loadRuntimeConfig();
@@ -23,11 +23,13 @@ async function bootstrap() {
   const remoteStore = useRemoteStatusStore();
   themeStore.setMode(themeStore.mode);
   const config = getConfig();
-  remoteStore.seedFromRuntimeConfig({
-    insurance: config.featureFlags.disableInsurance,
-    admission: config.featureFlags.disableAdmission,
-    ops: config.featureFlags.disableOps
-  });
+  const disabledMap = REMOTE_REGISTRY.reduce<Partial<Record<RemoteKey, boolean>>>((acc, remote) => {
+    if (remote.disabledFlag && config.featureFlags[remote.disabledFlag]) {
+      acc[remote.id] = true;
+    }
+    return acc;
+  }, {});
+  remoteStore.seedFromRuntimeConfig(disabledMap);
   remoteStore.loadDisabledFromStorage();
   eventBus.on('NAVIGATE', ({ path }) => {
     router.push(path);
@@ -43,7 +45,7 @@ async function bootstrap() {
     auditStore.add({
       id: `err_${Date.now()}`,
       level: 'error',
-      message: event.message,
+      message: event.message || 'خطای غیرمنتظره در شِل',
       source: 'shell',
       timestamp: new Date().toISOString(),
       context: { filename: event.filename, lineno: event.lineno }
@@ -54,7 +56,7 @@ async function bootstrap() {
     auditStore.add({
       id: `rej_${Date.now()}`,
       level: 'error',
-      message: 'Unhandled promise rejection',
+      message: 'رد شدن وعده بدون مدیریت',
       source: 'shell',
       timestamp: new Date().toISOString(),
       context: { reason: String(event.reason) }
