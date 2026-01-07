@@ -23,7 +23,9 @@
       "@shared/ui/styles": ["libs/shared/ui/src/styles.ts"],
       "@shared/contracts": ["libs/shared/contracts/src/index.ts"],
       "@shared/observability": ["libs/shared/observability/src/index.ts"],
-      "@shared/permissions": ["libs/shared/permissions/src/index.ts"]
+      "@shared/permissions": ["libs/shared/permissions/src/index.ts"],
+      "@shared/http": ["libs/shared/http/src/index.ts"],
+      "@shared/mocks": ["libs/shared/mocks/src/index.ts"]
     },
     "types": ["vite/client"]
   },

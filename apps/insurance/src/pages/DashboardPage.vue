@@ -1,21 +1,25 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="داشبورد بیمه" subtitle="نمای کلی کارکنان" />
-    <div class="kpi-grid">
-      <UiCard>
-        <h3>بیمه‌های فعال</h3>
+  <PageShell>
+    <PageHeader title="داشبورد بیمه" subtitle="نمای کلی کارکنان">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'بیمه' }, { label: 'داشبورد' }]" />
+      </template>
+    </PageHeader>
+    <div class="grid">
+      <div class="card">
+        <h3 class="title">بیمه‌های فعال</h3>
         <p class="kpi">{{ policiesCount }}</p>
-      </UiCard>
-      <UiCard>
-        <h3>درخواست‌های در انتظار</h3>
+      </div>
+      <div class="card">
+        <h3 class="title">درخواست‌های در انتظار</h3>
         <p class="kpi">{{ pendingRequests }}</p>
-      </UiCard>
-      <UiCard>
-        <h3>خسارت‌های باز</h3>
+      </div>
+      <div class="card">
+        <h3 class="title">خسارت‌های باز</h3>
         <p class="kpi">{{ openClaims }}</p>
-      </UiCard>
+      </div>
     </div>
-  </UiPage>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -42,10 +46,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.kpi-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .kpi {

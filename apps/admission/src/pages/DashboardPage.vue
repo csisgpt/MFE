@@ -1,25 +1,29 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="داشبورد پذیرش" subtitle="نمای کلی جریان پذیرش" />
-    <div class="kpi-grid">
-      <UiCard>
-        <h3>جدید</h3>
+  <PageShell>
+    <PageHeader title="داشبورد پذیرش" subtitle="نمای کلی جریان پذیرش">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'پذیرش' }, { label: 'داشبورد' }]" />
+      </template>
+    </PageHeader>
+    <div class="grid">
+      <div class="card">
+        <h3 class="title">جدید</h3>
         <p class="kpi">{{ kpis.new }}</p>
-      </UiCard>
-      <UiCard>
-        <h3>در بررسی</h3>
+      </div>
+      <div class="card">
+        <h3 class="title">در بررسی</h3>
         <p class="kpi">{{ kpis.inReview }}</p>
-      </UiCard>
-      <UiCard>
-        <h3>پذیرفته‌شده</h3>
+      </div>
+      <div class="card">
+        <h3 class="title">پذیرفته‌شده</h3>
         <p class="kpi">{{ kpis.accepted }}</p>
-      </UiCard>
-      <UiCard>
-        <h3>رد شده</h3>
+      </div>
+      <div class="card">
+        <h3 class="title">رد شده</h3>
         <p class="kpi">{{ kpis.rejected }}</p>
-      </UiCard>
+      </div>
     </div>
-  </UiPage>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -40,10 +44,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.kpi-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .kpi {

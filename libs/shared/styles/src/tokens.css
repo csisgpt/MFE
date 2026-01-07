@@ -17,7 +17,7 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Vazirmatn', 'IRANSans', 'Inter', 'Tahoma', system-ui, sans-serif;
 }
 
 :root {

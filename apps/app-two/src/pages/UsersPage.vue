@@ -1,40 +1,49 @@
 <template>
-  <UiCard>
-    <div class="header">
-      <h3>کاربران</h3>
-      <UiButton type="primary" @click="appTwoStore.showUserModal = true">افزودن کاربر</UiButton>
+  <PageShell>
+    <PageHeader title="کاربران" subtitle="فهرست کاربران سامانه">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'اپلیکیشن دو' }, { label: 'کاربران' }]" />
+      </template>
+      <template #actions>
+        <button class="action-button" type="button" @click="appTwoStore.showUserModal = true">
+          افزودن کاربر
+        </button>
+      </template>
+    </PageHeader>
+    <div class="card">
+      <EnterpriseDataGrid :row-data="users" :column-defs="columns" :pagination-page-size="5" />
     </div>
-    <UiDataTable :value="users" :columns="columns" />
-  </UiCard>
-  <UiModal v-model:open="appTwoStore.showUserModal" title="افزودن کاربر" @ok="addUser">
-    <div class="form">
-      <label>
-        نام
-        <input v-model="appTwoStore.newUser.name" />
-      </label>
-      <label>
-        نقش
-        <select v-model="appTwoStore.newUser.role">
-          <option value="مدیر">مدیر</option>
-          <option value="کاربر">کاربر</option>
-        </select>
-      </label>
-    </div>
-  </UiModal>
+    <UiModal v-model:open="appTwoStore.showUserModal" title="افزودن کاربر" @ok="addUser">
+      <div class="form">
+        <label>
+          نام
+          <input v-model="appTwoStore.newUser.name" />
+        </label>
+        <label>
+          نقش
+          <select v-model="appTwoStore.newUser.role">
+            <option value="مدیر">مدیر</option>
+            <option value="کاربر">کاربر</option>
+          </select>
+        </label>
+      </div>
+    </UiModal>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getUsers } from '@shared/api-client';
 import { useAppTwoStore } from '../stores/app-two.store';
+import type { ColDef } from 'ag-grid-community';
 
 const users = ref<{ id: string; name: string; role: string }[]>([]);
 const appTwoStore = useAppTwoStore();
 
-const columns = [
-  { field: 'id', header: 'شناسه' },
-  { field: 'name', header: 'نام' },
-  { field: 'role', header: 'نقش' }
+const columns: ColDef[] = [
+  { field: 'id', headerName: 'شناسه' },
+  { field: 'name', headerName: 'نام' },
+  { field: 'role', headerName: 'نقش' }
 ];
 
 const addUser = () => {
@@ -56,11 +65,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
 }
 
 .form {
@@ -75,5 +84,13 @@ select {
   padding: 6px 8px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+}
+
+.action-button {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 </style>
