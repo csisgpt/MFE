@@ -1,22 +1,41 @@
-import { REMOTE_REGISTRY, REMOTE_REGISTRY_BY_ID, getRemoteEntryUrl } from '@shared/config';
+import { REMOTE_REGISTRY, getRemoteEntryUrl } from '@shared/config';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
 import type { RemoteMeta } from '@shared/contracts';
 
-const remoteLoaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
-  (acc, remote) => {
-    acc[remote.id] = () => import(/* @vite-ignore */ remote.mountExport);
-    return acc;
+const remoteImportMap = {
+  appOne: {
+    mount: () => import('app-one/AppOneMount'),
+    meta: () => import('app-one/meta')
   },
-  {} as Record<RemoteKey, () => Promise<unknown>>
-);
+  appTwo: {
+    mount: () => import('app-two/AppTwoMount'),
+    meta: () => import('app-two/meta')
+  },
+  insurance: {
+    mount: () => import('insurance/InsuranceMount'),
+    meta: () => import('insurance/meta')
+  },
+  admission: {
+    mount: () => import('admission/AdmissionMount'),
+    meta: () => import('admission/meta')
+  },
+  ops: {
+    mount: () => import('ops/OpsMount'),
+    meta: () => import('ops/meta')
+  }
+} as const;
 
-const remoteMetaLoaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
-  (acc, remote) => {
-    acc[remote.id] = () => import(/* @vite-ignore */ remote.metaExport);
+const buildLoaders = <T extends keyof (typeof remoteImportMap)[RemoteKey]>(key: T) =>
+  REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>((acc, remote) => {
+    const entry = remoteImportMap[remote.id]?.[key];
+    if (entry) {
+      acc[remote.id] = entry;
+    }
     return acc;
-  },
-  {} as Record<RemoteKey, () => Promise<unknown>>
-);
+  }, {} as Record<RemoteKey, () => Promise<unknown>>);
+
+export const remoteMountLoaders = buildLoaders('mount');
+export const remoteMetaLoaders = buildLoaders('meta');
 
 const inflight = new Map<RemoteKey, Promise<void>>();
 
@@ -35,10 +54,11 @@ export function prefetchRemoteEntry(name: RemoteKey): void {
 }
 
 export async function loadRemoteMount(name: RemoteKey): Promise<void> {
-  const loader = remoteLoaders[name];
-  if (loader) {
-    await loader();
+  const loader = remoteMountLoaders[name];
+  if (!loader) {
+    throw new Error('ریموت ناشناخته است');
   }
+  await loader();
 }
 
 export async function loadRemoteMeta(name: RemoteKey): Promise<RemoteMeta | null> {
@@ -64,7 +84,7 @@ export async function validateRemote(name: RemoteKey, mode: 'light' | 'deep') {
 }
 
 function importRemoteMount(name: RemoteKey) {
-  const remote = REMOTE_REGISTRY_BY_ID.get(name);
-  if (!remote) return Promise.resolve();
-  return import(/* @vite-ignore */ remote.mountExport);
+  const loader = remoteMountLoaders[name];
+  if (!loader) return Promise.resolve();
+  return loader();
 }

@@ -24,7 +24,7 @@ import { computed, onMounted, shallowRef, ref, watch } from 'vue';
 import { REMOTE_REGISTRY } from '@shared/config';
 import { eventBus } from '@shared/store';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
-import { loadRemoteMeta } from '../utils/remotes';
+import { loadRemoteMeta, remoteMountLoaders } from '../utils/remotes';
 
 interface Props {
   remote: RemoteKey;
@@ -36,14 +36,6 @@ const remoteComponent = shallowRef();
 const state = ref<'loading' | 'error' | 'loaded' | 'disabled'>('loading');
 const errorMessage = ref('');
 const statusStore = useRemoteStatusStore();
-
-const loaders = REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
-  (acc, remote) => {
-    acc[remote.id] = () => import(/* @vite-ignore */ remote.mountExport);
-    return acc;
-  },
-  {} as Record<RemoteKey, () => Promise<unknown>>
-);
 
 const title = computed(() => {
   const match = REMOTE_REGISTRY.find((item) => item.id === props.remote);
@@ -60,7 +52,15 @@ async function loadRemote() {
   }
   state.value = 'loading';
   statusStore.markLoading(props.remote);
-  const loader = loaders[props.remote];
+  const loader = remoteMountLoaders[props.remote];
+  if (!loader) {
+    const message = 'ریموت ناشناخته است';
+    errorMessage.value = message;
+    state.value = 'error';
+    statusStore.markFailed(props.remote, message);
+    eventBus.emit('TOAST', { type: 'error', message });
+    return;
+  }
   try {
     const module = await Promise.race([
       loader(),
