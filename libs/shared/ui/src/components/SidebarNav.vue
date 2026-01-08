@@ -1,5 +1,5 @@
 <template>
-  <div class="border border-border">
+  <div class="border border-border h-screen overflow-y-auto sticky top-0">
     <div
       v-if="mobileOpen"
       class="fixed inset-0 z-30 bg-black/40 lg:hidden"
@@ -7,7 +7,7 @@
     ></div>
     <aside
       :class="[
-        'fixed inset-y-0 right-0 z-40 flex h-full flex-col gap-4 border-l border-border bg-surface px-3 py-4 transition-all lg:static lg:translate-x-0',
+        'fixed! inset-y-0! right-0 z-40 flex h-full flex-col gap-4 border-l border-border bg-surface px-3 py-4 transition-all lg:translate-x-0',
         collapsed ? 'w-20' : 'w-64',
         mobileOpen ? 'translate-x-0' : 'translate-x-full'
       ]"
