@@ -19,6 +19,16 @@ import UiSelect from './components/UiSelect.vue';
 import UiForm from './components/UiForm.vue';
 import UiFormItem from './components/UiFormItem.vue';
 import UiTag from './components/UiTag.vue';
+import AppLayout from './components/AppLayout.vue';
+import HeaderBar from './components/HeaderBar.vue';
+import SidebarNav from './components/SidebarNav.vue';
+import Breadcrumbs from './components/Breadcrumbs.vue';
+import PageHeader from './components/PageHeader.vue';
+import PageShell from './components/PageShell.vue';
+import EmptyState from './components/EmptyState.vue';
+import SkeletonBlock from './components/SkeletonBlock.vue';
+import UiIcon from './components/UiIcon.vue';
+import EnterpriseDataGrid from './components/EnterpriseDataGrid.vue';
 
 export function installUi(app: App) {
   app.use(Antd, { locale: faIR });
@@ -119,6 +129,16 @@ export function installUi(app: App) {
   app.component('UiForm', UiForm);
   app.component('UiFormItem', UiFormItem);
   app.component('UiTag', UiTag);
+  app.component('AppLayout', AppLayout);
+  app.component('HeaderBar', HeaderBar);
+  app.component('SidebarNav', SidebarNav);
+  app.component('Breadcrumbs', Breadcrumbs);
+  app.component('PageHeader', PageHeader);
+  app.component('PageShell', PageShell);
+  app.component('EmptyState', EmptyState);
+  app.component('SkeletonBlock', SkeletonBlock);
+  app.component('UiIcon', UiIcon);
+  app.component('EnterpriseDataGrid', EnterpriseDataGrid);
 }
 
 export {
@@ -134,5 +154,15 @@ export {
   UiSelect,
   UiForm,
   UiFormItem,
-  UiTag
+  UiTag,
+  AppLayout,
+  HeaderBar,
+  SidebarNav,
+  Breadcrumbs,
+  PageHeader,
+  PageShell,
+  EmptyState,
+  SkeletonBlock,
+  UiIcon,
+  EnterpriseDataGrid
 };

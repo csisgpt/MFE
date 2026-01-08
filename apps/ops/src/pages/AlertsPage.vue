@@ -1,42 +1,52 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="هشدارها" subtitle="هشدارهای عملیاتی و تایید دریافت" />
-    <UiSection>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>شناسه</th>
-              <th>پیام</th>
-              <th>شدت</th>
-              <th>عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="alert in alerts" :key="alert.id">
-              <td>{{ alert.id }}</td>
-              <td>{{ alert.message }}</td>
-              <td>{{ alert.severity }}</td>
-              <td><UiButton size="small" @click="ack(alert.id)">تایید دریافت</UiButton></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </UiSection>
-  </UiPage>
+  <PageShell>
+    <PageHeader title="هشدارها" subtitle="هشدارهای عملیاتی و تایید دریافت">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'عملیات' }, { label: 'هشدارها' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
+      <EnterpriseDataGrid :row-data="alerts" :column-defs="columns" :pagination-page-size="6" />
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { ackOpsAlert, getOpsAlerts } from '@shared/api-client';
 import { eventBus } from '@shared/store';
+import type { ColDef } from 'ag-grid-community';
 
-const alerts = ref([]);
+const alerts = ref<any[]>([]);
+
+const AckCell = {
+  template: `<button class="grid-action" type="button" @click="handleAck">تایید دریافت</button>`,
+  props: ['params'],
+  methods: {
+    handleAck() {
+      this.params?.ack?.(this.params.data.id);
+    }
+  }
+};
 
 const ack = async (id: string) => {
   await ackOpsAlert(id);
   eventBus.emit('TOAST', { type: 'success', message: 'هشدار تایید شد' });
 };
+
+const columns: ColDef[] = [
+  { field: 'id', headerName: 'شناسه' },
+  { field: 'message', headerName: 'پیام', flex: 1 },
+  { field: 'severity', headerName: 'شدت' },
+  {
+    headerName: 'عملیات',
+    field: 'actions',
+    cellRenderer: AckCell,
+    sortable: false,
+    filter: false,
+    cellRendererParams: { ack }
+  }
+];
 
 onMounted(async () => {
   alerts.value = await getOpsAlerts();
@@ -44,20 +54,20 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.table-wrap {
-  width: 100%;
-  overflow-x: auto;
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid var(--color-border);
+:deep(.grid-action) {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
 }
 </style>

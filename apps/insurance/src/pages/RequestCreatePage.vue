@@ -1,24 +1,28 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="ایجاد درخواست" subtitle="ثبت درخواست جدید بیمه" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="ایجاد درخواست" subtitle="ثبت درخواست جدید بیمه">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'بیمه' }, { label: 'ایجاد درخواست' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
       <UiForm layout="vertical" :model="store.newRequest" @finish="submit">
-        <UiFormItem label="نام کارمند">
-          <UiInput v-model:value="store.newRequest.employeeName" placeholder="نام کارمند" />
+        <UiFormItem label="کارمند">
+          <UiInput v-model:value="store.newRequest.employeeName" />
         </UiFormItem>
         <UiFormItem label="نوع درخواست">
-          <UiSelect v-model:value="store.newRequest.type" :options="typeOptions" />
+          <UiInput v-model:value="store.newRequest.type" />
         </UiFormItem>
-        <UiFormItem label="مبلغ برآوردی">
+        <UiFormItem label="مبلغ">
           <UiInput v-model:value="store.newRequest.amount" type="number" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">ثبت</UiButton>
+          <UiButton type="primary" html-type="submit">ثبت درخواست</UiButton>
           <UiButton @click="navigate('requests')">انصراف</UiButton>
         </div>
       </UiForm>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -29,11 +33,6 @@ import { useInsuranceStore } from '../stores/insurance.store';
 
 const router = useRouter();
 const store = useInsuranceStore();
-const typeOptions = [
-  { label: 'بیمه جدید', value: 'بیمه جدید' },
-  { label: 'به‌روزرسانی پوشش', value: 'به‌روزرسانی پوشش' },
-  { label: 'لغو بیمه', value: 'لغو بیمه' }
-];
 
 const submit = async () => {
   await createInsuranceRequest(store.newRequest);
@@ -56,6 +55,13 @@ const navigate = (target: string) => {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .actions {
   display: flex;
   gap: 12px;

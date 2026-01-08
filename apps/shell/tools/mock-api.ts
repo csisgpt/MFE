@@ -1,5 +1,6 @@
 // apps/shell/tools/mock-api.ts
 import type { Connect } from 'vite';
+import { createMockDb, paginate } from '@shared/mocks';
 
 type Role = 'admin' | 'user' | 'employee' | 'reviewer' | 'ops';
 
@@ -18,6 +19,11 @@ function sendJson(res: Connect.ServerResponse, status: number, data: Json) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(data));
+}
+
+function toPersianDigits(value: number) {
+  const map = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return value.toString().replace(/\d/g, (digit) => map[Number(digit)] ?? digit);
 }
 
 async function readJsonBody(req: Connect.IncomingMessage): Promise<any> {
@@ -49,6 +55,7 @@ export function createMockApi(): {
   db: {
     orders: any[];
     users: any[];
+    requests: any[];
     insuranceRequests: any[];
     claims: any[];
     policies: any[];
@@ -68,12 +75,12 @@ export function createMockApi(): {
     { id: '1003', status: 'در انتظار', total: 560 }
   ];
 
-  const users = [
-    { id: 'کاربر-۱', name: 'آوا سنگی', role: 'مدیر' },
-    { id: 'کاربر-۲', name: 'میلاد رای', role: 'کاربر' },
-    { id: 'کاربر-۳', name: 'پریا سینگ', role: 'کاربر' }
-  ];
+  const mockDb = createMockDb();
+  const users = mockDb.users;
+  const requests = mockDb.requests;
 
+  let userId = 1005;
+  let requestId = 2004;
   let insuranceRequestId = 3;
   let claimId = 2;
   let policyId = 3;
@@ -206,7 +213,7 @@ export function createMockApi(): {
   // Connect middleware
   // -----------------------------
   const middleware: Connect.NextHandleFunction = async (req, res, next) => {
-    const { pathname } = parseUrl(req);
+    const { pathname, searchParams } = parseUrl(req);
     const method = (req.method || 'GET').toUpperCase();
 
     // Only handle /api/mock/*
@@ -243,7 +250,150 @@ export function createMockApi(): {
     // ---- Users
     if (method === 'GET' && pathname === '/api/mock/users') {
       if (!requireAuth(req, res)) return;
-      return sendJson(res, 200, users);
+      if (searchParams.get('error') === 'true' || req.headers['x-mock-error'] === 'true') {
+        return sendJson(res, 500, { message: 'خطای شبیه‌سازی شده در دریافت کاربران' });
+      }
+      const delay = Number(searchParams.get('delay') ?? 350);
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+      if (searchParams.get('mode') === 'list') {
+        return sendJson(
+          res,
+          200,
+          users.map((user) => ({ id: user.id, name: user.fullName, role: user.role }))
+        );
+      }
+      const q = (searchParams.get('q') ?? '').trim();
+      const status = searchParams.get('status') ?? '';
+      const role = searchParams.get('role') ?? '';
+      const page = Number(searchParams.get('page') ?? 1);
+      const pageSize = Number(searchParams.get('pageSize') ?? 10);
+      const filtered = users.filter((user) => {
+        const matchesQuery =
+          !q ||
+          user.fullName.includes(q) ||
+          user.username.includes(q) ||
+          user.department.includes(q);
+        const matchesStatus = !status || user.status === status;
+        const matchesRole = !role || user.role === role;
+        return matchesQuery && matchesStatus && matchesRole;
+      });
+      return sendJson(res, 200, paginate(filtered, page, pageSize));
+    }
+
+    if (method === 'POST' && pathname === '/api/mock/users') {
+      if (!requireAuth(req, res)) return;
+      const payload = body ?? {};
+      const created = {
+        id: `کاربر-${toPersianDigits((userId += 1))}`,
+        username: payload.username ?? `کاربر-${toPersianDigits(userId)}`,
+        fullName: payload.fullName ?? 'کارمند جدید',
+        department: payload.department ?? 'منابع انسانی',
+        role: payload.role ?? 'کارشناس',
+        status: payload.status ?? 'فعال',
+        phone: payload.phone ?? '۰۹۱۲۰۰۰۰۰۰۰',
+        createdAt: new Date().toISOString()
+      };
+      users.unshift(created);
+      return sendJson(res, 200, created);
+    }
+
+    {
+      const m = match(pathname, /^\/api\/mock\/users\/([^/]+)$/);
+      if (method === 'GET' && m) {
+        if (!requireAuth(req, res)) return;
+        const record = users.find((item) => item.id === m[1]);
+        if (!record) return sendJson(res, 404, { message: 'یافت نشد' });
+        return sendJson(res, 200, record);
+      }
+      if (method === 'PUT' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = users.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        users[index] = { ...users[index], ...(body ?? {}) };
+        return sendJson(res, 200, users[index]);
+      }
+      if (method === 'DELETE' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = users.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        users.splice(index, 1);
+        return sendJson(res, 200, { ok: true });
+      }
+    }
+
+    // ---- Requests
+    if (method === 'GET' && pathname === '/api/mock/requests') {
+      if (!requireAuth(req, res)) return;
+      if (searchParams.get('error') === 'true' || req.headers['x-mock-error'] === 'true') {
+        return sendJson(res, 500, { message: 'خطای شبیه‌سازی شده در دریافت درخواست‌ها' });
+      }
+      const delay = Number(searchParams.get('delay') ?? 400);
+      if (delay > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+      const q = (searchParams.get('q') ?? '').trim();
+      const status = searchParams.get('status') ?? '';
+      const page = Number(searchParams.get('page') ?? 1);
+      const pageSize = Number(searchParams.get('pageSize') ?? 10);
+      const filtered = requests.filter((item) => {
+        const matchesQuery =
+          !q || item.title.includes(q) || item.requester.includes(q) || item.assignee.includes(q);
+        const matchesStatus = !status || item.status === status;
+        return matchesQuery && matchesStatus;
+      });
+      return sendJson(res, 200, paginate(filtered, page, pageSize));
+    }
+
+    if (method === 'POST' && pathname === '/api/mock/requests') {
+      if (!requireAuth(req, res)) return;
+      const payload = body ?? {};
+      const created = {
+        id: `درخواست-${toPersianDigits((requestId += 1))}`,
+        title: payload.title ?? 'درخواست جدید',
+        requester: payload.requester ?? 'ثبت‌کننده ناشناس',
+        assignee: payload.assignee ?? 'بدون مسئول',
+        status: payload.status ?? 'جدید',
+        priority: payload.priority ?? 'متوسط',
+        createdAt: new Date().toISOString()
+      };
+      requests.unshift(created);
+      return sendJson(res, 200, created);
+    }
+
+    if (method === 'PATCH' && match(pathname, /^\/api\/mock\/requests\/([^/]+)\/status$/)) {
+      if (!requireAuth(req, res)) return;
+      const m = match(pathname, /^\/api\/mock\/requests\/([^/]+)\/status$/);
+      const id = m?.[1];
+      const index = requests.findIndex((item) => item.id === id);
+      if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+      requests[index] = { ...requests[index], status: body?.status ?? requests[index].status };
+      return sendJson(res, 200, requests[index]);
+    }
+
+    {
+      const m = match(pathname, /^\/api\/mock\/requests\/([^/]+)$/);
+      if (method === 'GET' && m) {
+        if (!requireAuth(req, res)) return;
+        const record = requests.find((item) => item.id === m[1]);
+        if (!record) return sendJson(res, 404, { message: 'یافت نشد' });
+        return sendJson(res, 200, record);
+      }
+      if (method === 'PUT' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = requests.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        requests[index] = { ...requests[index], ...(body ?? {}) };
+        return sendJson(res, 200, requests[index]);
+      }
+      if (method === 'DELETE' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = requests.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        requests.splice(index, 1);
+        return sendJson(res, 200, { ok: true });
+      }
     }
 
     // ---- Reports
@@ -512,6 +662,7 @@ export function createMockApi(): {
     db: {
       orders,
       users,
+      requests,
       insuranceRequests,
       claims,
       policies,
