@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@source "../../../../apps/**/*.{vue,ts,tsx,js,jsx}";
+@source "../../../../libs/**/*.{vue,ts,tsx,js,jsx}";
+@source "../../../../index.html";
+
 @theme {
   --color-primary: #25eb50;
   --color-primary-contrast: #ffffff;

@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-surface-muted)] text-[var(--color-text)]" dir="rtl">
-    <div class="flex min-h-screen flex-row-reverse">
+  <div class="min-h-screen bg-[var(--color-surface-muted)] text-[var(--color-text)]">
+    <div class="flex min-h-screen flex-row-reverse w-full!">
       <SidebarNav
         :brand="brand"
         :groups="navGroups"
@@ -10,7 +10,7 @@
         @toggle-mobile="toggleMobile"
         @prefetch="(item) => $emit('prefetch', item)"
       />
-      <div class="flex min-h-screen flex-1 flex-col">
+      <div class="w-full flex flex-col">
         <HeaderBar
           :brand="brand"
           :user-name="userName"
@@ -24,7 +24,7 @@
           @toggle-mobile="toggleMobile"
           @search="(value) => $emit('search', value)"
         />
-        <main class="flex-1">
+        <main class="grow! px-8 py-4 bg-white">
           <slot />
         </main>
       </div>
