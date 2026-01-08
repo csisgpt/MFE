@@ -1,126 +1,174 @@
 <template>
   <PageShell>
-    <PageHeader title="کاربران" subtitle="مدیریت کاربران و پرسنل سازمان">
+    <PageHeader title="کاربران" subtitle="مدیریت چرخه کامل پرسنل و نقش‌های سازمانی">
       <template #breadcrumbs>
         <Breadcrumbs :items="[{ label: 'اپلیکیشن یک' }, { label: 'کاربران' }]" />
       </template>
       <template #actions>
-        <button class="action-button" type="button" @click="openCreate">افزودن کاربر</button>
+        <UiButton type="primary" class="action-primary" @click="openCreate">
+          <UiIcon name="add" />
+          افزودن کاربر
+        </UiButton>
       </template>
     </PageHeader>
 
-    <div class="card space-y-4">
-      <div class="filters">
-        <input v-model="query" class="input" placeholder="جستجو بر اساس نام یا واحد" />
-        <select v-model="statusFilter" class="input">
-          <option value="all">همه وضعیت‌ها</option>
-          <option value="فعال">فعال</option>
-          <option value="غیرفعال">غیرفعال</option>
-          <option value="تعلیق">تعلیق</option>
-        </select>
-        <button class="secondary-button" type="button" @click="reload">به‌روزرسانی</button>
-      </div>
-
-      <EnterpriseDataGrid
-        v-if="!errorMessage"
-        :row-data="filteredUsers"
-        :column-defs="columns"
-        :loading="loading"
-        :pagination-page-size="6"
-        :show-actions="true"
-        @row-action="handleAction"
-      />
-      <div v-else class="error-box">
-        <p>{{ errorMessage }}</p>
-        <button class="secondary-button" type="button" @click="reload">تلاش مجدد</button>
-      </div>
-      <EmptyState
-        v-if="!loading && !errorMessage && filteredUsers.length === 0"
-        title="کاربری ثبت نشده است"
-        description="برای شروع یک کاربر جدید اضافه کنید."
-      >
-        <button class="action-button" type="button" @click="openCreate">افزودن کاربر</button>
-      </EmptyState>
-    </div>
-
-    <div v-if="detailOpen" class="overlay" @click.self="detailOpen = false">
-      <div class="drawer">
-        <div class="drawer-header">
-          <h3>جزئیات کاربر</h3>
-          <button class="ghost-button" type="button" @click="detailOpen = false">بستن</button>
+    <section class="space-y-4">
+      <div class="card">
+        <div class="filters">
+          <UiInput
+            v-model:value="filters.query"
+            placeholder="جستجو بر اساس نام، واحد یا نقش"
+          >
+            <template #prefix>
+              <UiIcon name="search" />
+            </template>
+          </UiInput>
+          <UiSelect v-model:value="filters.status" :options="statusOptions" placeholder="انتخاب وضعیت" />
+          <UiSelect v-model:value="filters.role" :options="roleOptions" placeholder="انتخاب نقش" />
+          <UiButton class="refresh-button" @click="reload">
+            به‌روزرسانی
+          </UiButton>
         </div>
-        <div v-if="selectedUser" class="drawer-body">
-          <p>نام: {{ selectedUser.fullName }}</p>
-          <p>واحد: {{ selectedUser.department }}</p>
-          <p>نقش: {{ selectedUser.role }}</p>
-          <p>وضعیت: {{ selectedUser.status }}</p>
-          <p>شماره تماس: {{ selectedUser.phone }}</p>
-          <p>تاریخ ثبت: {{ selectedUser.createdAt }}</p>
-        </div>
-      </div>
-    </div>
 
-    <div v-if="formOpen" class="overlay" @click.self="closeForm">
-      <div class="modal">
-        <div class="drawer-header">
-          <h3>{{ editingUser ? 'ویرایش کاربر' : 'افزودن کاربر' }}</h3>
-          <button class="ghost-button" type="button" @click="closeForm">بستن</button>
-        </div>
-        <form class="form" @submit.prevent="submitForm">
-          <label>
-            نام و نام خانوادگی
-            <input v-model="form.fullName" required />
-          </label>
-          <label>
-            واحد سازمانی
-            <input v-model="form.department" required />
-          </label>
-          <label>
-            نقش سازمانی
-            <input v-model="form.role" required />
-          </label>
-          <label>
-            وضعیت
-            <select v-model="form.status">
-              <option value="فعال">فعال</option>
-              <option value="غیرفعال">غیرفعال</option>
-              <option value="تعلیق">تعلیق</option>
-            </select>
-          </label>
-          <label>
-            شماره تماس
-            <input v-model="form.phone" required />
-          </label>
-          <div class="form-actions">
-            <button class="secondary-button" type="button" @click="closeForm">انصراف</button>
-            <button class="action-button" type="submit" :disabled="saving">
-              {{ saving ? 'در حال ذخیره...' : 'ذخیره' }}
-            </button>
+        <div v-if="errorMessage" class="error-box">
+          <div>
+            <div class="font-semibold">اختلال در دریافت کاربران</div>
+            <div class="text-xs text-[var(--color-text-muted)]">{{ errorMessage }}</div>
           </div>
-        </form>
-      </div>
-    </div>
+          <UiButton @click="reload">تلاش مجدد</UiButton>
+        </div>
 
-    <div v-if="confirmDelete" class="overlay" @click.self="confirmDelete = null">
-      <div class="modal">
-        <div class="drawer-header">
-          <h3>حذف کاربر</h3>
-          <button class="ghost-button" type="button" @click="confirmDelete = null">بستن</button>
-        </div>
-        <p>آیا از حذف کاربر {{ confirmDelete?.fullName }} اطمینان دارید؟</p>
-        <div class="form-actions">
-          <button class="secondary-button" type="button" @click="confirmDelete = null">لغو</button>
-          <button class="danger-button" type="button" :disabled="saving" @click="deleteUser">
-            {{ saving ? 'در حال حذف...' : 'حذف' }}
-          </button>
+        <div v-else class="space-y-4">
+          <div v-if="loading && users.length === 0" class="space-y-3">
+            <SkeletonBlock height="24px" />
+            <SkeletonBlock height="24px" />
+            <SkeletonBlock height="24px" />
+            <SkeletonBlock height="24px" />
+          </div>
+          <EnterpriseDataGrid
+            v-else
+            :row-data="users"
+            :column-defs="columns"
+            :loading="loading"
+            :page="page"
+            :page-size="pageSize"
+            :total="total"
+            :quick-filter="filters.query"
+            :storage-key="gridStorageKey"
+            :show-actions="true"
+            @row-action="handleAction"
+            @page-change="handlePageChange"
+            @pageSize-change="handlePageSizeChange"
+          />
+
+          <EmptyState
+            v-if="!loading && users.length === 0"
+            title="کاربری ثبت نشده است"
+            description="برای شروع، یک کاربر سازمانی اضافه کنید."
+          >
+            <UiButton type="primary" class="action-primary" @click="openCreate">
+              افزودن کاربر
+            </UiButton>
+          </EmptyState>
         </div>
       </div>
-    </div>
+    </section>
+
+    <UiDrawer
+      v-model:open="detailOpen"
+      title="جزئیات کاربر"
+      placement="right"
+      width="420"
+    >
+      <div v-if="selectedUser" class="drawer-body">
+        <div class="drawer-row">
+          <span>نام و نام خانوادگی</span>
+          <strong>{{ selectedUser.fullName }}</strong>
+        </div>
+        <div class="drawer-row">
+          <span>واحد سازمانی</span>
+          <strong>{{ selectedUser.department }}</strong>
+        </div>
+        <div class="drawer-row">
+          <span>نقش</span>
+          <strong>{{ selectedUser.role }}</strong>
+        </div>
+        <div class="drawer-row">
+          <span>وضعیت</span>
+          <span class="status-pill" :class="statusClass(selectedUser.status)">
+            {{ selectedUser.status }}
+          </span>
+        </div>
+        <div class="drawer-row">
+          <span>شماره تماس</span>
+          <strong>{{ selectedUser.phone }}</strong>
+        </div>
+        <div class="drawer-row">
+          <span>تاریخ ثبت</span>
+          <strong>{{ selectedUser.createdAt }}</strong>
+        </div>
+      </div>
+    </UiDrawer>
+
+    <UiModal v-model:open="formOpen" :title="formTitle" :footer="null">
+      <div class="modal-body">
+        <div class="form-grid">
+          <div>
+            <label class="form-label">نام و نام خانوادگی</label>
+            <UiInput v-model:value="form.fullName" placeholder="نام کامل کاربر" />
+            <span v-if="formErrors.fullName" class="form-error">{{ formErrors.fullName }}</span>
+          </div>
+          <div>
+            <label class="form-label">واحد سازمانی</label>
+            <UiInput v-model:value="form.department" placeholder="مثلاً فناوری اطلاعات" />
+            <span v-if="formErrors.department" class="form-error">{{ formErrors.department }}</span>
+          </div>
+          <div>
+            <label class="form-label">نقش سازمانی</label>
+            <UiInput v-model:value="form.role" placeholder="عنوان نقش" />
+            <span v-if="formErrors.role" class="form-error">{{ formErrors.role }}</span>
+          </div>
+          <div>
+            <label class="form-label">وضعیت</label>
+            <UiSelect
+              v-model:value="form.status"
+              :options="statusOptions.filter((opt) => opt.value !== 'all')"
+              placeholder="انتخاب وضعیت"
+            />
+          </div>
+          <div>
+            <label class="form-label">شماره تماس</label>
+            <UiInput v-model:value="form.phone" placeholder="شماره تماس" />
+            <span v-if="formErrors.phone" class="form-error">{{ formErrors.phone }}</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <UiButton @click="closeForm">انصراف</UiButton>
+          <UiButton type="primary" :loading="saving" @click="submitForm">
+            {{ saving ? 'در حال ذخیره...' : 'ذخیره اطلاعات' }}
+          </UiButton>
+        </div>
+      </div>
+    </UiModal>
+
+    <UiModal v-model:open="confirmOpen" title="حذف کاربر" :footer="null">
+      <div class="modal-body">
+        <p class="text-sm text-[var(--color-text-muted)]">
+          آیا از حذف کاربر «{{ confirmDelete?.fullName }}» اطمینان دارید؟ این عملیات قابل بازگشت نیست.
+        </p>
+        <div class="form-actions">
+          <UiButton @click="confirmOpen = false">لغو</UiButton>
+          <UiButton type="primary" danger :loading="saving" @click="deleteUser">
+            {{ saving ? 'در حال حذف...' : 'حذف کاربر' }}
+          </UiButton>
+        </div>
+      </div>
+    </UiModal>
   </PageShell>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import type { ColDef } from 'ag-grid-community';
 import type { PersonnelUser } from '@shared/contracts';
 import {
@@ -130,18 +178,65 @@ import {
   updatePersonnelUser
 } from '@shared/api-client';
 import { eventBus } from '@shared/store';
+import { StatusBadgeRenderer } from '@shared/ui';
 
-const query = ref('');
-const statusFilter = ref<'all' | PersonnelUser['status']>('all');
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
 const users = ref<PersonnelUser[]>([]);
+const total = ref(0);
+const page = ref(1);
+const pageSize = ref(6);
 const selectedUser = ref<PersonnelUser | null>(null);
 const detailOpen = ref(false);
 const formOpen = ref(false);
+const confirmOpen = ref(false);
 const confirmDelete = ref<PersonnelUser | null>(null);
 const editingUser = ref<PersonnelUser | null>(null);
+const gridStorageKey = 'app-one-users-grid';
+
+const filters = reactive({
+  query: '',
+  status: 'all' as 'all' | PersonnelUser['status'],
+  role: 'all'
+});
+
+const statusOptions = [
+  { value: 'all', label: 'همه وضعیت‌ها' },
+  { value: 'فعال', label: 'فعال' },
+  { value: 'غیرفعال', label: 'غیرفعال' },
+  { value: 'تعلیق', label: 'تعلیق' }
+];
+
+const roleOptions = [
+  { value: 'all', label: 'همه نقش‌ها' },
+  { value: 'کارشناس ارشد', label: 'کارشناس ارشد' },
+  { value: 'مدیر سیستم', label: 'مدیر سیستم' },
+  { value: 'سرپرست تیم', label: 'سرپرست تیم' },
+  { value: 'تحلیل‌گر', label: 'تحلیل‌گر' },
+  { value: 'کارشناس پشتیبانی', label: 'کارشناس پشتیبانی' },
+  { value: 'مسئول جذب', label: 'مسئول جذب' },
+  { value: 'کارشناس امنیت', label: 'کارشناس امنیت' },
+  { value: 'کارشناس عملیات', label: 'کارشناس عملیات' },
+  { value: 'حسابرس داخلی', label: 'حسابرس داخلی' },
+  { value: 'کارشناس قراردادها', label: 'کارشناس قراردادها' },
+  { value: 'تحلیل‌گر بازار', label: 'تحلیل‌گر بازار' },
+  { value: 'سرپرست شیفت', label: 'سرپرست شیفت' }
+];
+
+const columns = computed<ColDef[]>(() => [
+  { field: 'fullName', headerName: 'نام و نام خانوادگی', minWidth: 180 },
+  { field: 'department', headerName: 'واحد سازمانی', minWidth: 160 },
+  { field: 'role', headerName: 'نقش', minWidth: 140 },
+  {
+    field: 'status',
+    headerName: 'وضعیت',
+    cellRenderer: StatusBadgeRenderer,
+    minWidth: 120
+  },
+  { field: 'phone', headerName: 'شماره تماس', minWidth: 150 },
+  { field: 'createdAt', headerName: 'تاریخ ثبت', minWidth: 120 }
+]);
 
 const form = reactive({
   fullName: '',
@@ -151,30 +246,28 @@ const form = reactive({
   phone: ''
 });
 
-const columns: ColDef[] = [
-  { field: 'fullName', headerName: 'نام' },
-  { field: 'department', headerName: 'واحد' },
-  { field: 'role', headerName: 'نقش' },
-  { field: 'status', headerName: 'وضعیت' },
-  { field: 'phone', headerName: 'شماره تماس' },
-  { field: 'createdAt', headerName: 'تاریخ ثبت' }
-];
+const formErrors = reactive({
+  fullName: '',
+  department: '',
+  role: '',
+  phone: ''
+});
 
-const filteredUsers = computed(() =>
-  users.value.filter((user) => {
-    const matchesQuery =
-      user.fullName.includes(query.value) || user.department.includes(query.value);
-    const matchesStatus = statusFilter.value === 'all' || user.status === statusFilter.value;
-    return matchesQuery && matchesStatus;
-  })
-);
+const formTitle = computed(() => (editingUser.value ? 'ویرایش کاربر' : 'افزودن کاربر'));
 
 const loadUsers = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    const response = await getPersonnelUsers(1, 20);
+    const response = await getPersonnelUsers({
+      page: page.value,
+      pageSize: pageSize.value,
+      query: filters.query,
+      status: filters.status,
+      role: filters.role
+    });
     users.value = response.data;
+    total.value = response.total;
   } catch (error) {
     errorMessage.value = 'بارگذاری کاربران با خطا مواجه شد.';
   } finally {
@@ -193,6 +286,12 @@ const openCreate = () => {
     department: '',
     role: '',
     status: 'فعال',
+    phone: ''
+  });
+  Object.assign(formErrors, {
+    fullName: '',
+    department: '',
+    role: '',
     phone: ''
   });
   formOpen.value = true;
@@ -222,22 +321,33 @@ const handleAction = (payload: { action: 'view' | 'edit' | 'delete'; row: Person
   }
   if (payload.action === 'delete') {
     confirmDelete.value = payload.row;
+    confirmOpen.value = true;
   }
 };
 
+const validateForm = () => {
+  formErrors.fullName = form.fullName.trim() ? '' : 'نام را وارد کنید.';
+  formErrors.department = form.department.trim() ? '' : 'واحد سازمانی را وارد کنید.';
+  formErrors.role = form.role.trim() ? '' : 'نقش سازمانی را وارد کنید.';
+  formErrors.phone = form.phone.trim() ? '' : 'شماره تماس را وارد کنید.';
+  return !formErrors.fullName && !formErrors.department && !formErrors.role && !formErrors.phone;
+};
+
 const submitForm = async () => {
+  if (!validateForm()) return;
   saving.value = true;
   try {
     if (editingUser.value) {
       const updated = await updatePersonnelUser(editingUser.value.id, form);
       users.value = users.value.map((item) => (item.id === updated.id ? updated : item));
-      eventBus.emit('TOAST', { type: 'success', message: 'کاربر با موفقیت ویرایش شد.' });
+      eventBus.emit('TOAST', { type: 'success', message: 'اطلاعات کاربر به‌روزرسانی شد.' });
     } else {
-      const created = await createPersonnelUser(form);
-      users.value = [created, ...users.value];
+      await createPersonnelUser(form);
       eventBus.emit('TOAST', { type: 'success', message: 'کاربر جدید ثبت شد.' });
+      page.value = 1;
     }
     formOpen.value = false;
+    await loadUsers();
   } catch (error) {
     eventBus.emit('TOAST', { type: 'error', message: 'ذخیره اطلاعات ناموفق بود.' });
   } finally {
@@ -250,15 +360,48 @@ const deleteUser = async () => {
   saving.value = true;
   try {
     await deletePersonnelUser(confirmDelete.value.id);
-    users.value = users.value.filter((item) => item.id !== confirmDelete.value?.id);
     eventBus.emit('TOAST', { type: 'info', message: 'کاربر حذف شد.' });
-    confirmDelete.value = null;
+    confirmOpen.value = false;
+    page.value = 1;
+    await loadUsers();
   } catch (error) {
     eventBus.emit('TOAST', { type: 'error', message: 'حذف کاربر ناموفق بود.' });
   } finally {
     saving.value = false;
   }
 };
+
+const handlePageChange = (nextPage: number) => {
+  page.value = nextPage;
+  loadUsers();
+};
+
+const handlePageSizeChange = (nextSize: number) => {
+  pageSize.value = nextSize;
+  page.value = 1;
+  loadUsers();
+};
+
+const statusClass = (status: PersonnelUser['status']) => {
+  switch (status) {
+    case 'فعال':
+      return 'status-success';
+    case 'غیرفعال':
+      return 'status-muted';
+    case 'تعلیق':
+      return 'status-danger';
+    default:
+      return 'status-muted';
+  }
+};
+
+watch(
+  () => [filters.query, filters.status, filters.role],
+  () => {
+    page.value = 1;
+    loadUsers();
+  }
+);
 
 onMounted(() => {
   loadUsers();
@@ -269,89 +412,105 @@ onMounted(() => {
 .card {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 16px;
 }
 
 .filters {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
-.input {
-  padding: 8px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-
-.action-button {
-  background: var(--color-primary);
-  color: var(--color-primary-contrast);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.secondary-button {
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.danger-button {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  display: flex;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   align-items: center;
-  justify-content: center;
-  z-index: 50;
-  padding: 16px;
 }
 
-.drawer {
-  background: var(--color-surface);
-  width: min(400px, 90vw);
+.action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-button {
+  width: 100%;
+}
+
+.error-box {
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger-soft);
   border-radius: 16px;
-  padding: 16px;
-}
-
-.drawer-header {
+  padding: 12px 16px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .drawer-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+}
+
+.drawer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 14px;
 }
 
-.modal {
-  background: var(--color-surface);
-  width: min(500px, 92vw);
-  border-radius: 16px;
-  padding: 16px;
+.drawer-row span {
+  color: var(--color-text-muted);
 }
 
-.form {
+.status-pill {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.status-muted {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.status-danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.modal-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.form-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--color-danger);
 }
 
 .form-actions {
@@ -360,19 +519,9 @@ onMounted(() => {
   gap: 8px;
 }
 
-.ghost-button {
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-}
-
-.error-box {
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  background: rgba(248, 113, 113, 0.1);
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+@media (max-width: 768px) {
+  .refresh-button {
+    width: auto;
+  }
 }
 </style>
