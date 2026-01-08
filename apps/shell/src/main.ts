@@ -3,10 +3,10 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 import { getConfig, loadRuntimeConfig, REMOTE_REGISTRY } from '@shared/config';
+import '@shared/styles';
 import { installUi } from '@shared/ui';
 import '@shared/ui/styles';
 import { eventBus, setHostPinia, useHostAuditStore, useHostThemeStore } from '@shared/store';
-import '@shared/styles';
 import { useRemoteStatusStore, type RemoteKey } from './stores/remote-status.store';
 
 async function bootstrap() {

@@ -1,22 +1,24 @@
 <template>
-  <UiPage>
-    <UiPageHeader :title="title" :subtitle="subtitle">
+  <PageShell>
+    <PageHeader :title="title" :subtitle="subtitle">
       <template #actions>
-        <UiButton size="small" @click="loadRemote">تلاش دوباره</UiButton>
+        <button class="action-button" type="button" @click="loadRemote">تلاش دوباره</button>
       </template>
-    </UiPageHeader>
-    <UiSection v-if="state === 'loading'" title="در حال بارگذاری">
-      <div class="skeleton" />
-    </UiSection>
-    <UiSection v-else-if="state === 'disabled'" title="ریموت غیرفعال است">
-      <p>این ریموت با فلگ‌های ویژگی غیرفعال شده است. آن را در بخش تنظیمات سیستم فعال کنید.</p>
-    </UiSection>
-    <UiSection v-else-if="state === 'error'" title="بارگذاری ناموفق">
-      <p>{{ errorMessage }}</p>
-      <UiButton size="small" type="primary" @click="loadRemote">تلاش دوباره</UiButton>
-    </UiSection>
+    </PageHeader>
+    <div v-if="state === 'loading'" class="card space-y-3">
+      <SkeletonBlock height="18px" />
+      <SkeletonBlock height="120px" />
+    </div>
+    <EmptyState
+      v-else-if="state === 'disabled'"
+      title="ریموت غیرفعال است"
+      description="این ریموت با فلگ‌های ویژگی غیرفعال شده است. آن را در بخش تنظیمات سیستم فعال کنید."
+    />
+    <EmptyState v-else-if="state === 'error'" title="بارگذاری ناموفق" :description="errorMessage">
+      <button class="action-button" type="button" @click="loadRemote">تلاش دوباره</button>
+    </EmptyState>
     <component v-else :is="remoteComponent" />
-  </UiPage>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -105,20 +107,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.skeleton {
-  width: 100%;
-  height: 160px;
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
-  border-radius: var(--radius-md);
-  animation: shimmer 1.6s infinite;
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: 200px 0;
-  }
+.action-button {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 </style>

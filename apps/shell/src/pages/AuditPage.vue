@@ -1,38 +1,50 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="ممیزی" subtitle="تاریخچه درخواست‌ها، رویدادها و خطاها" />
-    <UiSection title="فیلترها">
+  <PageShell>
+    <PageHeader title="ممیزی" subtitle="تاریخچه درخواست‌ها، رویدادها و خطاها">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'خانه', to: '/' }, { label: 'ممیزی' }]" />
+      </template>
+    </PageHeader>
+    <div class="card space-y-4">
       <div class="filters">
-        <UiInput v-model:value="search" placeholder="جستجو در پیام یا منبع" />
-        <UiSelect v-model:value="level" :options="levelOptions" placeholder="سطح" />
-        <UiButton size="small" @click="auditStore.clear">پاک کردن</UiButton>
+        <input
+          v-model="search"
+          class="input"
+          type="text"
+          placeholder="جستجو در پیام یا منبع"
+        />
+        <select v-model="level" class="input">
+          <option value="all">همه سطوح</option>
+          <option value="info">اطلاعات</option>
+          <option value="error">خطا</option>
+        </select>
+        <button class="action-button" type="button" @click="auditStore.clear">پاک کردن</button>
       </div>
-    </UiSection>
-    <UiSection title="رویدادها">
-      <UiDataTable :value="localizedEntries" :columns="columns" />
-    </UiSection>
-  </UiPage>
+      <EnterpriseDataGrid
+        v-if="localizedEntries.length"
+        :row-data="localizedEntries"
+        :column-defs="columnDefs"
+        :pagination-page-size="6"
+      />
+      <EmptyState v-else title="رویدادی ثبت نشده است" description="هنوز داده‌ای برای ممیزی در دسترس نیست." />
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useHostAuditStore } from '@shared/store';
+import type { ColDef } from 'ag-grid-community';
 
 const auditStore = useHostAuditStore();
 const search = ref('');
 const level = ref('all');
 
-const levelOptions = [
-  { label: 'همه سطوح', value: 'all' },
-  { label: 'اطلاعات', value: 'info' },
-  { label: 'خطا', value: 'error' }
-];
-
-const columns = [
-  { field: 'timestampLabel', header: 'زمان' },
-  { field: 'levelLabel', header: 'سطح' },
-  { field: 'sourceLabel', header: 'منبع' },
-  { field: 'message', header: 'پیام' }
+const columnDefs: ColDef[] = [
+  { field: 'timestampLabel', headerName: 'زمان' },
+  { field: 'levelLabel', headerName: 'سطح' },
+  { field: 'sourceLabel', headerName: 'منبع' },
+  { field: 'message', headerName: 'پیام', flex: 1 }
 ];
 
 const filteredEntries = computed(() =>
@@ -60,6 +72,7 @@ const localizedEntries = computed(() =>
       {
         shell: 'شل',
         system: 'سامانه',
+        'http-client': 'کلاینت رابط برنامه‌نویسی',
         'api-client': 'کلاینت رابط برنامه‌نویسی',
         'app-one': 'اپلیکیشن یک',
         'app-two': 'اپلیکیشن دو',
@@ -73,9 +86,31 @@ const localizedEntries = computed(() =>
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .filters {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.input {
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.action-button {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 </style>

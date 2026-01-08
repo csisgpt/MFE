@@ -1,5 +1,6 @@
 // apps/shell/tools/mock-api.ts
 import type { Connect } from 'vite';
+import { createMockDb, paginate } from './mock-db';
 
 type Role = 'admin' | 'user' | 'employee' | 'reviewer' | 'ops';
 
@@ -49,6 +50,8 @@ export function createMockApi(): {
   db: {
     orders: any[];
     users: any[];
+    personnelUsers: any[];
+    serviceRequests: any[];
     insuranceRequests: any[];
     claims: any[];
     policies: any[];
@@ -74,6 +77,12 @@ export function createMockApi(): {
     { id: 'کاربر-۳', name: 'پریا سینگ', role: 'کاربر' }
   ];
 
+  const mockDb = createMockDb();
+  const personnelUsers = mockDb.personnelUsers;
+  const serviceRequests = mockDb.serviceRequests;
+
+  let personnelUserId = 1005;
+  let serviceRequestId = 2004;
   let insuranceRequestId = 3;
   let claimId = 2;
   let policyId = 3;
@@ -112,7 +121,13 @@ export function createMockApi(): {
 
   const policies = [
     { id: 'بیمه-۱', holder: 'آوا سنگی', plan: 'طلایی', status: 'فعال', renewalDate: '۱۴۰۴/۱۰/۱۱' },
-    { id: 'بیمه-۲', holder: 'میلاد رای', plan: 'نقره‌ای', status: 'فعال', renewalDate: '۱۴۰۴/۱۲/۲۰' }
+    {
+      id: 'بیمه-۲',
+      holder: 'میلاد رای',
+      plan: 'نقره‌ای',
+      status: 'فعال',
+      renewalDate: '۱۴۰۴/۱۲/۲۰'
+    }
   ];
 
   const admissionApplications = [
@@ -200,13 +215,14 @@ export function createMockApi(): {
   // -----------------------------
   // Route matching helpers
   // -----------------------------
-  const match = (pathname: string, pattern: RegExp): RegExpExecArray | null => pattern.exec(pathname);
+  const match = (pathname: string, pattern: RegExp): RegExpExecArray | null =>
+    pattern.exec(pathname);
 
   // -----------------------------
   // Connect middleware
   // -----------------------------
   const middleware: Connect.NextHandleFunction = async (req, res, next) => {
-    const { pathname } = parseUrl(req);
+    const { pathname, searchParams } = parseUrl(req);
     const method = (req.method || 'GET').toUpperCase();
 
     // Only handle /api/mock/*
@@ -244,6 +260,108 @@ export function createMockApi(): {
     if (method === 'GET' && pathname === '/api/mock/users') {
       if (!requireAuth(req, res)) return;
       return sendJson(res, 200, users);
+    }
+
+    // ---- Personnel users
+    if (method === 'GET' && pathname === '/api/mock/personnel/users') {
+      if (!requireAuth(req, res)) return;
+      if (searchParams.get('error') === 'true') {
+        return sendJson(res, 500, { message: 'خطای شبیه‌سازی شده در دریافت کاربران' });
+      }
+      const page = Number(searchParams.get('page') ?? 1);
+      const pageSize = Number(searchParams.get('pageSize') ?? 10);
+      return sendJson(res, 200, paginate(personnelUsers, page, pageSize));
+    }
+
+    if (method === 'POST' && pathname === '/api/mock/personnel/users') {
+      if (!requireAuth(req, res)) return;
+      const payload = body ?? {};
+      const created = {
+        id: `کاربر-${(personnelUserId += 1)}`,
+        fullName: payload.fullName ?? 'کارمند جدید',
+        department: payload.department ?? 'منابع انسانی',
+        role: payload.role ?? 'کارشناس',
+        status: payload.status ?? 'فعال',
+        phone: payload.phone ?? '۰۹۱۲۰۰۰۰۰۰۰',
+        createdAt: new Date().toLocaleDateString('fa-IR')
+      };
+      personnelUsers.unshift(created);
+      return sendJson(res, 200, created);
+    }
+
+    {
+      const m = match(pathname, /^\/api\/mock\/personnel\/users\/([^/]+)$/);
+      if (method === 'GET' && m) {
+        if (!requireAuth(req, res)) return;
+        const record = personnelUsers.find((item) => item.id === m[1]);
+        if (!record) return sendJson(res, 404, { message: 'یافت نشد' });
+        return sendJson(res, 200, record);
+      }
+      if (method === 'PUT' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = personnelUsers.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        personnelUsers[index] = { ...personnelUsers[index], ...(body ?? {}) };
+        return sendJson(res, 200, personnelUsers[index]);
+      }
+      if (method === 'DELETE' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = personnelUsers.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        personnelUsers.splice(index, 1);
+        return sendJson(res, 200, { ok: true });
+      }
+    }
+
+    // ---- Service requests
+    if (method === 'GET' && pathname === '/api/mock/requests') {
+      if (!requireAuth(req, res)) return;
+      if (searchParams.get('error') === 'true') {
+        return sendJson(res, 500, { message: 'خطای شبیه‌سازی شده در دریافت درخواست‌ها' });
+      }
+      const page = Number(searchParams.get('page') ?? 1);
+      const pageSize = Number(searchParams.get('pageSize') ?? 10);
+      return sendJson(res, 200, paginate(serviceRequests, page, pageSize));
+    }
+
+    if (method === 'POST' && pathname === '/api/mock/requests') {
+      if (!requireAuth(req, res)) return;
+      const payload = body ?? {};
+      const created = {
+        id: `درخواست-${(serviceRequestId += 1)}`,
+        title: payload.title ?? 'درخواست جدید',
+        requester: payload.requester ?? 'ثبت‌کننده ناشناس',
+        assignee: payload.assignee ?? 'بدون مسئول',
+        status: payload.status ?? 'در انتظار',
+        priority: payload.priority ?? 'متوسط',
+        createdAt: new Date().toLocaleDateString('fa-IR')
+      };
+      serviceRequests.unshift(created);
+      return sendJson(res, 200, created);
+    }
+
+    {
+      const m = match(pathname, /^\/api\/mock\/requests\/([^/]+)$/);
+      if (method === 'GET' && m) {
+        if (!requireAuth(req, res)) return;
+        const record = serviceRequests.find((item) => item.id === m[1]);
+        if (!record) return sendJson(res, 404, { message: 'یافت نشد' });
+        return sendJson(res, 200, record);
+      }
+      if (method === 'PUT' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = serviceRequests.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        serviceRequests[index] = { ...serviceRequests[index], ...(body ?? {}) };
+        return sendJson(res, 200, serviceRequests[index]);
+      }
+      if (method === 'DELETE' && m) {
+        if (!requireAuth(req, res)) return;
+        const index = serviceRequests.findIndex((item) => item.id === m[1]);
+        if (index === -1) return sendJson(res, 404, { message: 'یافت نشد' });
+        serviceRequests.splice(index, 1);
+        return sendJson(res, 200, { ok: true });
+      }
     }
 
     // ---- Reports
@@ -294,7 +412,10 @@ export function createMockApi(): {
     }
 
     {
-      const mApprove = match(pathname, /^\/api\/mock\/insurance\/admin\/requests\/([^/]+)\/approve$/);
+      const mApprove = match(
+        pathname,
+        /^\/api\/mock\/insurance\/admin\/requests\/([^/]+)\/approve$/
+      );
       if (method === 'POST' && mApprove) {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
         const id = mApprove[1];
@@ -453,7 +574,9 @@ export function createMockApi(): {
 
       const pendingInsurance = insuranceRequests.filter((x) => x.status === 'در انتظار').length;
       const approvedInsurance = insuranceRequests.filter((x) => x.status === 'تایید شده').length;
-      const acceptedAdmissions = admissionApplications.filter((x) => x.status === 'پذیرفته‌شده').length;
+      const acceptedAdmissions = admissionApplications.filter(
+        (x) => x.status === 'پذیرفته‌شده'
+      ).length;
       const rejectedAdmissions = admissionApplications.filter((x) => x.status === 'رد شده').length;
 
       return sendJson(res, 200, [
@@ -512,6 +635,8 @@ export function createMockApi(): {
     db: {
       orders,
       users,
+      personnelUsers,
+      serviceRequests,
       insuranceRequests,
       claims,
       policies,

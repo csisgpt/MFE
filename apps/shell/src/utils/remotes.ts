@@ -4,12 +4,12 @@ import type { RemoteMeta } from '@shared/contracts';
 
 const remoteImportMap = {
   appOne: {
-    mount: () => import('app-one/AppOneMount'),
-    meta: () => import('app-one/meta')
+    mount: () => import('appOne/AppOneMount'),
+    meta: () => import('appOne/meta')
   },
   appTwo: {
-    mount: () => import('app-two/AppTwoMount'),
-    meta: () => import('app-two/meta')
+    mount: () => import('appTwo/AppTwoMount'),
+    meta: () => import('appTwo/meta')
   },
   insurance: {
     mount: () => import('insurance/InsuranceMount'),
@@ -26,13 +26,16 @@ const remoteImportMap = {
 } as const;
 
 const buildLoaders = <T extends keyof (typeof remoteImportMap)[RemoteKey]>(key: T) =>
-  REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>((acc, remote) => {
-    const entry = remoteImportMap[remote.id]?.[key];
-    if (entry) {
-      acc[remote.id] = entry;
-    }
-    return acc;
-  }, {} as Record<RemoteKey, () => Promise<unknown>>);
+  REMOTE_REGISTRY.reduce<Record<RemoteKey, () => Promise<unknown>>>(
+    (acc, remote) => {
+      const entry = remoteImportMap[remote.id]?.[key];
+      if (entry) {
+        acc[remote.id] = entry;
+      }
+      return acc;
+    },
+    {} as Record<RemoteKey, () => Promise<unknown>>
+  );
 
 export const remoteMountLoaders = buildLoaders('mount');
 export const remoteMetaLoaders = buildLoaders('meta');

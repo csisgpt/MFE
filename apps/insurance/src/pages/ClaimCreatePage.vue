@@ -1,7 +1,11 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="ثبت خسارت" subtitle="اعلام خسارت جدید" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="ثبت خسارت" subtitle="اعلام خسارت جدید">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'بیمه' }, { label: 'ثبت خسارت' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
       <UiForm layout="vertical" :model="store.newClaim" @finish="submit">
         <UiFormItem label="شناسه بیمه‌نامه">
           <UiInput v-model:value="store.newClaim.policyId" />
@@ -20,8 +24,8 @@
           <UiButton @click="navigate('claims')">انصراف</UiButton>
         </div>
       </UiForm>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -54,6 +58,13 @@ const navigate = (target: string) => {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .actions {
   display: flex;
   gap: 12px;

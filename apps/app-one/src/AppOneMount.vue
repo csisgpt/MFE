@@ -1,15 +1,11 @@
 <template>
   <div class="app-one">
     <nav class="subnav">
-      <UiButton type="link" @click="navigate('')">داشبورد</UiButton>
-      <UiButton type="link" @click="navigate('orders')">سفارش‌ها</UiButton>
+      <button class="tab" type="button" @click="navigate('')">نمای کلی</button>
+      <button class="tab" type="button" @click="navigate('users')">کاربران</button>
+      <button class="tab" type="button" @click="navigate('requests')">درخواست‌ها</button>
     </nav>
-    <component
-      :is="currentView"
-      :order-id="orderId"
-      @open-order="handleOpenOrder"
-      @back-to-orders="handleBackToOrders"
-    />
+    <component :is="currentView" />
   </div>
 </template>
 
@@ -17,8 +13,8 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DashboardPage from './pages/DashboardPage.vue';
-import OrdersPage from './pages/OrdersPage.vue';
-import OrderDetailsPage from './pages/OrderDetailsPage.vue';
+import UsersPage from './pages/UsersPage.vue';
+import RequestsPage from './pages/RequestsPage.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,19 +27,12 @@ const subPath = computed(() => {
   return raw ?? '';
 });
 
-const orderId = computed(() => {
-  if (subPath.value.startsWith('orders/')) {
-    return subPath.value.split('/')[1];
-  }
-  return '';
-});
-
 const currentView = computed(() => {
-  if (subPath.value.startsWith('orders/')) {
-    return OrderDetailsPage;
+  if (subPath.value.startsWith('users')) {
+    return UsersPage;
   }
-  if (subPath.value.startsWith('orders')) {
-    return OrdersPage;
+  if (subPath.value.startsWith('requests')) {
+    return RequestsPage;
   }
   return DashboardPage;
 });
@@ -52,14 +41,6 @@ const navigate = (target: string) => {
   const path = target ? `/app-one/${target}` : '/app-one';
   router.push(path);
 };
-
-const handleOpenOrder = (id: string) => {
-  router.push(`/app-one/orders/${id}`);
-};
-
-const handleBackToOrders = () => {
-  router.push('/app-one/orders');
-};
 </script>
 
 <style scoped>
@@ -67,5 +48,13 @@ const handleBackToOrders = () => {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  border: 1px solid var(--color-border);
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: var(--color-surface);
 }
 </style>

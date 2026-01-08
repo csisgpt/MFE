@@ -1,39 +1,38 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="درخواست‌ها" subtitle="مدیریت فرایند متقاضیان" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="درخواست‌های پذیرش" subtitle="وضعیت متقاضیان و امتیازدهی">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'پذیرش' }, { label: 'درخواست‌ها' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
       <div class="filters">
-        <UiInput v-model:value="store.filter" placeholder="فیلتر بر اساس وضعیت" />
+        <input v-model="query" class="input" placeholder="جستجو بر اساس نام" />
       </div>
-      <UiDataTable :value="filtered" :columns="columns" @row-click="handleRowClick" />
-    </UiSection>
-  </UiPage>
+      <EnterpriseDataGrid :row-data="filtered" :column-defs="columns" :pagination-page-size="6" />
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { getAdmissionApplications } from '@shared/api-client';
-import { useAdmissionStore } from '../stores/admission.store';
+import type { ColDef } from 'ag-grid-community';
 
-const router = useRouter();
-const store = useAdmissionStore();
+const query = ref('');
 const applications = ref([]);
 
-const columns = [
-  { field: 'id', header: 'شناسه' },
-  { field: 'applicantName', header: 'متقاضی' },
-  { field: 'program', header: 'رشته' },
-  { field: 'status', header: 'وضعیت' }
+const columns: ColDef[] = [
+  { field: 'id', headerName: 'شناسه' },
+  { field: 'applicantName', headerName: 'نام متقاضی' },
+  { field: 'program', headerName: 'رشته' },
+  { field: 'status', headerName: 'وضعیت' },
+  { field: 'createdAt', headerName: 'تاریخ ثبت' }
 ];
 
 const filtered = computed(() =>
-  applications.value.filter((item: { status: string }) => item.status.includes(store.filter))
+  applications.value.filter((row: any) => row.applicantName?.includes(query.value))
 );
-
-const handleRowClick = (event: { data: { id: string } }) => {
-  router.push(`/admission/applications/${event.data.id}`);
-};
 
 onMounted(async () => {
   applications.value = await getAdmissionApplications();
@@ -41,7 +40,21 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .filters {
   margin-bottom: 12px;
+}
+
+.input {
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  width: 100%;
 }
 </style>

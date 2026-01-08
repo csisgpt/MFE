@@ -1,18 +1,22 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="مدیریت عملیات" subtitle="فلگ‌های ویژگی و کنترل ریموت‌ها" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="مدیریت عملیات" subtitle="فلگ‌های ویژگی و کنترل ریموت‌ها">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'عملیات' }, { label: 'مدیریت' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
       <p v-if="!isAdmin" class="warning">مجوز مدیر لازم است.</p>
-      <div v-else>
-        <h4>فلگ‌های ویژگی</h4>
-        <ul>
+      <div v-else class="space-y-3">
+        <h4 class="font-semibold">فلگ‌های ویژگی</h4>
+        <ul class="space-y-1 text-sm text-[var(--color-text-muted)]">
           <li v-for="(value, key) in flags" :key="key">
             {{ flagLabels[key] ?? 'نامشخص' }}: {{ value ? 'روشن' : 'خاموش' }}
           </li>
         </ul>
       </div>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -31,6 +35,13 @@ const flagLabels: Record<string, string> = {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .warning {
   color: #dc2626;
 }

@@ -10,13 +10,31 @@ export const useAuth = () => {
   };
 };
 
-export async function login(username: string, role: string) {
+export type LoginPayload = {
+  username: string;
+  role: 'admin' | 'employee' | 'reviewer' | 'ops' | 'user';
+  remember?: boolean;
+};
+
+const REDIRECT_KEY = 'auth-redirect';
+
+export async function login(payload: LoginPayload) {
   const authStore = useHostAuthStore();
-  authStore.setAuth('mock-token', {
+  const normalizedRole =
+    payload.role === 'admin' ||
+    payload.role === 'employee' ||
+    payload.role === 'reviewer' ||
+    payload.role === 'ops'
+      ? payload.role
+      : 'user';
+
+  authStore.setAuth(`mock-${normalizedRole}`, {
     id: 'user-1',
-    name: username,
-    role: role === 'admin' || role === 'employee' || role === 'reviewer' || role === 'ops' ? role : 'user'
+    name: payload.username,
+    role: normalizedRole
   });
+
+  localStorage.setItem('auth-remember', payload.remember ? 'true' : 'false');
 }
 
 export function logout() {
@@ -25,10 +43,12 @@ export function logout() {
   eventBus.emit('AUTH_LOGOUT', undefined);
 }
 
-export function requireAuth() {
-  const authStore = useHostAuthStore();
-  if (!authStore.isAuthenticated) {
-    return '/login';
-  }
-  return true;
+export function setRedirectPath(path: string) {
+  localStorage.setItem(REDIRECT_KEY, path);
+}
+
+export function getRedirectPath() {
+  const stored = localStorage.getItem(REDIRECT_KEY);
+  localStorage.removeItem(REDIRECT_KEY);
+  return stored;
 }

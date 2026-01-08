@@ -1,8 +1,12 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="جزئیات درخواست" subtitle="بررسی و نهایی‌سازی" />
-    <UiSection>
-      <div v-if="loading">در حال بارگذاری...</div>
+  <PageShell>
+    <PageHeader title="جزئیات درخواست" subtitle="بررسی و نهایی‌سازی">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'بیمه' }, { label: 'جزئیات درخواست' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
+      <SkeletonBlock v-if="loading" height="120px" />
       <div v-else>
         <p><strong>شناسه:</strong> {{ request?.id }}</p>
         <p><strong>کارمند:</strong> {{ request?.employeeName }}</p>
@@ -14,8 +18,8 @@
           <UiButton @click="emit('back-to-requests')">بازگشت</UiButton>
         </div>
       </div>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +86,13 @@ watch(() => props.requestId, fetchRequest);
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .actions {
   display: flex;
   gap: 12px;
