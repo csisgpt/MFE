@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @source "../../../../apps/**/*.{vue,ts,tsx,js,jsx}";
 @source "../../../../libs/**/*.{vue,ts,tsx,js,jsx}";
@@ -21,7 +21,7 @@
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
-  --font-sans: 'Vazirmatn', 'IRANSans', 'Inter', 'Tahoma', system-ui, sans-serif;
+  --font-sans: 'IRANYekanX', 'Vazirmatn', 'IRANSans', 'Inter', 'Tahoma', system-ui, sans-serif;
 }
 
 :root {

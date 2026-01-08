@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-surface-muted)] text-[var(--color-text)]">
-    <div class="flex min-h-screen flex-row-reverse w-full!">
+  <div class="min-h-screen bg-surface-muted text-text">
+    <div class="flex min-h-screen w-full!">
       <SidebarNav
         :brand="brand"
         :groups="navGroups"
@@ -24,7 +24,7 @@
           @toggle-mobile="toggleMobile"
           @search="(value) => $emit('search', value)"
         />
-        <main class="grow! px-8 py-4 bg-white">
+        <main class="grow! px-8 py-4 bg-surface">
           <slot />
         </main>
       </div>
