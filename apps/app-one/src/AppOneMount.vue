@@ -1,9 +1,33 @@
 <template>
   <div class="app-one">
     <nav class="subnav">
-      <button class="tab" type="button" @click="navigate('')">نمای کلی</button>
-      <button class="tab" type="button" @click="navigate('users')">کاربران</button>
-      <button class="tab" type="button" @click="navigate('requests')">درخواست‌ها</button>
+      <UiButton
+        class="tab"
+        :class="{ active: subPath === '' }"
+        type="default"
+        @click="navigate('')"
+      >
+        <UiIcon name="home" />
+        نمای کلی
+      </UiButton>
+      <UiButton
+        class="tab"
+        :class="{ active: subPath.startsWith('users') }"
+        type="default"
+        @click="navigate('users')"
+      >
+        <UiIcon name="users" />
+        کاربران
+      </UiButton>
+      <UiButton
+        class="tab"
+        :class="{ active: subPath.startsWith('requests') }"
+        type="default"
+        @click="navigate('requests')"
+      >
+        <UiIcon name="requests" />
+        درخواست‌ها
+      </UiButton>
     </nav>
     <component :is="currentView" />
   </div>
@@ -52,9 +76,19 @@ const navigate = (target: string) => {
 }
 
 .tab {
-  border: 1px solid var(--color-border);
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border-radius: 12px;
+  border: 1px solid var(--color-border);
   background: var(--color-surface);
+  color: var(--color-text);
+  padding: 4px 14px;
+}
+
+.tab.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 </style>

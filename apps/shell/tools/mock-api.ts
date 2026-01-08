@@ -81,8 +81,8 @@ export function createMockApi(): {
   const personnelUsers = mockDb.personnelUsers;
   const serviceRequests = mockDb.serviceRequests;
 
-  let personnelUserId = 1005;
-  let serviceRequestId = 2004;
+  let personnelUserId = 1012;
+  let serviceRequestId = 2012;
   let insuranceRequestId = 3;
   let claimId = 2;
   let policyId = 3;
@@ -270,7 +270,21 @@ export function createMockApi(): {
       }
       const page = Number(searchParams.get('page') ?? 1);
       const pageSize = Number(searchParams.get('pageSize') ?? 10);
-      return sendJson(res, 200, paginate(personnelUsers, page, pageSize));
+      const query = String(searchParams.get('query') ?? '').trim();
+      const status = searchParams.get('status');
+      const role = searchParams.get('role');
+      const filtered = personnelUsers.filter((user) => {
+        const matchesQuery =
+          !query ||
+          user.fullName.includes(query) ||
+          user.department.includes(query) ||
+          user.role.includes(query) ||
+          user.phone.includes(query);
+        const matchesStatus = !status || user.status === status;
+        const matchesRole = !role || user.role === role;
+        return matchesQuery && matchesStatus && matchesRole;
+      });
+      return sendJson(res, 200, paginate(filtered, page, pageSize));
     }
 
     if (method === 'POST' && pathname === '/api/mock/personnel/users') {
@@ -321,7 +335,20 @@ export function createMockApi(): {
       }
       const page = Number(searchParams.get('page') ?? 1);
       const pageSize = Number(searchParams.get('pageSize') ?? 10);
-      return sendJson(res, 200, paginate(serviceRequests, page, pageSize));
+      const query = String(searchParams.get('query') ?? '').trim();
+      const status = searchParams.get('status');
+      const priority = searchParams.get('priority');
+      const filtered = serviceRequests.filter((request) => {
+        const matchesQuery =
+          !query ||
+          request.title.includes(query) ||
+          request.requester.includes(query) ||
+          request.assignee.includes(query);
+        const matchesStatus = !status || request.status === status;
+        const matchesPriority = !priority || request.priority === priority;
+        return matchesQuery && matchesStatus && matchesPriority;
+      });
+      return sendJson(res, 200, paginate(filtered, page, pageSize));
     }
 
     if (method === 'POST' && pathname === '/api/mock/requests') {

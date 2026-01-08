@@ -9,6 +9,7 @@ import ToastService from 'primevue/toastservice';
 import UiButton from './components/UiButton.vue';
 import UiCard from './components/UiCard.vue';
 import UiModal from './components/UiModal.vue';
+import UiDrawer from './components/UiDrawer.vue';
 import UiDataTable from './components/UiDataTable.vue';
 import UiToastHost from './components/UiToastHost.vue';
 import UiPage from './components/UiPage.vue';
@@ -29,6 +30,8 @@ import EmptyState from './components/EmptyState.vue';
 import SkeletonBlock from './components/SkeletonBlock.vue';
 import UiIcon from './components/UiIcon.vue';
 import EnterpriseDataGrid from './components/EnterpriseDataGrid.vue';
+import ActionButtonsRenderer from './aggrid/renderers/ActionButtonsRenderer.vue';
+import StatusBadgeRenderer from './aggrid/renderers/StatusBadgeRenderer.vue';
 
 export function installUi(app: App) {
   app.use(Antd, { locale: faIR });
@@ -119,6 +122,7 @@ export function installUi(app: App) {
   app.component('UiButton', UiButton);
   app.component('UiCard', UiCard);
   app.component('UiModal', UiModal);
+  app.component('UiDrawer', UiDrawer);
   app.component('UiDataTable', UiDataTable);
   app.component('UiToastHost', UiToastHost);
   app.component('UiPage', UiPage);
@@ -145,6 +149,7 @@ export {
   UiButton,
   UiCard,
   UiModal,
+  UiDrawer,
   UiDataTable,
   UiToastHost,
   UiPage,
@@ -164,5 +169,7 @@ export {
   EmptyState,
   SkeletonBlock,
   UiIcon,
-  EnterpriseDataGrid
+  EnterpriseDataGrid,
+  ActionButtonsRenderer,
+  StatusBadgeRenderer
 };

@@ -38,8 +38,8 @@
               v-for="item in group.items"
               :key="item.to"
               :to="item.to"
-              class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]"
-              active-class="bg-[var(--color-primary-soft)] text-[var(--color-primary)]"
+              class="nav-link flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-[var(--color-text)] transition hover:bg-[var(--color-surface-muted)]"
+              active-class="is-active"
               @mouseenter="$emit('prefetch', item)"
               @click="mobileOpen ? $emit('toggle-mobile') : null"
             >
@@ -112,3 +112,15 @@ defineEmits<{
   (e: 'prefetch', item: NavItem): void;
 }>();
 </script>
+
+<style scoped>
+.nav-link.is-active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  box-shadow: inset -3px 0 0 var(--color-primary);
+}
+
+.nav-link.is-active :deep(svg) {
+  color: var(--color-primary);
+}
+</style>
