@@ -22,7 +22,7 @@ export default defineConfig({
       name: 'shell',
       remotes: Object.fromEntries(
         REMOTE_REGISTRY.map((remote) => [
-          remote.importKey,
+          remote.federationName,
           {
             type: 'module',
             name: remote.federationName,

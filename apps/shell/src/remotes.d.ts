@@ -1,14 +1,14 @@
-declare module 'app-one/*';
-declare module 'app-two/*';
+declare module 'appOne/*';
+declare module 'appTwo/*';
 declare module 'insurance/*';
 declare module 'admission/*';
 declare module 'ops/*';
 
-declare module 'app-one/meta' {
+declare module 'appOne/meta' {
   import type { RemoteMeta } from '@shared/contracts';
   export const remoteMeta: RemoteMeta;
 }
-declare module 'app-two/meta' {
+declare module 'appTwo/meta' {
   import type { RemoteMeta } from '@shared/contracts';
   export const remoteMeta: RemoteMeta;
 }

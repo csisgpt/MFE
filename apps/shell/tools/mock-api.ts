@@ -1,6 +1,6 @@
 // apps/shell/tools/mock-api.ts
 import type { Connect } from 'vite';
-import { createMockDb, paginate } from '@shared/mocks';
+import { createMockDb, paginate } from './mock-db';
 
 type Role = 'admin' | 'user' | 'employee' | 'reviewer' | 'ops';
 
@@ -121,7 +121,13 @@ export function createMockApi(): {
 
   const policies = [
     { id: 'بیمه-۱', holder: 'آوا سنگی', plan: 'طلایی', status: 'فعال', renewalDate: '۱۴۰۴/۱۰/۱۱' },
-    { id: 'بیمه-۲', holder: 'میلاد رای', plan: 'نقره‌ای', status: 'فعال', renewalDate: '۱۴۰۴/۱۲/۲۰' }
+    {
+      id: 'بیمه-۲',
+      holder: 'میلاد رای',
+      plan: 'نقره‌ای',
+      status: 'فعال',
+      renewalDate: '۱۴۰۴/۱۲/۲۰'
+    }
   ];
 
   const admissionApplications = [
@@ -209,7 +215,8 @@ export function createMockApi(): {
   // -----------------------------
   // Route matching helpers
   // -----------------------------
-  const match = (pathname: string, pattern: RegExp): RegExpExecArray | null => pattern.exec(pathname);
+  const match = (pathname: string, pattern: RegExp): RegExpExecArray | null =>
+    pattern.exec(pathname);
 
   // -----------------------------
   // Connect middleware
@@ -405,7 +412,10 @@ export function createMockApi(): {
     }
 
     {
-      const mApprove = match(pathname, /^\/api\/mock\/insurance\/admin\/requests\/([^/]+)\/approve$/);
+      const mApprove = match(
+        pathname,
+        /^\/api\/mock\/insurance\/admin\/requests\/([^/]+)\/approve$/
+      );
       if (method === 'POST' && mApprove) {
         if (!requireAuth(req, res) || !requireRole(req, res, ['admin'])) return;
         const id = mApprove[1];
@@ -564,7 +574,9 @@ export function createMockApi(): {
 
       const pendingInsurance = insuranceRequests.filter((x) => x.status === 'در انتظار').length;
       const approvedInsurance = insuranceRequests.filter((x) => x.status === 'تایید شده').length;
-      const acceptedAdmissions = admissionApplications.filter((x) => x.status === 'پذیرفته‌شده').length;
+      const acceptedAdmissions = admissionApplications.filter(
+        (x) => x.status === 'پذیرفته‌شده'
+      ).length;
       const rejectedAdmissions = admissionApplications.filter((x) => x.status === 'رد شده').length;
 
       return sendJson(res, 200, [

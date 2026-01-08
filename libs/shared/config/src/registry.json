@@ -4,8 +4,8 @@
     "importKey": "app-one",
     "federationName": "appOne",
     "basePath": "/app-one",
-    "mountExport": "app-one/AppOneMount",
-    "metaExport": "app-one/meta",
+    "mountExport": "appOne/AppOneMount",
+    "metaExport": "appOne/meta",
     "titleFa": "اپلیکیشن یک",
     "enabledByDefault": true,
     "projectName": "app-one"
@@ -15,8 +15,8 @@
     "importKey": "app-two",
     "federationName": "appTwo",
     "basePath": "/app-two",
-    "mountExport": "app-two/AppTwoMount",
-    "metaExport": "app-two/meta",
+    "mountExport": "appTwo/AppTwoMount",
+    "metaExport": "appTwo/meta",
     "titleFa": "اپلیکیشن دو",
     "enabledByDefault": true,
     "projectName": "app-two"

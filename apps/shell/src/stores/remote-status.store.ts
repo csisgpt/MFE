@@ -20,14 +20,17 @@ export type RemoteStatus = {
 
 const storageKey = 'mfe.disabledRemotes';
 
-const defaultRemotes = REMOTE_REGISTRY.reduce<Record<RemoteKey, RemoteStatus>>((acc, remote) => {
-  acc[remote.id] = {
-    name: remote.id,
-    label: remote.titleFa,
-    status: 'idle'
-  };
-  return acc;
-}, {} as Record<RemoteKey, RemoteStatus>);
+const defaultRemotes = REMOTE_REGISTRY.reduce<Record<RemoteKey, RemoteStatus>>(
+  (acc, remote) => {
+    acc[remote.id] = {
+      name: remote.id,
+      label: remote.titleFa,
+      status: 'idle'
+    };
+    return acc;
+  },
+  {} as Record<RemoteKey, RemoteStatus>
+);
 
 export const useRemoteStatusStore = defineStore('remoteStatus', {
   state: () => ({
