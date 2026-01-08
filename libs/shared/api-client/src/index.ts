@@ -1,12 +1,12 @@
-import { getConfig } from '@shared/config';
-import { eventBus, useHostAuthStore } from '@shared/store';
-import { createLogger, createRequestId } from '@shared/observability';
+import { httpClient, normalizeHttpError } from '@shared/http';
 import type {
   AdmissionApplication,
   Claim,
   InsuranceRequest,
+  PersonnelUser,
   Policy,
   Report,
+  ServiceRequest,
   User
 } from '@shared/contracts';
 
@@ -17,156 +17,134 @@ export type ApiError = {
   details?: unknown;
 };
 
-type RequestOptions = RequestInit & { timeoutMs?: number };
-
-const logger = createLogger('api-client');
-
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const config = getConfig();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 8000);
-  const authStore = useHostAuthStore();
-  const requestId = createRequestId();
-  const startedAt = Date.now();
-
-  try {
-    const response = await fetch(`${config.apiBaseUrl}${path}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-        'x-request-id': requestId,
-        'x-user-role': authStore.user?.role ?? '',
-        Authorization: authStore.token ? `Bearer ${authStore.token}` : ''
-      },
-      signal: controller.signal
-    });
-
-    if (!response.ok) {
-      const message = await response.text();
-      logger.warn(`درخواست ناموفق بود: ${path}`, { status: response.status, requestId });
-      eventBus.emit('AUDIT_LOG', {
-        id: requestId,
-        level: 'error',
-        message: 'درخواست رابط برنامه‌نویسی ناموفق بود',
-        source: 'api-client',
-        timestamp: new Date().toISOString(),
-        context: { status: response.status }
-      });
-      throw normalizeError(response.status, message);
-    }
-
-    if (response.status === 204) {
-      logger.info(`درخواست ${path} انجام شد`, { requestId, durationMs: Date.now() - startedAt });
-      return {} as T;
-    }
-
-    const data = (await response.json()) as T;
-    logger.info(`درخواست ${path} انجام شد`, { requestId, durationMs: Date.now() - startedAt });
-    eventBus.emit('AUDIT_LOG', {
-      id: requestId,
-      level: 'info',
-      message: 'درخواست رابط برنامه‌نویسی انجام شد',
-      source: 'api-client',
-      timestamp: new Date().toISOString(),
-      context: { durationMs: Date.now() - startedAt }
-    });
-    return data;
-  } catch (error) {
-    if ((error as ApiError).status) {
-      throw error;
-    }
-
-    logger.error(`خطا در درخواست ${path}`, { requestId, error });
-    eventBus.emit('AUDIT_LOG', {
-      id: requestId,
-      level: 'error',
-      message: 'خطا در درخواست رابط برنامه‌نویسی',
-      source: 'api-client',
-      timestamp: new Date().toISOString(),
-      context: { error: (error as Error).message }
-    });
-    throw normalizeError(0, (error as Error).message, error);
-  } finally {
-    clearTimeout(timeout);
-  }
-}
+export type PaginatedResponse<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
 
 export function normalizeError(status: number, message: string, details?: unknown): ApiError {
-  return {
-    status,
-    code: status === 0 ? 'NETWORK_ERROR' : `HTTP_${status}`,
-    message: message || 'خطای غیرمنتظره',
-    details
-  };
+  return normalizeHttpError(status, message, details);
 }
 
-export const getOrders = () => request<{ id: string; status: string; total: number }[]>('/mock/orders');
+export const getOrders = () => httpClient.request<{ id: string; status: string; total: number }[]>('/mock/orders');
 export const getOrder = (id: string) =>
-  request<{ id: string; status: string; total: number }>(`/mock/orders/${id}`);
+  httpClient.request<{ id: string; status: string; total: number }>(`/mock/orders/${id}`);
 export const approveOrder = (id: string) =>
-  request<{ ok: boolean }>(`/mock/orders/${id}/approve`, { method: 'POST' });
-export const getUsers = () => request<User[]>('/mock/users');
+  httpClient.request<{ ok: boolean }>(`/mock/orders/${id}/approve`, { method: 'POST' });
+export const getUsers = () => httpClient.request<User[]>('/mock/users?mode=list');
 export const createReport = (payload: { title: string; dateRange: string; notes: string }) =>
-  request<{ ok: boolean }>(`/mock/reports`, {
+  httpClient.request<{ ok: boolean }>(`/mock/reports`, {
     method: 'POST',
     body: JSON.stringify(payload)
   });
 
-export const getInsuranceRequests = () => request<InsuranceRequest[]>('/mock/insurance/requests');
+export const getPersonnelUsers = (page = 1, pageSize = 10, query = '', status = '', role = '', error = false) =>
+  httpClient.request<PaginatedResponse<PersonnelUser>>(
+    `/mock/users?page=${page}&pageSize=${pageSize}&q=${encodeURIComponent(query)}&status=${encodeURIComponent(
+      status
+    )}&role=${encodeURIComponent(role)}${error ? '&error=true' : ''}`
+  );
+export const getPersonnelUser = (id: string) => httpClient.request<PersonnelUser>(`/mock/users/${id}`);
+export const createPersonnelUser = (payload: Partial<PersonnelUser>) =>
+  httpClient.request<PersonnelUser>(`/mock/users`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+export const updatePersonnelUser = (id: string, payload: Partial<PersonnelUser>) =>
+  httpClient.request<PersonnelUser>(`/mock/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  });
+export const deletePersonnelUser = (id: string) =>
+  httpClient.request<{ ok: boolean }>(`/mock/users/${id}`, { method: 'DELETE' });
+
+export const getServiceRequests = (page = 1, pageSize = 10, query = '', status = '', error = false) =>
+  httpClient.request<PaginatedResponse<ServiceRequest>>(
+    `/mock/requests?page=${page}&pageSize=${pageSize}&q=${encodeURIComponent(query)}&status=${encodeURIComponent(
+      status
+    )}${error ? '&error=true' : ''}`
+  );
+export const getServiceRequest = (id: string) =>
+  httpClient.request<ServiceRequest>(`/mock/requests/${id}`);
+export const createServiceRequest = (payload: Partial<ServiceRequest>) =>
+  httpClient.request<ServiceRequest>(`/mock/requests`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+export const updateServiceRequest = (id: string, payload: Partial<ServiceRequest>) =>
+  httpClient.request<ServiceRequest>(`/mock/requests/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  });
+export const updateServiceRequestStatus = (id: string, status: ServiceRequest['status']) =>
+  httpClient.request<ServiceRequest>(`/mock/requests/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+export const deleteServiceRequest = (id: string) =>
+  httpClient.request<{ ok: boolean }>(`/mock/requests/${id}`, { method: 'DELETE' });
+
+export const getInsuranceRequests = () => httpClient.request<InsuranceRequest[]>('/mock/insurance/requests');
 export const createInsuranceRequest = (payload: Partial<InsuranceRequest>) =>
-  request<InsuranceRequest>('/mock/insurance/requests', {
+  httpClient.request<InsuranceRequest>('/mock/insurance/requests', {
     method: 'POST',
     body: JSON.stringify(payload)
   });
 export const getInsuranceRequest = (id: string) =>
-  request<InsuranceRequest>(`/mock/insurance/requests/${id}`);
+  httpClient.request<InsuranceRequest>(`/mock/insurance/requests/${id}`);
 export const updateInsuranceRequest = (id: string, payload: Partial<InsuranceRequest>) =>
-  request<InsuranceRequest>(`/mock/insurance/requests/${id}`, {
+  httpClient.request<InsuranceRequest>(`/mock/insurance/requests/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload)
   });
 export const approveInsuranceRequest = (id: string) =>
-  request<InsuranceRequest>(`/mock/insurance/admin/requests/${id}/approve`, { method: 'POST' });
+  httpClient.request<InsuranceRequest>(`/mock/insurance/admin/requests/${id}/approve`, { method: 'POST' });
 export const rejectInsuranceRequest = (id: string) =>
-  request<InsuranceRequest>(`/mock/insurance/admin/requests/${id}/reject`, { method: 'POST' });
-export const getClaims = () => request<Claim[]>('/mock/insurance/claims');
+  httpClient.request<InsuranceRequest>(`/mock/insurance/admin/requests/${id}/reject`, { method: 'POST' });
+export const getClaims = () => httpClient.request<Claim[]>('/mock/insurance/claims');
 export const createClaim = (payload: Partial<Claim>) =>
-  request<Claim>('/mock/insurance/claims', { method: 'POST', body: JSON.stringify(payload) });
-export const getPolicies = () => request<Policy[]>('/mock/insurance/policies');
+  httpClient.request<Claim>('/mock/insurance/claims', { method: 'POST', body: JSON.stringify(payload) });
+export const getPolicies = () => httpClient.request<Policy[]>('/mock/insurance/policies');
 export const createPolicy = (payload: Partial<Policy>) =>
-  request<Policy>('/mock/insurance/policies', { method: 'POST', body: JSON.stringify(payload) });
+  httpClient.request<Policy>('/mock/insurance/policies', { method: 'POST', body: JSON.stringify(payload) });
 export const updatePolicy = (id: string, payload: Partial<Policy>) =>
-  request<Policy>(`/mock/insurance/policies/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  httpClient.request<Policy>(`/mock/insurance/policies/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
 
 export const getAdmissionApplications = () =>
-  request<AdmissionApplication[]>('/mock/admission/applications');
+  httpClient.request<AdmissionApplication[]>('/mock/admission/applications');
 export const getAdmissionApplication = (id: string) =>
-  request<AdmissionApplication>(`/mock/admission/applications/${id}`);
+  httpClient.request<AdmissionApplication>(`/mock/admission/applications/${id}`);
 export const reviewAdmissionApplication = (id: string, payload: { score: number; notes: string }) =>
-  request<AdmissionApplication>(`/mock/admission/applications/${id}/review`, {
+  httpClient.request<AdmissionApplication>(`/mock/admission/applications/${id}/review`, {
     method: 'PUT',
     body: JSON.stringify(payload)
   });
 export const decideAdmissionApplication = (id: string, payload: { decision: string; reason: string }) =>
-  request<AdmissionApplication>(`/mock/admission/applications/${id}/decision`, {
+  httpClient.request<AdmissionApplication>(`/mock/admission/applications/${id}/decision`, {
     method: 'POST',
     body: JSON.stringify(payload)
   });
 export const getAdmissionConfig = () =>
-  request<{ workflow: string; reviewers: string[] }>('/mock/admission/config');
+  httpClient.request<{ workflow: string; reviewers: string[] }>('/mock/admission/config');
 export const updateAdmissionConfig = (payload: { workflow: string; reviewers: string[] }) =>
-  request<{ ok: boolean }>('/mock/admission/config', { method: 'PUT', body: JSON.stringify(payload) });
+  httpClient.request<{ ok: boolean }>('/mock/admission/config', {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  });
 
-export const getOpsKpis = () => request<{ label: string; value: number }[]>('/mock/ops/kpis');
-export const getOpsAlerts = () => request<{ id: string; message: string; severity: string }[]>(
-  '/mock/ops/alerts'
-);
+export const getOpsKpis = () => httpClient.request<{ label: string; value: number }[]>('/mock/ops/kpis');
+export const getOpsAlerts = () =>
+  httpClient.request<{ id: string; message: string; severity: string }[]>(
+    '/mock/ops/alerts'
+  );
 export const ackOpsAlert = (id: string) =>
-  request<{ ok: boolean }>(`/mock/ops/alerts/${id}/ack`, { method: 'POST' });
-export const getOpsReports = () => request<Report[]>('/mock/ops/reports');
+  httpClient.request<{ ok: boolean }>(`/mock/ops/alerts/${id}/ack`, { method: 'POST' });
+export const getOpsReports = () => httpClient.request<Report[]>('/mock/ops/reports');
 export const createOpsReport = (payload: Partial<Report>) =>
-  request<Report>('/mock/ops/reports', { method: 'POST', body: JSON.stringify(payload) });
-export const getOpsAnalytics = () => request<{ id: string; segment: string; value: number }[]>(
-  '/mock/ops/analytics'
-);
+  httpClient.request<Report>('/mock/ops/reports', { method: 'POST', body: JSON.stringify(payload) });
+export const getOpsAnalytics = () =>
+  httpClient.request<{ id: string; segment: string; value: number }[]>(
+    '/mock/ops/analytics'
+  );

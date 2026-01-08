@@ -1,58 +1,57 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="بازبینی درخواست" subtitle="امتیاز و یادداشت‌ها" />
-    <UiSection>
-      <UiForm layout="vertical" :model="store.reviewDraft" @finish="submit">
+  <PageShell>
+    <PageHeader title="بازبینی درخواست" subtitle="امتیاز و یادداشت‌ها">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'پذیرش' }, { label: 'بازبینی' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
+      <UiForm layout="vertical" :model="form" @finish="submit">
         <UiFormItem label="امتیاز">
-          <UiInput v-model:value="store.reviewDraft.score" type="number" />
+          <UiInput v-model:value="form.score" type="number" />
         </UiFormItem>
         <UiFormItem label="یادداشت‌ها">
-          <UiInput v-model:value="store.reviewDraft.notes" />
+          <UiInput v-model:value="form.notes" />
         </UiFormItem>
         <div class="actions">
-          <UiButton type="primary" html-type="submit">ذخیره بازبینی</UiButton>
-          <UiButton @click="back">بازگشت</UiButton>
+          <UiButton type="primary" html-type="submit">ثبت بازبینی</UiButton>
+          <UiButton @click="emit('back')">بازگشت</UiButton>
         </div>
       </UiForm>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import { reviewAdmissionApplication } from '@shared/api-client';
 import { eventBus } from '@shared/store';
-import { useAdmissionStore } from '../stores/admission.store';
+
+const emit = defineEmits<{ (e: 'back'): void }>();
 
 interface Props {
   applicationId: string;
 }
 
 const props = defineProps<Props>();
-const router = useRouter();
-const store = useAdmissionStore();
+const form = ref({ score: 75, notes: '' });
 
 const submit = async () => {
-  await reviewAdmissionApplication(props.applicationId, store.reviewDraft);
-  eventBus.emit('TOAST', { type: 'success', message: 'بازبینی ذخیره شد' });
-  eventBus.emit('AUDIT_LOG', {
-    id: `audit_${Date.now()}`,
-    level: 'info',
-    message: 'بازبینی پذیرش ثبت شد',
-    source: 'admission',
-    timestamp: new Date().toISOString(),
-    context: { id: props.applicationId }
-  });
-  store.resetReview();
-  router.push(`/admission/applications/${props.applicationId}`);
-};
-
-const back = () => {
-  router.push(`/admission/applications/${props.applicationId}`);
+  if (!props.applicationId) return;
+  await reviewAdmissionApplication(props.applicationId, form.value);
+  eventBus.emit('TOAST', { type: 'success', message: 'بازبینی ثبت شد' });
+  emit('back');
 };
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .actions {
   display: flex;
   gap: 12px;

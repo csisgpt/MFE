@@ -1,31 +1,60 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="بررسی درخواست‌ها" subtitle="تایید یا رد درخواست‌ها" />
-    <UiSection>
-      <UiDataTable :value="requests" :columns="columns" @row-click="handleRowClick" />
-    </UiSection>
-  </UiPage>
+  <PageShell>
+    <PageHeader title="درخواست‌های بیمه" subtitle="بررسی و تأیید درخواست‌ها">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'بیمه' }, { label: 'مدیریت درخواست‌ها' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
+      <EnterpriseDataGrid
+        :row-data="requests"
+        :column-defs="columns"
+        :pagination-page-size="6"
+        @row-action="handleAction"
+        :show-actions="true"
+      />
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getInsuranceRequests } from '@shared/api-client';
+import { approveInsuranceRequest, getInsuranceRequests, rejectInsuranceRequest } from '@shared/api-client';
+import { eventBus } from '@shared/store';
+import type { ColDef } from 'ag-grid-community';
 
-const emit = defineEmits<{ (e: 'open-request', id: string): void }>();
-
-const requests = ref([]);
-const columns = [
-  { field: 'id', header: 'شناسه درخواست' },
-  { field: 'employeeName', header: 'کارمند' },
-  { field: 'status', header: 'وضعیت' },
-  { field: 'amount', header: 'مبلغ' }
+const requests = ref<any[]>([]);
+const columns: ColDef[] = [
+  { field: 'id', headerName: 'شناسه' },
+  { field: 'employeeName', headerName: 'کارمند' },
+  { field: 'type', headerName: 'نوع' },
+  { field: 'status', headerName: 'وضعیت' },
+  { field: 'amount', headerName: 'مبلغ' }
 ];
 
-const handleRowClick = (event: { data: { id: string } }) => {
-  emit('open-request', event.data.id);
+const handleAction = async (payload: { type: 'view' | 'edit' | 'delete'; row: any }) => {
+  if (payload.type === 'edit') {
+    const updated = await approveInsuranceRequest(payload.row.id);
+    requests.value = requests.value.map((item) => (item.id === updated.id ? updated : item));
+    eventBus.emit('TOAST', { type: 'success', message: 'درخواست تأیید شد.' });
+  }
+  if (payload.type === 'delete') {
+    const updated = await rejectInsuranceRequest(payload.row.id);
+    requests.value = requests.value.map((item) => (item.id === updated.id ? updated : item));
+    eventBus.emit('TOAST', { type: 'info', message: 'درخواست رد شد.' });
+  }
 };
 
 onMounted(async () => {
   requests.value = await getInsuranceRequests();
 });
 </script>
+
+<style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+</style>

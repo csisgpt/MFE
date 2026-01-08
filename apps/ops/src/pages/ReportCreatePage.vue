@@ -1,7 +1,11 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="ایجاد گزارش" subtitle="ساخت گزارش عملیاتی جدید" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="ایجاد گزارش" subtitle="ساخت گزارش عملیاتی جدید">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'عملیات' }, { label: 'ایجاد گزارش' }]" />
+      </template>
+    </PageHeader>
+    <div class="card">
       <p v-if="!canCreate" class="warning">مجوز ایجاد گزارش را ندارید.</p>
       <UiForm layout="vertical" :model="store.reportDraft" @finish="submit">
         <UiFormItem label="عنوان">
@@ -15,8 +19,8 @@
           <UiButton @click="back">انصراف</UiButton>
         </div>
       </UiForm>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -58,6 +62,13 @@ const back = () => {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .actions {
   display: flex;
   gap: 12px;

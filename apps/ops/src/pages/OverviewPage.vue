@@ -1,13 +1,17 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="نمای کلی عملیات" subtitle="شاخص‌های کلیدی میان‌حوزه‌ای" />
-    <div class="kpi-grid">
-      <UiCard v-for="kpi in kpis" :key="kpi.label">
-        <h3>{{ kpi.label }}</h3>
+  <PageShell>
+    <PageHeader title="نمای کلی عملیات" subtitle="شاخص‌های کلیدی میان‌حوزه‌ای">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'عملیات' }, { label: 'نمای کلی' }]" />
+      </template>
+    </PageHeader>
+    <div class="grid">
+      <div v-for="kpi in kpis" :key="kpi.label" class="card">
+        <h3 class="title">{{ kpi.label }}</h3>
         <p class="kpi">{{ kpi.value }}</p>
-      </UiCard>
+      </div>
     </div>
-  </UiPage>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -22,10 +26,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.kpi-grid {
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .kpi {

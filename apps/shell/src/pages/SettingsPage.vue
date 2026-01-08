@@ -1,24 +1,27 @@
 <template>
-  <UiPage>
-    <UiPageHeader title="تنظیمات" subtitle="ترجیحات شِل" />
-    <UiSection>
+  <PageShell>
+    <PageHeader title="تنظیمات" subtitle="ترجیحات شِل و نمایش">
+      <template #breadcrumbs>
+        <Breadcrumbs :items="[{ label: 'خانه', to: '/' }, { label: 'تنظیمات' }]" />
+      </template>
+    </PageHeader>
+    <div class="card space-y-4">
       <div class="row">
-        <span>پوسته: {{ themeLabel }}</span>
-        <UiButton @click="toggleTheme">تغییر پوسته</UiButton>
+        <span>پوسته فعلی: {{ themeLabel }}</span>
+        <button class="action-button" type="button" @click="toggleTheme">تغییر پوسته</button>
       </div>
       <div class="row">
-        <label>
-          زبان
-          <select v-model="appStore.language" @change="handleLanguage">
+        <label class="flex flex-col gap-2 text-sm">
+          زبان سامانه
+          <select v-model="appStore.language" class="input" @change="handleLanguage">
             <option value="fa">فارسی</option>
-            <option value="en">انگلیسی</option>
-            <option value="fr">فرانسوی</option>
-            <option value="es">اسپانیایی</option>
+            <option value="ar">عربی</option>
+            <option value="tr">ترکی</option>
           </select>
         </label>
       </div>
-    </UiSection>
-  </UiPage>
+    </div>
+  </PageShell>
 </template>
 
 <script setup lang="ts">
@@ -41,15 +44,32 @@ const handleLanguage = () => {
 </script>
 
 <style scoped>
+.card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 16px;
+}
+
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  gap: 12px;
 }
 
-select {
-  padding: 6px;
-  border-radius: var(--radius-sm);
+.input {
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.action-button {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
 }
 </style>

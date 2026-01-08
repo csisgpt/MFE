@@ -2,16 +2,15 @@ import { defineStore } from 'pinia';
 
 export const useAppOneStore = defineStore('appOne', {
   state: () => ({
-    orderQuery: '',
-    dashboardCounter: 0,
-    summary: { activeOrders: 3, region: 'شرق کشور' }
-  }),
-  actions: {
-    setOrderQuery(query: string) {
-      this.orderQuery = query;
+    summary: {
+      activeUsers: 28,
+      pendingRequests: 6,
+      resolvedRequests: 18
     },
-    incrementCounter() {
-      this.dashboardCounter += 1;
-    }
-  }
+    recentActivity: [
+      'ثبت درخواست جدید برای شبکه داخلی',
+      'ویرایش اطلاعات کاربر واحد پشتیبانی',
+      'تأیید درخواست سطح دسترسی مالی'
+    ]
+  })
 });

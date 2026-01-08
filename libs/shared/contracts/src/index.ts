@@ -51,6 +51,32 @@ export interface User {
   role: string;
 }
 
+export type UserStatus = 'فعال' | 'غیرفعال' | 'تعلیق';
+
+export interface PersonnelUser {
+  id: string;
+  username: string;
+  fullName: string;
+  department: string;
+  role: string;
+  status: UserStatus;
+  phone: string;
+  createdAt: string;
+}
+
+export type RequestStatus = 'جدید' | 'در حال بررسی' | 'انجام شد' | 'رد شد';
+export type RequestPriority = 'بالا' | 'متوسط' | 'کم';
+
+export interface ServiceRequest {
+  id: string;
+  title: string;
+  requester: string;
+  assignee: string;
+  status: RequestStatus;
+  priority: RequestPriority;
+  createdAt: string;
+}
+
 export interface Report {
   id: string;
   title: string;
