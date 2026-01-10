@@ -1,5 +1,5 @@
 <template>
-  <div class="standalone">
+  <div class="standalone p-4">
     <header class="header">اپلیکیشن دو (حالت مستقل)</header>
     <AppTwoMount />
   </div>

@@ -9,7 +9,7 @@
     "format:check": "prettier --check .",
     "build:mfe": "nx run-many -t build --projects=shell,app-one,app-two,insurance,admission,ops",
     "preview:mfe": "node tools/preview-mfe.mjs",
-    "package:mfe": "pnpm build:mfe && node tools/package-mfe.mjs",
+    "preview:mfe:mock": "cross-env MOCK_API=1 node tools/preview-mfe.mjs",
     "check:fa-ui": "node tools/check-fa-ui.mjs"
   },
   "devDependencies": {

@@ -1,0 +1,18 @@
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-quartz.css";
+
+/* token mapping */
+.ag-theme-quartz {
+  --ag-background-color: var(--color-surface);
+  --ag-foreground-color: var(--color-text);
+  --ag-border-color: var(--color-border);
+  --ag-header-background-color: var(--color-surface-muted);
+  --ag-row-hover-color: var(--color-primary-soft);
+  --ag-selected-row-background-color: var(--color-primary-soft);
+  --ag-font-family: var(--font-sans);
+  --ag-font-size: 13px;
+  --ag-border-radius: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+}

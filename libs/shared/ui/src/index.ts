@@ -29,6 +29,7 @@ import EmptyState from './components/EmptyState.vue';
 import SkeletonBlock from './components/SkeletonBlock.vue';
 import UiIcon from './components/UiIcon.vue';
 import EnterpriseDataGrid from './components/EnterpriseDataGrid.vue';
+import './ag-grid-styles.css';
 
 export function installUi(app: App) {
   app.use(Antd, { locale: faIR });

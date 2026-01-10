@@ -1,9 +1,9 @@
 <template>
   <div class="grid">
     <UiCard>
-      <h3>نمای کلی</h3>
-      <p>کاربران فعال: {{ stats.activeUsers }}</p>
-      <p>گزارش‌های تولیدشده: {{ stats.reports }}</p>
+      <h3 class="title">نمای کلی</h3>
+      <p class="value">کاربران فعال: {{ stats.activeUsers }}</p>
+      <p class="subtitle">گزارش‌های تولیدشده: {{ stats.reports }}</p>
       <UiButton @click="toggleTheme">تغییر پوسته سراسری</UiButton>
     </UiCard>
     <UiCard>
@@ -33,5 +33,23 @@ const toggleTheme = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
+}
+
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 </style>

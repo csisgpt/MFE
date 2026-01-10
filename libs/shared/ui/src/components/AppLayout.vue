@@ -10,7 +10,7 @@
         @toggle-mobile="toggleMobile"
         @prefetch="(item) => $emit('prefetch', item)"
       />
-      <div class="w-full flex flex-col">
+      <div class="w-full flex flex-col grow!">
         <HeaderBar
           :brand="brand"
           :user-name="userName"

@@ -1,7 +1,8 @@
 <template>
-  <div class="w-full">
-    <div class="ag-theme-quartz w-full" :style="{ minHeight }">
+  <div class="w-full h-full">
+    <div class="ag-theme-quartz w-full h-full flex flex-col" :style="{ minHeight }">
       <AgGridVue
+      class="grow h-full"
         :column-defs="resolvedColumnDefs"
         :row-data="rowData"
         :default-col-def="defaultColDef"
@@ -163,33 +164,6 @@ watch(
 </script>
 
 <style scoped>
-@import 'ag-grid-community/styles/ag-grid.css';
-@import 'ag-grid-community/styles/ag-theme-quartz.css';
-
-:global(.ag-theme-quartz) {
-  --ag-background-color: var(--color-surface);
-  --ag-foreground-color: var(--color-text);
-  --ag-border-color: var(--color-border);
-  --ag-secondary-border-color: var(--color-border);
-  --ag-header-background-color: var(--color-surface-muted);
-  --ag-header-foreground-color: var(--color-text);
-  --ag-row-hover-color: var(--color-primary-soft);
-  --ag-selected-row-background-color: var(--color-primary-soft);
-  --ag-odd-row-background-color: var(--color-surface);
-  --ag-font-family: var(--font-sans);
-  --ag-font-size: 13px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-:global(.ag-theme-quartz .ag-header-cell) {
-  font-weight: 600;
-}
-
-:global(.ag-theme-quartz .ag-root-wrapper) {
-  border: none;
-}
 
 .action-btn {
   border: 1px solid var(--color-border);
@@ -209,4 +183,15 @@ watch(
   color: #dc2626;
   border-color: rgba(220, 38, 38, 0.4);
 }
+
+
+
+</style>
+
+
+<style> 
+.ag-root-wrapper {
+  height: 100 !important;
+}
+
 </style>

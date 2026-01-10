@@ -12,7 +12,7 @@
         <button class="action-button" type="button" @click="validateAll">اعتبارسنجی ریموت‌ها</button>
       </template>
     </PageHeader>
-    <div class="card">
+    <div class="card grow">
       <EnterpriseDataGrid :row-data="remoteRows" :column-defs="columnDefs" :pagination="false" />
     </div>
   </PageShell>

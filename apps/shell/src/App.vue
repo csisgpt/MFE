@@ -12,7 +12,9 @@
     @open-profile="handleProfile"
     @prefetch="handlePrefetch"
   >
-    <RouterView :key="route.fullPath" />
+    <Transition mode="out-in" name="slide-fade">
+      <RouterView :key="route.fullPath" />
+    </Transition>
     <UiToastHost />
   </AppLayout>
   <div v-else class="min-h-screen bg-[var(--color-surface-muted)]" dir="rtl">
@@ -106,3 +108,18 @@ const handlePrefetch = (item: { remoteId?: string }) => {
 
 const isAuthRoute = computed(() => route.name === 'login');
 </script>
+
+<style>
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.4s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+}
+</style>

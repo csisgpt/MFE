@@ -9,7 +9,7 @@
       </template>
     </PageHeader>
 
-    <div class="card space-y-4">
+    <div class="card space-y-4 flex flex-col">
       <div class="filters">
         <input v-model="query" class="input" placeholder="جستجو بر اساس نام یا واحد" />
         <select v-model="statusFilter" class="input">
