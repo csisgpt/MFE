@@ -17,7 +17,7 @@
     </Transition>
     <UiToastHost />
   </AppLayout>
-  <div v-else class="min-h-screen bg-[var(--color-surface-muted)]" dir="rtl">
+  <div v-else class="min-h-screen bg-surface-muted" dir="rtl">
     <RouterView />
     <UiToastHost />
   </div>

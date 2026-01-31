@@ -5,7 +5,10 @@
         <Breadcrumbs :items="[{ label: 'اپلیکیشن یک' }, { label: 'کاربران' }]" />
       </template>
       <template #actions>
-        <button class="action-button" type="button" @click="openCreate">افزودن کاربر</button>
+        <UiButton type="primary" class="action-primary" @click="openCreate">
+          <UiIcon name="add" />
+          افزودن کاربر
+        </UiButton>
       </template>
     </PageHeader>
 
@@ -25,7 +28,7 @@
         <button class="secondary-button" type="button" @click="reload">تلاش مجدد</button>
       </div>
       <EmptyState
-        v-if="!loading && !errorMessage && filteredUsers.length === 0"
+        v-if="!loading && !errorMessage && mainData.length === 0"
         title="کاربری ثبت نشده است"
         description="برای شروع یک کاربر جدید اضافه کنید."
       >
@@ -39,23 +42,11 @@
           <h3>جزئیات کاربر</h3>
           <button class="ghost-button" type="button" @click="detailOpen = false">بستن</button>
         </div>
-        <div v-if="selectedUser" class="drawer-body">
-          <p>نام: {{ selectedUser.fullName }}</p>
-          <p>واحد: {{ selectedUser.department }}</p>
-          <p>نقش: {{ selectedUser.role }}</p>
-          <p>وضعیت: {{ selectedUser.status }}</p>
-          <p>شماره تماس: {{ selectedUser.phone }}</p>
-          <p>تاریخ ثبت: {{ selectedUser.createdAt }}</p>
-        </div>
       </div>
     </div>
 
-    <UiModal v-model:open="formOpen" title="افزودن کاربر" @ok="submitForm">
+    <UiModal :open="formOpen" title="افزودن کاربر" @ok="submitForm">
       <div>
-        <!-- <div class="drawer-header">
-          <h3>{{ editingUser ? 'ویرایش کاربر' : 'افزودن کاربر' }}</h3>
-          <button class="ghost-button" type="button" @click="closeForm">بستن</button>
-        </div> -->
         <UiForm class="form" @submit.prevent="submitForm">
           <UiFormItem label="نام و نام خانوادگی">
             <UiInput v-model="form.fullName" required />
@@ -77,29 +68,11 @@
         </UiForm>
       </div>
     </UiModal>
-
-    <!-- <div v-if="formOpen" class="overlay" @click.self="closeForm"></div> -->
-
-    <div v-if="confirmDelete" class="overlay" @click.self="confirmDelete = null">
-      <div class="modal">
-        <div class="drawer-header">
-          <h3>حذف کاربر</h3>
-          <button class="ghost-button" type="button" @click="confirmDelete = null">بستن</button>
-        </div>
-        <p>آیا از حذف کاربر {{ confirmDelete?.fullName }} اطمینان دارید؟</p>
-        <div class="form-actions">
-          <button class="secondary-button" type="button" @click="confirmDelete = null">لغو</button>
-          <button class="danger-button" type="button" :disabled="saving" @click="deleteUser">
-            {{ saving ? 'در حال حذف...' : 'حذف' }}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div class="grow!">
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, defineAsyncComponent, shallowRef } from 'vue';
+import { computed, onMounted, reactive, ref, defineAsyncComponent, shallowRef, watch } from 'vue';
 import type { ColDef, GridApi, GridOptions, ICellRendererParams } from 'ag-grid-community';
 import type { PersonnelUser } from '@shared/contracts';
 import {
@@ -109,7 +82,15 @@ import {
   updatePersonnelUser
 } from '@shared/api-client';
 import { eventBus } from '@shared/store';
-import { UiModal, UiInput, UiSelect, UiForm, UiFormItem, MainTable } from '@shared/ui';
+import {
+  UiModal,
+  UiInput,
+  UiSelect,
+  UiForm,
+  UiFormItem,
+  MainTable,
+  StatusBadgeRenderer
+} from '@shared/ui';
 
 type ShareDto = {
   id: number;
@@ -119,6 +100,75 @@ type ShareDto = {
   usedAmount: number;
   remainingAmount: number;
 };
+
+export interface FileDto {
+  id: string;
+  url: string;
+  fileType: number;
+  fullName: string;
+}
+
+interface AllocationRequestDto {
+  id: number;
+  button: any;
+  createdOn: string; // ISO
+  sendToHeadOfBudgetDepartmentOn: string | null;
+  createdById: number;
+  createdByFullName: string;
+  systemId: string;
+  fiscalYearId: number;
+  isCumulative: boolean;
+  subject: string;
+  costCenterOperatorPositionIds: string[];
+  month: number;
+  paymentMethod: number;
+  files: FileDto[];
+  excelFile: FileDto | null;
+  priority: number;
+  status: number;
+  flowStatus: number;
+  userFlowStatus: number;
+  isCurrentUserFlowStatus: boolean;
+  canEdit: boolean;
+  canReturnForRevision: boolean;
+  showExtraActionFields: boolean;
+  allowedActions: number[];
+  defaultAction: number;
+  currentFlowHistoryId: number | null;
+  costCenterId: number;
+  costCenterTitle: string;
+  requestedVolume: number;
+  requestedCredit: number;
+  expertProposedVolume: number;
+  expertProposedCredit: number;
+  approvedVolume: number;
+  approvedCredit: number;
+  items: AllocationRequestItemDto[];
+  allocationRequestFlowsHistory: Array<{
+    id: number;
+    actionById: number;
+    actionByFullName: string;
+    flowStatus: number;
+    currentFlowStatusUserFullName: string;
+    action: number;
+    receivedOn: string;
+    viewOn: string | null;
+    actionOn: string | null;
+  }>;
+  descriptions: Array<{
+    id: number;
+    systemId: string;
+    createdOn: string;
+    createdById: number;
+    createdByFullName: string;
+    description: string;
+    canEdit: boolean;
+    canDelete: boolean;
+    files: FileDto[];
+    allocationRequestItemId: number | null;
+    allocationRequestFlowHistoryId: number | null;
+  }>;
+}
 
 type TashimRow = AllocationRequestDto & {
   allocationRequestId: number;
@@ -139,7 +189,7 @@ type TashimRow = AllocationRequestDto & {
   id: number;
 };
 
-const usableDataGrid = defineAsyncComponent(() => MainTable);
+// const usableDataGrid = defineAsyncComponent(() => MainTable);
 // const MainTable = defineAsyncComponent(() => import('@/shared/ui').then((m) => m.MainTable));
 
 const mainData = ref([
@@ -835,15 +885,20 @@ const mainData = ref([
     id: 2096
   }
 ]);
+
 const query = ref('');
 const statusFilter = ref<'all' | PersonnelUser['status']>('all');
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
 const users = ref<PersonnelUser[]>([]);
+const total = ref(0);
+const page = ref(1);
+const pageSize = ref(6);
 const selectedUser = ref<PersonnelUser | null>(null);
 const detailOpen = ref(false);
 const formOpen = ref(false);
+const confirmOpen = ref(false);
 const confirmDelete = ref<PersonnelUser | null>(null);
 const editingUser = ref<PersonnelUser | null>(null);
 const userStatusOptions = [
@@ -851,6 +906,50 @@ const userStatusOptions = [
   { label: 'غیر فعال', value: 2 },
   { label: 'تعلیق', value: 3 }
 ];
+const gridStorageKey = 'app-one-users-grid';
+
+const filters = reactive({
+  query: '',
+  status: 'all' as 'all' | PersonnelUser['status'],
+  role: 'all'
+});
+
+const statusOptions = [
+  { value: 'all', label: 'همه وضعیت‌ها' },
+  { value: 'فعال', label: 'فعال' },
+  { value: 'غیرفعال', label: 'غیرفعال' },
+  { value: 'تعلیق', label: 'تعلیق' }
+];
+
+const roleOptions = [
+  { value: 'all', label: 'همه نقش‌ها' },
+  { value: 'کارشناس ارشد', label: 'کارشناس ارشد' },
+  { value: 'مدیر سیستم', label: 'مدیر سیستم' },
+  { value: 'سرپرست تیم', label: 'سرپرست تیم' },
+  { value: 'تحلیل‌گر', label: 'تحلیل‌گر' },
+  { value: 'کارشناس پشتیبانی', label: 'کارشناس پشتیبانی' },
+  { value: 'مسئول جذب', label: 'مسئول جذب' },
+  { value: 'کارشناس امنیت', label: 'کارشناس امنیت' },
+  { value: 'کارشناس عملیات', label: 'کارشناس عملیات' },
+  { value: 'حسابرس داخلی', label: 'حسابرس داخلی' },
+  { value: 'کارشناس قراردادها', label: 'کارشناس قراردادها' },
+  { value: 'تحلیل‌گر بازار', label: 'تحلیل‌گر بازار' },
+  { value: 'سرپرست شیفت', label: 'سرپرست شیفت' }
+];
+
+const columns = computed<ColDef[]>(() => [
+  { field: 'fullName', headerName: 'نام و نام خانوادگی', minWidth: 180 },
+  { field: 'department', headerName: 'واحد سازمانی', minWidth: 160 },
+  { field: 'role', headerName: 'نقش', minWidth: 140 },
+  {
+    field: 'status',
+    headerName: 'وضعیت',
+    cellRenderer: StatusBadgeRenderer,
+    minWidth: 120
+  },
+  { field: 'phone', headerName: 'شماره تماس', minWidth: 150 },
+  { field: 'createdAt', headerName: 'تاریخ ثبت', minWidth: 120 }
+]);
 
 const form = reactive({
   fullName: '',
@@ -960,22 +1059,28 @@ const mainColumnDefs = shallowRef<ColDef<TashimRow>[]>([
     chartDataType: 'excluded'
   }
 ]);
+const formErrors = reactive({
+  fullName: '',
+  department: '',
+  role: '',
+  phone: ''
+});
 
-const filteredUsers = computed(() =>
-  users.value.filter((user) => {
-    const matchesQuery =
-      user.fullName.includes(query.value) || user.department.includes(query.value);
-    const matchesStatus = statusFilter.value === 'all' || user.status === statusFilter.value;
-    return matchesQuery && matchesStatus;
-  })
-);
+const formTitle = computed(() => (editingUser.value ? 'ویرایش کاربر' : 'افزودن کاربر'));
 
 const loadUsers = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    const response = await getPersonnelUsers(1, 20);
+    const response = await getPersonnelUsers({
+      page: page.value,
+      pageSize: pageSize.value,
+      query: filters.query,
+      status: filters.status,
+      role: filters.role
+    });
     users.value = response.data;
+    total.value = response.total;
   } catch (error) {
     errorMessage.value = 'بارگذاری کاربران با خطا مواجه شد.';
   } finally {
@@ -996,7 +1101,14 @@ const openCreate = () => {
     status: 'فعال',
     phone: ''
   });
+  Object.assign(formErrors, {
+    fullName: '',
+    department: '',
+    role: '',
+    phone: ''
+  });
   formOpen.value = true;
+  console.log('asdasdas');
 };
 
 const closeForm = () => {
@@ -1023,22 +1135,33 @@ const handleAction = (payload: { action: 'view' | 'edit' | 'delete'; row: Person
   }
   if (payload.action === 'delete') {
     confirmDelete.value = payload.row;
+    confirmOpen.value = true;
   }
 };
 
+const validateForm = () => {
+  formErrors.fullName = form.fullName.trim() ? '' : 'نام را وارد کنید.';
+  formErrors.department = form.department.trim() ? '' : 'واحد سازمانی را وارد کنید.';
+  formErrors.role = form.role.trim() ? '' : 'نقش سازمانی را وارد کنید.';
+  formErrors.phone = form.phone.trim() ? '' : 'شماره تماس را وارد کنید.';
+  return !formErrors.fullName && !formErrors.department && !formErrors.role && !formErrors.phone;
+};
+
 const submitForm = async () => {
+  if (!validateForm()) return;
   saving.value = true;
   try {
     if (editingUser.value) {
       const updated = await updatePersonnelUser(editingUser.value.id, form);
       users.value = users.value.map((item) => (item.id === updated.id ? updated : item));
-      eventBus.emit('TOAST', { type: 'success', message: 'کاربر با موفقیت ویرایش شد.' });
+      eventBus.emit('TOAST', { type: 'success', message: 'اطلاعات کاربر به‌روزرسانی شد.' });
     } else {
-      const created = await createPersonnelUser(form);
-      users.value = [created, ...users.value];
+      await createPersonnelUser(form);
       eventBus.emit('TOAST', { type: 'success', message: 'کاربر جدید ثبت شد.' });
+      page.value = 1;
     }
     formOpen.value = false;
+    await loadUsers();
   } catch (error) {
     eventBus.emit('TOAST', { type: 'error', message: 'ذخیره اطلاعات ناموفق بود.' });
   } finally {
@@ -1051,15 +1174,48 @@ const deleteUser = async () => {
   saving.value = true;
   try {
     await deletePersonnelUser(confirmDelete.value.id);
-    users.value = users.value.filter((item) => item.id !== confirmDelete.value?.id);
     eventBus.emit('TOAST', { type: 'info', message: 'کاربر حذف شد.' });
-    confirmDelete.value = null;
+    confirmOpen.value = false;
+    page.value = 1;
+    await loadUsers();
   } catch (error) {
     eventBus.emit('TOAST', { type: 'error', message: 'حذف کاربر ناموفق بود.' });
   } finally {
     saving.value = false;
   }
 };
+
+const handlePageChange = (nextPage: number) => {
+  page.value = nextPage;
+  loadUsers();
+};
+
+const handlePageSizeChange = (nextSize: number) => {
+  pageSize.value = nextSize;
+  page.value = 1;
+  loadUsers();
+};
+
+const statusClass = (status: PersonnelUser['status']) => {
+  switch (status) {
+    case 'فعال':
+      return 'status-success';
+    case 'غیرفعال':
+      return 'status-muted';
+    case 'تعلیق':
+      return 'status-danger';
+    default:
+      return 'status-muted';
+  }
+};
+
+watch(
+  () => [filters.query, filters.status, filters.role],
+  () => {
+    page.value = 1;
+    loadUsers();
+  }
+);
 
 onMounted(() => {
   loadUsers();
@@ -1070,89 +1226,105 @@ onMounted(() => {
 .card {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 16px;
 }
 
 .filters {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
-.input {
-  padding: 8px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-}
-
-.action-button {
-  background: var(--color-primary);
-  color: var(--color-primary-contrast);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.secondary-button {
-  background: var(--color-surface-muted);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.danger-button {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 12px;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  display: flex;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   align-items: center;
-  justify-content: center;
-  z-index: 50;
-  padding: 16px;
 }
 
-.drawer {
-  background: var(--color-surface);
-  width: min(400px, 90vw);
+.action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-button {
+  width: 100%;
+}
+
+.error-box {
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger-soft);
   border-radius: 16px;
-  padding: 16px;
-}
-
-.drawer-header {
+  padding: 12px 16px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .drawer-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+}
+
+.drawer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 14px;
 }
 
-.modal {
-  background: var(--color-surface);
-  width: min(500px, 92vw);
-  border-radius: 16px;
-  padding: 16px;
+.drawer-row span {
+  color: var(--color-text-muted);
 }
 
-.form {
+.status-pill {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.status-muted {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.status-danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.modal-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.form-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--color-danger);
 }
 
 .form-actions {
@@ -1161,24 +1333,9 @@ onMounted(() => {
   gap: 8px;
 }
 
-.ghost-button {
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
+@media (max-width: 768px) {
+  .refresh-button {
+    width: auto;
+  }
 }
-
-.error-box {
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  background: rgba(248, 113, 113, 0.1);
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
-
 </style>
-
-

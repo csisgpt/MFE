@@ -118,3 +118,15 @@ defineEmits<{
   (e: 'prefetch', item: NavItem): void;
 }>();
 </script>
+
+<style scoped>
+.nav-link.is-active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  box-shadow: inset -3px 0 0 var(--color-primary);
+}
+
+.nav-link.is-active :deep(svg) {
+  color: var(--color-primary);
+}
+</style>

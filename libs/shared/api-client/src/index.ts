@@ -40,10 +40,33 @@ export const createReport = (payload: { title: string; dateRange: string; notes:
     body: JSON.stringify(payload)
   });
 
-export const getPersonnelUsers = (page = 1, pageSize = 10, error = false) =>
-  httpClient.request<PaginatedResponse<PersonnelUser>>(
-    `/mock/personnel/users?page=${page}&pageSize=${pageSize}${error ? '&error=true' : ''}`
+export const getPersonnelUsers = (params?: {
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  status?: PersonnelUser['status'] | 'all';
+  role?: string;
+  error?: boolean;
+}) => {
+  const {
+    page = 1,
+    pageSize = 10,
+    query,
+    status,
+    role,
+    error = false
+  } = params ?? {};
+  const search = new URLSearchParams();
+  search.set('page', String(page));
+  search.set('pageSize', String(pageSize));
+  if (query) search.set('query', query);
+  if (status && status !== 'all') search.set('status', status);
+  if (role && role !== 'all') search.set('role', role);
+  if (error) search.set('error', 'true');
+  return httpClient.request<PaginatedResponse<PersonnelUser>>(
+    `/mock/personnel/users?${search.toString()}`
   );
+};
 export const getPersonnelUser = (id: string) =>
   httpClient.request<PersonnelUser>(`/mock/personnel/users/${id}`);
 export const createPersonnelUser = (payload: Partial<PersonnelUser>) =>
@@ -59,10 +82,31 @@ export const updatePersonnelUser = (id: string, payload: Partial<PersonnelUser>)
 export const deletePersonnelUser = (id: string) =>
   httpClient.request<{ ok: boolean }>(`/mock/personnel/users/${id}`, { method: 'DELETE' });
 
-export const getServiceRequests = (page = 1, pageSize = 10, error = false) =>
-  httpClient.request<PaginatedResponse<ServiceRequest>>(
-    `/mock/requests?page=${page}&pageSize=${pageSize}${error ? '&error=true' : ''}`
-  );
+export const getServiceRequests = (params?: {
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  status?: ServiceRequest['status'] | 'all';
+  priority?: ServiceRequest['priority'] | 'all';
+  error?: boolean;
+}) => {
+  const {
+    page = 1,
+    pageSize = 10,
+    query,
+    status,
+    priority,
+    error = false
+  } = params ?? {};
+  const search = new URLSearchParams();
+  search.set('page', String(page));
+  search.set('pageSize', String(pageSize));
+  if (query) search.set('query', query);
+  if (status && status !== 'all') search.set('status', status);
+  if (priority && priority !== 'all') search.set('priority', priority);
+  if (error) search.set('error', 'true');
+  return httpClient.request<PaginatedResponse<ServiceRequest>>(`/mock/requests?${search.toString()}`);
+};
 export const getServiceRequest = (id: string) =>
   httpClient.request<ServiceRequest>(`/mock/requests/${id}`);
 export const createServiceRequest = (payload: Partial<ServiceRequest>) =>
