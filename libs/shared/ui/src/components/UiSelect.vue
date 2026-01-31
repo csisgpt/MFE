@@ -1,5 +1,5 @@
 <template>
-  <a-select v-bind="$attrs">
+  <a-select class="min-w-[200px]!" v-bind="$attrs">
     <slot />
   </a-select>
 </template>

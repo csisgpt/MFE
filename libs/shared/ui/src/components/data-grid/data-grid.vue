@@ -240,7 +240,7 @@ const loadAgGrid = async () => {
       IntegratedChartsModule.with(AgChartsEnterpriseModule),
     ]);
 
-    LicenseManager.setLicenseKey(import.meta.env.VITE_AG_GRID_LICENSE_KEY);
+    LicenseManager.setLicenseKey("DownloadDevTools_COM_NDEwMjM0NTgwMDAwMA==59158b5225400879a12a96634544f5b6");
 
     isGridLoaded.value = true;
   } catch (error) {
