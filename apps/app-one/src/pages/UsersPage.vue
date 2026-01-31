@@ -1,5 +1,5 @@
 <template>
-  <PageShell>
+  <div class="grow! flex flex-col">
     <PageHeader title="کاربران" subtitle="مدیریت کاربران و پرسنل سازمان">
       <template #breadcrumbs>
         <Breadcrumbs :items="[{ label: 'اپلیکیشن یک' }, { label: 'کاربران' }]" />
@@ -9,26 +9,16 @@
       </template>
     </PageHeader>
 
-    <div class="card space-y-4 flex flex-col">
-      <div class="filters">
-        <input v-model="query" class="input" placeholder="جستجو بر اساس نام یا واحد" />
-        <select v-model="statusFilter" class="input">
-          <option value="all">همه وضعیت‌ها</option>
-          <option value="فعال">فعال</option>
-          <option value="غیرفعال">غیرفعال</option>
-          <option value="تعلیق">تعلیق</option>
-        </select>
-        <button class="secondary-button" type="button" @click="reload">به‌روزرسانی</button>
-      </div>
-
-      <EnterpriseDataGrid
+    <div class="card bg-surface-muted! grow!">
+      <MainTable
         v-if="!errorMessage"
-        :row-data="filteredUsers"
-        :column-defs="columns"
-        :loading="loading"
-        :pagination-page-size="6"
-        :show-actions="true"
-        @row-action="handleAction"
+        class="min-h-[300px]"
+        :local-data="mainData"
+        mode="local"
+        :row-model-type="'clientSide'"
+        title="تسهیم اعتبار ستادی"
+        :column-defs="mainColumnDefs"
+        :default-col-def="defaultColDef"
       />
       <div v-else class="error-box">
         <p>{{ errorMessage }}</p>
@@ -60,46 +50,35 @@
       </div>
     </div>
 
-    <div v-if="formOpen" class="overlay" @click.self="closeForm">
-      <div class="modal">
-        <div class="drawer-header">
+    <UiModal v-model:open="formOpen" title="افزودن کاربر" @ok="submitForm">
+      <div>
+        <!-- <div class="drawer-header">
           <h3>{{ editingUser ? 'ویرایش کاربر' : 'افزودن کاربر' }}</h3>
           <button class="ghost-button" type="button" @click="closeForm">بستن</button>
-        </div>
-        <form class="form" @submit.prevent="submitForm">
-          <label>
-            نام و نام خانوادگی
-            <input v-model="form.fullName" required />
-          </label>
-          <label>
-            واحد سازمانی
-            <input v-model="form.department" required />
-          </label>
-          <label>
-            نقش سازمانی
-            <input v-model="form.role" required />
-          </label>
-          <label>
-            وضعیت
-            <select v-model="form.status">
-              <option value="فعال">فعال</option>
-              <option value="غیرفعال">غیرفعال</option>
-              <option value="تعلیق">تعلیق</option>
-            </select>
-          </label>
-          <label>
-            شماره تماس
-            <input v-model="form.phone" required />
-          </label>
-          <div class="form-actions">
-            <button class="secondary-button" type="button" @click="closeForm">انصراف</button>
-            <button class="action-button" type="submit" :disabled="saving">
-              {{ saving ? 'در حال ذخیره...' : 'ذخیره' }}
-            </button>
-          </div>
-        </form>
+        </div> -->
+        <UiForm class="form" @submit.prevent="submitForm">
+          <UiFormItem label="نام و نام خانوادگی">
+            <UiInput v-model="form.fullName" required />
+          </UiFormItem>
+
+          <UiFormItem label="واحد سازمانی">
+            <UiInput v-model="form.department" required />
+          </UiFormItem>
+          <UiFormItem label="نقش سازمانی">
+            <UiInput v-model="form.role" required />
+          </UiFormItem>
+
+          <UiFormItem label="وضعیت">
+            <UiSelect v-model:value="form.status" :options="userStatusOptions" />
+          </UiFormItem>
+          <UiFormItem label="شماره تماس">
+            <UiInput v-model="form.phone" required />
+          </UiFormItem>
+        </UiForm>
       </div>
-    </div>
+    </UiModal>
+
+    <!-- <div v-if="formOpen" class="overlay" @click.self="closeForm"></div> -->
 
     <div v-if="confirmDelete" class="overlay" @click.self="confirmDelete = null">
       <div class="modal">
@@ -116,12 +95,12 @@
         </div>
       </div>
     </div>
-  </PageShell>
+  </div class="grow!">
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
-import type { ColDef } from 'ag-grid-community';
+import { computed, onMounted, reactive, ref, defineAsyncComponent, shallowRef } from 'vue';
+import type { ColDef, GridApi, GridOptions, ICellRendererParams } from 'ag-grid-community';
 import type { PersonnelUser } from '@shared/contracts';
 import {
   createPersonnelUser,
@@ -130,7 +109,732 @@ import {
   updatePersonnelUser
 } from '@shared/api-client';
 import { eventBus } from '@shared/store';
+import { UiModal, UiInput, UiSelect, UiForm, UiFormItem, MainTable } from '@shared/ui';
 
+type ShareDto = {
+  id: number;
+  costCenterId: number;
+  costCenterTitle: string;
+  amount: number;
+  usedAmount: number;
+  remainingAmount: number;
+};
+
+type TashimRow = AllocationRequestDto & {
+  allocationRequestId: number;
+  systemId: string;
+  subject: string;
+
+  activityId: number;
+  activityTitle: string;
+  sectionTitle: string;
+  programTitle: string;
+
+  approvedCredit: number;
+  usedCredit: number;
+  remainingCredit: number;
+
+  shares: ShareDto[];
+  hasShares: boolean;
+  id: number;
+};
+
+const usableDataGrid = defineAsyncComponent(() => MainTable);
+// const MainTable = defineAsyncComponent(() => import('@/shared/ui').then((m) => m.MainTable));
+
+const mainData = ref([
+  {
+    systemId: '1404-10003',
+    subject: 'شسیشسی',
+    shareType: null,
+    approvedCredit: 1000,
+    usedCredit: 0,
+    remainingCredit: 1000,
+    shares: [],
+    items: [
+      {
+        allocationRequestId: 1928,
+        systemId: '1404-10003-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 1000,
+        id: 1490
+      }
+    ],
+    hasShares: false,
+    id: 1928
+  },
+  {
+    systemId: '1404-10004',
+    subject: 'یبسیب',
+    shareType: null,
+    approvedCredit: 1111000,
+    usedCredit: 0,
+    remainingCredit: 1111000,
+    shares: [],
+    items: [
+      {
+        allocationRequestId: 1929,
+        systemId: '1404-10004-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 1111000,
+        id: 1491
+      }
+    ],
+    hasShares: false,
+    id: 1929
+  },
+  {
+    systemId: '1404-10005',
+    subject: 'شسیبسب',
+    shareType: 2,
+    approvedCredit: 34534000,
+    usedCredit: 0,
+    remainingCredit: 34534000,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 8500000,
+        usedAmount: 0,
+        remainingAmount: 8500000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 16
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 10000000,
+        usedAmount: 0,
+        remainingAmount: 10000000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 17
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 13500000,
+        usedAmount: 0,
+        remainingAmount: 13500000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 18
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 1930,
+        systemId: '1404-10005-01',
+        activityId: 50,
+        allocatedBudgetActivityId: 571,
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 34534000,
+        id: 1492
+      }
+    ],
+    hasShares: true,
+    id: 1930
+  },
+  {
+    systemId: '1404-10070',
+    subject: 'شسیسشیشسی',
+    shareType: 4,
+    approvedCredit: 896666665000,
+    usedCredit: 0,
+    remainingCredit: 896666665000,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1510,
+        allocationRequestItemSystemId: '1404-10070-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 1
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1510,
+        allocationRequestItemSystemId: '1404-10070-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 2
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1510,
+        allocationRequestItemSystemId: '1404-10070-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 3
+      },
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1511,
+        allocationRequestItemSystemId: '1404-10070-02',
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 4
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1511,
+        allocationRequestItemSystemId: '1404-10070-02',
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 5
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 200000000,
+        usedAmount: 0,
+        remainingAmount: 200000000,
+        allocationRequestItemId: 1511,
+        allocationRequestItemSystemId: '1404-10070-02',
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 6
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 1997,
+        systemId: '1404-10070-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 7777777000,
+        id: 1510
+      },
+      {
+        allocationRequestId: 1997,
+        systemId: '1404-10070-02',
+        activityId: 50,
+        allocatedBudgetActivityId: 571,
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 888888888000,
+        id: 1511
+      }
+    ],
+    hasShares: true,
+    id: 1997
+  },
+  {
+    systemId: '1404-10073',
+    subject: 'sadsadsadas',
+    shareType: null,
+    approvedCredit: 10000,
+    usedCredit: 0,
+    remainingCredit: 10000,
+    shares: [],
+    items: [
+      {
+        allocationRequestId: 2000,
+        systemId: '1404-10073-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 10000,
+        id: 1516
+      }
+    ],
+    hasShares: false,
+    id: 2000
+  },
+  {
+    systemId: '1404-10079',
+    subject: 'تست سیستم جدید v4-',
+    shareType: 2,
+    approvedCredit: 1000,
+    usedCredit: 0,
+    remainingCredit: 1000,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 100,
+        usedAmount: 0,
+        remainingAmount: 100,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 13
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 300,
+        usedAmount: 0,
+        remainingAmount: 300,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 14
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 600,
+        usedAmount: 0,
+        remainingAmount: 600,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 15
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 2006,
+        systemId: '1404-10079-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 1000,
+        id: 1519
+      }
+    ],
+    hasShares: true,
+    id: 2006
+  },
+  {
+    systemId: '1404-10134',
+    subject: 'dsfsdfsdf',
+    shareType: 4,
+    approvedCredit: 36007184599,
+    usedCredit: 2773235101,
+    remainingCredit: 33233949498,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 1000,
+        usedAmount: 2550867867,
+        remainingAmount: -2550866867,
+        allocationRequestItemId: 1574,
+        allocationRequestItemSystemId: '1404-10134-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 7
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 500,
+        usedAmount: 0,
+        remainingAmount: 500,
+        allocationRequestItemId: 1574,
+        allocationRequestItemSystemId: '1404-10134-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 8
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 400,
+        usedAmount: 0,
+        remainingAmount: 400,
+        allocationRequestItemId: 1574,
+        allocationRequestItemSystemId: '1404-10134-01',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 9
+      },
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 30000000000,
+        usedAmount: 222367234,
+        remainingAmount: 29777632766,
+        allocationRequestItemId: 1575,
+        allocationRequestItemSystemId: '1404-10134-02',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 10
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 3000000000,
+        usedAmount: 0,
+        remainingAmount: 3000000000,
+        allocationRequestItemId: 1575,
+        allocationRequestItemSystemId: '1404-10134-02',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 11
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 3000000000,
+        usedAmount: 0,
+        remainingAmount: 3000000000,
+        allocationRequestItemId: 1575,
+        allocationRequestItemSystemId: '1404-10134-02',
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: null,
+        sectionTitle: null,
+        id: 12
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 2061,
+        systemId: '1404-10134-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 2000,
+        id: 1574
+      },
+      {
+        allocationRequestId: 2061,
+        systemId: '1404-10134-02',
+        activityId: 49,
+        allocatedBudgetActivityId: 570,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 36007182599,
+        id: 1575
+      }
+    ],
+    hasShares: true,
+    id: 2061
+  },
+  {
+    systemId: '1404-10164',
+    subject: 'رذزرذرزذرزذ',
+    shareType: 3,
+    approvedCredit: 850000000,
+    usedCredit: 0,
+    remainingCredit: 850000000,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 32000000,
+        usedAmount: 0,
+        remainingAmount: 32000000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: 26,
+        budgetProgramTitle: 'برنامه 1',
+        sectionId: null,
+        sectionTitle: null,
+        id: 22
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 33000000,
+        usedAmount: 0,
+        remainingAmount: 33000000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: 26,
+        budgetProgramTitle: 'برنامه 1',
+        sectionId: null,
+        sectionTitle: null,
+        id: 23
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 34500000,
+        usedAmount: 0,
+        remainingAmount: 34500000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: 26,
+        budgetProgramTitle: 'برنامه 1',
+        sectionId: null,
+        sectionTitle: null,
+        id: 24
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 2092,
+        systemId: '1404-10164-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 566,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 100000000,
+        id: 1626
+      },
+      {
+        allocationRequestId: 2092,
+        systemId: '1404-10164-02',
+        activityId: 49,
+        allocatedBudgetActivityId: 570,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 100000000,
+        id: 1627
+      },
+      {
+        allocationRequestId: 2092,
+        systemId: '1404-10164-03',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 650000000,
+        id: 1628
+      }
+    ],
+    hasShares: true,
+    id: 2092
+  },
+  {
+    systemId: '1404-10168',
+    subject: 'غقفغفقغفقغفقغ',
+    shareType: 2,
+    approvedCredit: 793300000,
+    usedCredit: 0,
+    remainingCredit: 793300000,
+    shares: [
+      {
+        costCenterId: 104,
+        costCenterTitle: 'مدیریت سامانه‌های الکترونیک و خدمات هوشمند',
+        amount: 4000000,
+        usedAmount: 0,
+        remainingAmount: 4000000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 19
+      },
+      {
+        costCenterId: 111,
+        costCenterTitle: 'مرکز خدمات استان سمنان',
+        amount: 4100000,
+        usedAmount: 0,
+        remainingAmount: 4100000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 20
+      },
+      {
+        costCenterId: 112,
+        costCenterTitle: 'مرکز خدمات استان قم',
+        amount: 4200000,
+        usedAmount: 0,
+        remainingAmount: 4200000,
+        allocationRequestItemId: null,
+        allocationRequestItemSystemId: null,
+        allocatedBudgetActivityTitle: null,
+        budgetProgramId: null,
+        budgetProgramTitle: null,
+        sectionId: 21,
+        sectionTitle: 'فصل 1',
+        id: 21
+      }
+    ],
+    items: [
+      {
+        allocationRequestId: 2096,
+        systemId: '1404-10168-01',
+        activityId: 49,
+        allocatedBudgetActivityId: 564,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 12300000,
+        id: 1630
+      },
+      {
+        allocationRequestId: 2096,
+        systemId: '1404-10168-02',
+        activityId: 49,
+        allocatedBudgetActivityId: 570,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 10000000,
+        id: 1631
+      },
+      {
+        allocationRequestId: 2096,
+        systemId: '1404-10168-03',
+        activityId: 49,
+        allocatedBudgetActivityId: 566,
+        allocatedBudgetActivityTitle: 'فعالیت 1',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 250000000,
+        id: 1632
+      },
+      {
+        allocationRequestId: 2096,
+        systemId: '1404-10168-04',
+        activityId: 50,
+        allocatedBudgetActivityId: 571,
+        allocatedBudgetActivityTitle: 'فعالیت 2',
+        sectionId: '21',
+        sectionTitle: 'فصل 1',
+        budgetProgramId: '26',
+        budgetProgramTitle: 'برنامه 1',
+        approvedCredit: 521000000,
+        id: 1633
+      }
+    ],
+    hasShares: true,
+    id: 2096
+  }
+]);
 const query = ref('');
 const statusFilter = ref<'all' | PersonnelUser['status']>('all');
 const loading = ref(false);
@@ -142,6 +846,11 @@ const detailOpen = ref(false);
 const formOpen = ref(false);
 const confirmDelete = ref<PersonnelUser | null>(null);
 const editingUser = ref<PersonnelUser | null>(null);
+const userStatusOptions = [
+  { label: 'فعال', value: 1 },
+  { label: 'غیر فعال', value: 2 },
+  { label: 'تعلیق', value: 3 }
+];
 
 const form = reactive({
   fullName: '',
@@ -151,14 +860,106 @@ const form = reactive({
   phone: ''
 });
 
-const columns: ColDef[] = [
-  { field: 'fullName', headerName: 'نام' },
-  { field: 'department', headerName: 'واحد' },
-  { field: 'role', headerName: 'نقش' },
-  { field: 'status', headerName: 'وضعیت' },
-  { field: 'phone', headerName: 'شماره تماس' },
-  { field: 'createdAt', headerName: 'تاریخ ثبت' }
-];
+const defaultColDef: ColDef = {
+  resizable: true,
+  sortable: true,
+  filter: true,
+  flex: 1,
+  autoHeight: true
+};
+
+const formatFaInt = (val: unknown) => {
+  const n = Number(val);
+  if (!Number.isFinite(n)) return '';
+  return new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 }).format(n);
+};
+
+const calcPercent = (used: number, total: number) => {
+  const t = Number(total ?? 0);
+  const u = Number(used ?? 0);
+  return t > 0 ? Math.round((u / t) * 100) : 0;
+};
+
+function progressRenderer(p: ICellRendererParams<TashimRow>) {
+  const el = document.createElement('div');
+  el.style.width = '180px';
+
+  const row = p.data;
+  const percent = calcPercent(row?.usedCredit ?? 0, row?.approvedCredit ?? 0);
+
+  const label = document.createElement('div');
+  label.className = 'text-[12px] text-gray-600 mb-1';
+  label.textContent = `${percent}%`;
+
+  const barWrap = document.createElement('div');
+  barWrap.style.cssText =
+    'height:6px;background:rgba(0,0,0,0.1);border-radius:999px;overflow:hidden;';
+
+  const bar = document.createElement('div');
+  bar.style.cssText = `height:6px;width:${percent}%;background:rgb(34,197,94);`;
+
+  barWrap.appendChild(bar);
+  el.appendChild(label);
+  el.appendChild(barWrap);
+  return el;
+}
+
+function sharesCountRenderer(p: ICellRendererParams<TashimRow>) {
+  const el = document.createElement('span');
+  const n = Array.isArray(p.data?.shares) ? p.data!.shares.length : 0;
+  el.textContent = n ? String(n) : '—';
+  return el;
+}
+
+const mainColumnDefs = shallowRef<ColDef<TashimRow>[]>([
+  { field: 'systemId', headerName: 'کد تخصیص', minWidth: 150 },
+  { field: 'subject', headerName: 'موضوع', minWidth: 200 },
+  { field: 'activityTitle', headerName: 'فعالیت', minWidth: 160 },
+  //   { field: "sectionTitle", headerName: "فصل", minWidth: 140 },
+  //   { field: "programTitle", headerName: "برنامه", minWidth: 140 },
+
+  {
+    field: 'approvedCredit',
+    headerName: 'اعتبار مصوب',
+    minWidth: 150,
+    valueFormatter: (p) => formatFaInt(p.value),
+    tooltipValueGetter: (p) => formatFaInt(p.value)
+  },
+  {
+    field: 'usedCredit',
+    headerName: 'هزینه‌کرد',
+    minWidth: 140,
+    valueFormatter: (p) => formatFaInt(p.value),
+    tooltipValueGetter: (p) => formatFaInt(p.value)
+  },
+  {
+    field: 'remainingCredit',
+    headerName: 'مانده',
+    minWidth: 140,
+    valueFormatter: (p) => formatFaInt(p.value),
+    tooltipValueGetter: (p) => formatFaInt(p.value)
+  },
+
+  // محاسباتی‌ها (بدون field)
+  {
+    colId: 'progress',
+    headerName: 'وضعیت مصرف',
+    minWidth: 220,
+    sortable: false,
+    filter: false,
+    cellRenderer: progressRenderer as any,
+    chartDataType: 'excluded'
+  },
+  {
+    colId: 'sharesCount',
+    headerName: 'تسهیم‌ها',
+    minWidth: 110,
+    sortable: false,
+    filter: false,
+    cellRenderer: sharesCountRenderer as any,
+    chartDataType: 'excluded'
+  }
+]);
 
 const filteredUsers = computed(() =>
   users.value.filter((user) => {
@@ -375,4 +1176,9 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
 }
+
+
+
 </style>
+
+

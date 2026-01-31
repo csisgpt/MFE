@@ -23,7 +23,9 @@ import {
   Table,
   Trash2,
   User,
-  Users
+  Users,
+  Moon,
+  Sun
 } from 'lucide-vue-next';
 
 const props = withDefaults(
@@ -47,6 +49,8 @@ const props = withDefaults(
       | 'chevronLeft'
       | 'chevronRight'
       | 'users'
+      | 'moon'
+      | 'sun'
       | 'requests';
     size?: number;
     strokeWidth?: number;
@@ -77,7 +81,9 @@ const iconComponent = computed(() => {
     chevronLeft: ChevronLeft,
     chevronRight: ChevronRight,
     users: Users,
-    requests: ClipboardList
+    requests: ClipboardList,
+    moon: Moon,
+    sun: Sun
   };
   return map[props.name] ?? LayoutGrid;
 });

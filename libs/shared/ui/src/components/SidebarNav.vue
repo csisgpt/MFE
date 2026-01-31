@@ -13,20 +13,21 @@
         ]"
       >
         <div class="flex items-center justify-between px-2">
-          <div class="flex items-center gap-2 text-sm font-semibold text-text">
+          <div class="flex items-center gap-2 text-sm font-semibold text-text" v-if="!collapsed">
             <div
               class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary"
             >
               <UiIcon name="apps" />
             </div>
-            <span v-if="!collapsed">{{ brand }}</span>
+            <span >{{ brand }}</span>
           </div>
           <button
-            class="hidden cursor-pointer h-8 w-8 items-center justify-center rounded-lg border border-border text-text lg:flex"
+            class="hidden cursor-pointer h-8! w-8! items-center justify-center rounded-lg border border-border text-text lg:flex"
             type="button"
+            :class="{'bg-primary' : collapsed}"
             @click="$emit('toggle-collapse')"
           >
-            <UiIcon :name="collapsed ? 'chevronLeft' : 'chevronRight'" />
+            <UiIcon :stroke-width="collapsed ? 4 : 1.8" :class="{'stroke-white' : collapsed}" :name="collapsed ? 'chevronLeft' : 'chevronRight'" />
           </button>
         </div>
 

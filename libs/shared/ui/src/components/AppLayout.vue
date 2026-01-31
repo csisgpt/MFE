@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-surface-muted text-text">
-    <div class="flex min-h-screen w-full!">
+    <div class="flex w-full!">
       <SidebarNav
         :brand="brand"
         :groups="navGroups"
@@ -12,7 +12,7 @@
       />
       <div class="w-full flex flex-col grow!">
         <HeaderBar
-          :brand="brand"
+          :brand="selectedRemote"
           :user-name="userName"
           :user-role="userRole"
           :notifications-count="notificationsCount"
@@ -24,7 +24,7 @@
           @toggle-mobile="toggleMobile"
           @search="(value) => $emit('search', value)"
         />
-        <main class="grow! px-8 py-4 bg-surface">
+        <main class="grow! bg-surface">
           <slot />
         </main>
       </div>
@@ -36,7 +36,10 @@
 import { computed, ref, watch } from 'vue';
 import HeaderBar from './HeaderBar.vue';
 import SidebarNav, { type NavGroup, type NavItem } from './SidebarNav.vue';
+import { REMOTE_REGISTRY } from '@shared/config';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const props = withDefaults(
   defineProps<{
     brand: string;
@@ -75,6 +78,19 @@ const toggleCollapsed = () => {
 const toggleMobile = () => {
   mobileOpen.value = !mobileOpen.value;
 };
+
+const selectedRemote = computed(() => {
+  return (
+    REMOTE_REGISTRY?.find((remote) => remote?.importKey == route?.name)?.titleFa ??
+    props.navGroups?.find((x) => x.items?.find((x) => x?.to == route.path))?.label ??
+    'مرکز یکپارچه سازمان'
+  );
+});
+
+// const title = computed(() => {
+//   const match = REMOTE_REGISTRY.find((item) => item.id === props.remote);
+//   return match?.titleFa ?? 'ماژول';
+// });
 
 watch(sidebarCollapsed, (value) => {
   localStorage.setItem(collapsedKey, value ? 'true' : 'false');

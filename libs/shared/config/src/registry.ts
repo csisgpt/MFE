@@ -62,3 +62,53 @@ export function buildRemoteEntryMap() {
 }
 
 export { getRemoteEntryUrl };
+
+
+
+// {
+//     "id": "appTwo",
+//     "importKey": "app-two",
+//     "federationName": "appTwo",
+//     "basePath": "/app-two",
+//     "mountExport": "appTwo/AppTwoMount",
+//     "metaExport": "appTwo/meta",
+//     "titleFa": "اپلیکیشن دو",
+//     "enabledByDefault": true,
+//     "projectName": "app-two"
+//   },
+//   {
+//     "id": "insurance",
+//     "importKey": "insurance",
+//     "federationName": "insurance",
+//     "basePath": "/insurance",
+//     "mountExport": "insurance/InsuranceMount",
+//     "metaExport": "insurance/meta",
+//     "titleFa": "بیمه",
+//     "enabledByDefault": true,
+//     "projectName": "insurance",
+//     "disabledFlag": "disableInsurance"
+//   },
+//   {
+//     "id": "admission",
+//     "importKey": "admission",
+//     "federationName": "admission",
+//     "basePath": "/admission",
+//     "mountExport": "admission/AdmissionMount",
+//     "metaExport": "admission/meta",
+//     "titleFa": "پذیرش",
+//     "enabledByDefault": true,
+//     "projectName": "admission",
+//     "disabledFlag": "disableAdmission"
+//   },
+//   {
+//     "id": "ops",
+//     "importKey": "ops",
+//     "federationName": "ops",
+//     "basePath": "/ops",
+//     "mountExport": "ops/OpsMount",
+//     "metaExport": "ops/meta",
+//     "titleFa": "عملیات",
+//     "enabledByDefault": true,
+//     "projectName": "ops",
+//     "disabledFlag": "disableOps"
+//   }

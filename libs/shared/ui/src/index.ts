@@ -29,7 +29,7 @@ import EmptyState from './components/EmptyState.vue';
 import SkeletonBlock from './components/SkeletonBlock.vue';
 import UiIcon from './components/UiIcon.vue';
 import EnterpriseDataGrid from './components/EnterpriseDataGrid.vue';
-import './ag-grid-styles.css';
+import MainTable from './components/data-grid/data-grid.vue';
 
 export function installUi(app: App) {
   app.use(Antd, { locale: faIR });
@@ -139,6 +139,7 @@ export function installUi(app: App) {
   app.component('EmptyState', EmptyState);
   app.component('SkeletonBlock', SkeletonBlock);
   app.component('UiIcon', UiIcon);
+  app.component('MainTable', MainTable);
   app.component('EnterpriseDataGrid', EnterpriseDataGrid);
 }
 
@@ -165,5 +166,6 @@ export {
   EmptyState,
   SkeletonBlock,
   UiIcon,
-  EnterpriseDataGrid
+  EnterpriseDataGrid, 
+  MainTable
 };

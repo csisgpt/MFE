@@ -1,10 +1,10 @@
 <template>
   <PageShell>
-    <PageHeader :title="title" :subtitle="subtitle">
+    <!-- <PageHeader :title="title" :subtitle="subtitle">
       <template #actions>
         <button class="action-button" type="button" @click="loadRemote">تلاش دوباره</button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
     <div v-if="state === 'loading'" class="card space-y-3">
       <SkeletonBlock height="18px" />
       <SkeletonBlock height="120px" />

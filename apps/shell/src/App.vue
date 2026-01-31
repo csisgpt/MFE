@@ -13,7 +13,7 @@
     @prefetch="handlePrefetch"
   >
     <Transition mode="out-in" name="slide-fade">
-      <RouterView :key="route.fullPath" />
+      <RouterView :key="route.matched[0]?.name ?? route.name" />
     </Transition>
     <UiToastHost />
   </AppLayout>

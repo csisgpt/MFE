@@ -14,7 +14,7 @@ const remoteRoutes = buildShellRoutes().map((route) => ({
   path: route.path,
   name: route.name,
   component: RemoteLoader,
-  props: { remote: route.remoteId },
+  props: (r: any) => ({ remote: route.remoteId, catchAll: r.params.catchAll }),
   meta: { requiresAuth: true }
 }));
 

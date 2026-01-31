@@ -1,52 +1,46 @@
 <template>
-  <div class="app-one">
+  <div class="app-one h-full flex flex-col">
     <nav class="subnav">
-      <button class="tab" type="button" @click="navigate('')">نمای کلی</button>
-      <button class="tab" type="button" @click="navigate('users')">کاربران</button>
-      <button class="tab" type="button" @click="navigate('requests')">درخواست‌ها</button>
+      <RouterLink
+        v-for="(item, i) in APP_ONE_ROUTES?.filter((x) => x.path)"
+        :to="`/app-one/${item.path}`"
+        class="tab transition-all z-98"
+        active-class="tab--active"
+        >{{ item.meta?.label }}</RouterLink
+      >
     </nav>
-    <component :is="currentView" />
+    <Transition mode="out-in" name="slide-fade">
+      <component :is="currentView" />
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
 import DashboardPage from './pages/DashboardPage.vue';
 import UsersPage from './pages/UsersPage.vue';
 import RequestsPage from './pages/RequestsPage.vue';
-
+import APP_ONE_ROUTES from './configs/routes';
 const route = useRoute();
-const router = useRouter();
 
 const subPath = computed(() => {
   const raw = route.params.catchAll;
-  if (Array.isArray(raw)) {
-    return raw.join('/');
-  }
+  if (Array.isArray(raw)) return raw.join('/');
   return raw ?? '';
 });
 
 const currentView = computed(() => {
-  if (subPath.value.startsWith('users')) {
-    return UsersPage;
-  }
-  if (subPath.value.startsWith('requests')) {
-    return RequestsPage;
-  }
+  if (subPath.value.includes('users')) return UsersPage;
+  if (subPath.value.includes('requests')) return RequestsPage;
+  // هم /app-one و هم /app-one/home اگر خواستی
   return DashboardPage;
 });
-
-const navigate = (target: string) => {
-  const path = target ? `/app-one/${target}` : '/app-one';
-  router.push(path);
-};
 </script>
 
 <style scoped>
 .subnav {
   display: flex;
-  gap: 12px;
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
@@ -54,7 +48,16 @@ const navigate = (target: string) => {
 .tab {
   border: 1px solid var(--color-border);
   padding: 6px 14px;
-  border-radius: 12px;
+  border-radius: 0 0 12px 12px;
   background: var(--color-surface);
+  text-decoration: none;
+}
+
+.tab--active {
+  background: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+  transform: scale(1.2);
+  margin-top: 4px;
+  z-index: 99;
 }
 </style>
