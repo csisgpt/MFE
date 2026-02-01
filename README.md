@@ -157,6 +157,12 @@ Ant Design Vue + PrimeVue CSS is imported once from `@shared/ui/styles` in the s
   - `http://csis.ir:4990/remotes/ops/remoteEntry.js`
 - Shared singletons: **vue**, **pinia**, **vue-router**
 
+### Remote import map generation
+Remote import maps are generated from `libs/shared/config/src/registry.json` to keep the shell in sync:
+```bash
+pnpm gen:remotes
+```
+
 ## MFE Trust Features
 - `/system` system status page with remote status, retry, and disable toggles.
 - `/audit` audit page with request/error history and filters.

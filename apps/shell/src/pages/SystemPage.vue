@@ -45,13 +45,14 @@ import type { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
 import { loadRemoteMount, validateRemote } from '../utils/remotes';
 import { eventBus } from '@shared/store';
-import { MainTable, EmptyState , UiSelect } from '@shared/ui';
+import { MainTable, EmptyState, UiSelect } from '@shared/ui';
 
 type ValidationMode = 'light' | 'deep';
 
 type RemoteMeta = {
   version?: string;
   buildTime?: string;
+  requiredHostApi?: string;
 };
 
 type RemoteRow = {
@@ -67,6 +68,11 @@ type RemoteRow = {
   lastValidationStatus?: 'ok' | 'failed';
   lastValidationError?: string;
   lastError?: string;
+
+  compatibilityStatus?: 'ok' | 'failed';
+  compatibilityMessage?: string;
+  compatibilityRequired?: string;
+  compatibilityHost?: string;
 
   isDisabled: boolean;
 };
@@ -113,6 +119,10 @@ const statusLabel = (status: string, isDisabled: boolean) => {
 
 const validationLabel = (status: 'ok' | 'failed') => (status === 'ok' ? 'موفق' : 'ناموفق');
 const validationModeLabel = (mode: ValidationMode) => (mode === 'deep' ? 'عمیق' : 'سبک');
+const compatibilityLabel = (status?: 'ok' | 'failed') => {
+  if (!status) return '—';
+  return status === 'ok' ? 'سازگار' : 'ناسازگار';
+};
 
 const formatTimestamp = (value?: string) => {
   if (!value) return '';
@@ -174,6 +184,25 @@ const columnDefs = shallowRef<ColDef<RemoteRow>[]>([
     valueGetter: (params) => formatTimestamp(params.data?.meta?.buildTime) || 'نامشخص'
   },
   {
+    headerName: 'سازگاری',
+    colId: 'compatibility',
+    minWidth: 150,
+    valueGetter: (params) => compatibilityLabel(params.data?.compatibilityStatus)
+  },
+  {
+    headerName: 'جزئیات سازگاری',
+    colId: 'compatibilityDetail',
+    minWidth: 220,
+    flex: 2,
+    valueGetter: (params) =>
+      params.data?.compatibilityMessage ||
+      (params.data?.compatibilityStatus === 'ok' && params.data?.compatibilityRequired
+        ? `بازه ${params.data.compatibilityRequired} (میزبان ${params.data.compatibilityHost ?? '—'})`
+        : '—'),
+    tooltipValueGetter: (params) =>
+      params.value && params.value !== '—' ? String(params.value) : ''
+  },
+  {
     headerName: 'وضعیت',
     colId: 'status',
     minWidth: 140,
@@ -226,11 +255,27 @@ const validateAll = async () => {
     try {
       const result = await validateRemote(remote.name, validationMode.value);
       if (!result.ok) {
+        if (result.meta) {
+          statusStore.setMeta(remote.name, result.meta as any);
+        }
+        if (result.compatibility) {
+          statusStore.setCompatibility(remote.name, 'failed', {
+            message: result.compatibility.reason,
+            required: result.compatibility.required,
+            host: result.compatibility.host
+          });
+        }
         throw new Error(result.error || 'اعتبارسنجی ناموفق بود');
       }
 
       if (result.meta) {
         statusStore.setMeta(remote.name, result.meta as any);
+      }
+      if (result.compatibility) {
+        statusStore.setCompatibility(remote.name, 'ok', {
+          required: result.compatibility.required,
+          host: result.compatibility.host
+        });
       }
 
       statusStore.markValidated(remote.name, 'ok');

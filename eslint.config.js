@@ -39,6 +39,18 @@ export default [
             {
               "sourceTag": "type:lib",
               "onlyDependOnLibsWithTags": ["type:lib"]
+            },
+            {
+              "sourceTag": "layer:foundation",
+              "onlyDependOnLibsWithTags": ["layer:foundation"]
+            },
+            {
+              "sourceTag": "layer:platform",
+              "onlyDependOnLibsWithTags": ["layer:foundation", "layer:platform"]
+            },
+            {
+              "sourceTag": "layer:ui",
+              "onlyDependOnLibsWithTags": ["layer:foundation", "layer:platform", "layer:ui"]
             }
           ]
         }
@@ -58,6 +70,22 @@ export default [
           "patterns": [
             { "group": ["ant-design-vue/*"], "message": "Import UI through @shared/ui" },
             { "group": ["primevue/*"], "message": "Import UI through @shared/ui" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['apps/**/src/**/*.{ts,tsx,vue}', 'libs/**/src/**/*.{ts,tsx,vue}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          "patterns": [
+            {
+              "group": ["libs/shared/**/src/**"],
+              "message": "از مسیر عمومی @shared/<lib> استفاده کنید."
+            }
           ]
         }
       ]

@@ -26,7 +26,7 @@
 
   <template v-else>
     <div
-      class="flex flex-col h-full w-full"
+      class="flex flex-col h-full w-full ag-theme-quartz"
       :dir="direction"
       ref="gridContainer"
     >
@@ -205,6 +205,14 @@ const emit = defineEmits<{
 /* ======================== Lazy Load ag-grid ======================== */
 let AgGridVue: any = null;
 let autosizeTimer: ReturnType<typeof setTimeout> | null = null;
+let agGridStylesLoaded = false;
+
+const loadAgGridStyles = async () => {
+  if (agGridStylesLoaded) return;
+  agGridStylesLoaded = true;
+  await import("ag-grid-community/styles/ag-grid.css");
+  await import("ag-grid-community/styles/ag-theme-quartz.css");
+};
 
 const myTheme = themeQuartz.withParams({
   backgroundColor : "var(--color-surface-muted)" ,
@@ -215,13 +223,14 @@ const myTheme = themeQuartz.withParams({
 const isGridLoaded = ref(false);
 
 const loadAgGrid = async () => {
+  await loadAgGridStyles();
   if (AgGridVue) return;
 
   try {
     const module = await import("ag-grid-vue3");
     AgGridVue = module.AgGridVue;
 
-    // ✅ ag-grid CSS را در اینجا لود کن (فقط زمانی که کامپوننت نیاز پیدا کند)
+    // ✅ ag-grid CSS فقط یک بار لود می‌شود.
 
     // ✅ ModuleRegistry را صرفاً زمانی بارگذاری کن که ag-grid لود شود
     const { ModuleRegistry, AllCommunityModule, TooltipModule } = await import(
@@ -660,6 +669,8 @@ defineExpose({
 .ag-theme-quartz {
   --ag-header-height: 48px;
   --ag-row-height: 40px;
+  height: 100%;
+  width: 100%;
 }
 
 .rg-empty {

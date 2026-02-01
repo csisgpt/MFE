@@ -2,6 +2,8 @@ export type RemoteMeta = {
   name: string;
   version: string;
   buildTime: string;
+  requiredHostApi?: string;
+  runtime?: 'integrated' | 'standalone';
 };
 
 export type InsuranceRequestStatus = 'در انتظار' | 'تایید شده' | 'رد شده';

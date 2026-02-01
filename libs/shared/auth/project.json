@@ -1,14 +1,14 @@
 {
-  "name": "shared",
-  "root": "libs/shared",
-  "sourceRoot": "libs/shared/src",
+  "name": "shared-auth",
+  "root": "libs/shared/auth",
+  "sourceRoot": "libs/shared/auth/src",
   "projectType": "library",
-  "tags": ["type:lib"],
+  "tags": ["type:lib", "layer:platform"],
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint libs/shared"
+        "command": "eslint libs/shared/auth"
       }
     },
     "test": {

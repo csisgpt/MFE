@@ -2,6 +2,7 @@ export type FeatureFlags = Record<string, boolean>;
 
 export interface RuntimeConfig {
   apiBaseUrl: string;
+  hostApiVersion: string;
   featureFlags: FeatureFlags;
   remotePrefixes: {
     appOne: string;
@@ -14,6 +15,7 @@ export interface RuntimeConfig {
 
 const defaultConfig: RuntimeConfig = {
   apiBaseUrl: '/api',
+  hostApiVersion: '1.0.0',
   featureFlags: {
     enableReports: true,
     disableInsurance: false,

@@ -1,5 +1,6 @@
 {
   "apiBaseUrl": "/api",
+  "hostApiVersion": "1.0.0",
   "featureFlags": {
     "enableReports": true,
     "disableInsurance": false,
