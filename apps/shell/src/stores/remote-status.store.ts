@@ -15,6 +15,10 @@ export type RemoteStatus = {
   lastValidatedAt?: string;
   lastValidationStatus?: 'ok' | 'failed';
   lastValidationError?: string;
+  compatibilityStatus?: 'ok' | 'failed';
+  compatibilityMessage?: string;
+  compatibilityRequired?: string;
+  compatibilityHost?: string;
   meta?: RemoteMeta;
 };
 
@@ -84,6 +88,10 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
       }
       remote.status = 'loading';
       remote.lastError = undefined;
+      remote.compatibilityStatus = undefined;
+      remote.compatibilityMessage = undefined;
+      remote.compatibilityRequired = undefined;
+      remote.compatibilityHost = undefined;
     },
     markLoaded(name: RemoteKey, meta?: RemoteMeta) {
       const remote = this.remotes[name];
@@ -118,6 +126,24 @@ export const useRemoteStatusStore = defineStore('remoteStatus', {
       remote.lastValidatedAt = new Date().toISOString();
       remote.lastValidationStatus = status;
       remote.lastValidationError = error;
+    },
+    setCompatibility(
+      name: RemoteKey,
+      status: 'ok' | 'failed',
+      details?: {
+        message?: string;
+        required?: string;
+        host?: string;
+      }
+    ) {
+      const remote = this.remotes[name];
+      if (!remote) {
+        return;
+      }
+      remote.compatibilityStatus = status;
+      remote.compatibilityMessage = details?.message;
+      remote.compatibilityRequired = details?.required;
+      remote.compatibilityHost = details?.host;
     },
     toggleDisabled(name: RemoteKey) {
       if (this.disabled.has(name)) {

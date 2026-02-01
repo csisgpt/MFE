@@ -6,6 +6,7 @@
   "scripts": {
     "nx": "nx",
     "serve:all": "nx run-many -t serve --projects=app-one,app-two,insurance,admission,ops,shell --parallel=10",
+    "gen:remotes": "node tools/generate-remote-import-map.mjs",
     "format:check": "prettier --check .",
     "build:mfe": "nx run-many -t build --projects=shell,app-one,app-two,insurance,admission,ops",
     "preview:mfe": "node tools/preview-mfe.mjs",
@@ -51,6 +52,7 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.2.0",
     "tailwindcss": "4.1.18",
+    "semver": "^7.6.3",
     "vue": "^3.4.38",
     "vue-router": "^4.4.3"
   }
