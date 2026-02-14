@@ -3,7 +3,8 @@ import { createPinia } from 'pinia';
 import App from './App.vue';
 import { installUi } from '@shared/ui';
 import { setHostPinia, useHostThemeStore } from '@shared/store';
-import '@shared/styles';
+import '@shared/styles/tokens';
+import '@shared/styles/base';
 import { createRouter, createWebHistory } from 'vue-router';
 import AdmissionMount from './AdmissionMount.vue';
 

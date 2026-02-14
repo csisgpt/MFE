@@ -1,0 +1,27 @@
+{
+  "name": "shared-store",
+  "root": "libs/shared/store",
+  "sourceRoot": "libs/shared/store/src",
+  "projectType": "library",
+  "tags": ["type:lib", "layer:platform"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint libs/shared/store"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.config.ts"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/shared/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

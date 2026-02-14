@@ -14,6 +14,13 @@
       title="ریموت غیرفعال است"
       description="این ریموت با فلگ‌های ویژگی غیرفعال شده است. آن را در بخش تنظیمات سیستم فعال کنید."
     />
+    <EmptyState
+      v-else-if="state === 'incompatible'"
+      title="ریموت ناسازگار است"
+      :description="errorMessage"
+    >
+      <button class="action-button" type="button" @click="loadRemote">تلاش دوباره</button>
+    </EmptyState>
     <EmptyState v-else-if="state === 'error'" title="بارگذاری ناموفق" :description="errorMessage">
       <button class="action-button" type="button" @click="loadRemote">تلاش دوباره</button>
     </EmptyState>
@@ -23,10 +30,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, shallowRef, ref, watch } from 'vue';
-import { REMOTE_REGISTRY } from '@shared/config';
+import { getConfig, REMOTE_REGISTRY } from '@shared/config';
 import { eventBus } from '@shared/store';
 import { useRemoteStatusStore, type RemoteKey } from '../stores/remote-status.store';
-import { loadRemoteMeta, remoteMountLoaders } from '../utils/remotes';
+import { checkCompatibility, loadRemoteMeta, remoteMountLoaders } from '../utils/remotes';
 
 interface Props {
   remote: RemoteKey;
@@ -35,7 +42,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const remoteComponent = shallowRef();
-const state = ref<'loading' | 'error' | 'loaded' | 'disabled'>('loading');
+const state = ref<'loading' | 'error' | 'loaded' | 'disabled' | 'incompatible'>('loading');
 const errorMessage = ref('');
 const statusStore = useRemoteStatusStore();
 
@@ -64,6 +71,46 @@ async function loadRemote() {
     return;
   }
   try {
+    const meta = await loadRemoteMeta(props.remote);
+    if (meta) {
+      statusStore.setMeta(props.remote, meta);
+    }
+    const compatibility = checkCompatibility(meta);
+    if (!compatibility.ok) {
+      const { hostApiVersion } = getConfig();
+      const message =
+        compatibility.reason ??
+        `نسخه میزبان (${hostApiVersion}) با این ریموت سازگار نیست.`;
+      // فارسی: در صورت ناسازگاری نسخه‌ها، از بارگذاری ریموت جلوگیری می‌کنیم.
+      errorMessage.value = message;
+      state.value = 'incompatible';
+      statusStore.markFailed(props.remote, message);
+      statusStore.setCompatibility(props.remote, 'failed', {
+        message,
+        required: compatibility.required,
+        host: compatibility.host
+      });
+      eventBus.emit('AUDIT_LOG', {
+        id: `audit_${Date.now()}`,
+        level: 'error',
+        message: `ناسازگاری نسخه میزبان با ${title.value}`,
+        source: 'shell',
+        timestamp: new Date().toISOString(),
+        context: {
+          remote: props.remote,
+          required: compatibility.required,
+          host: compatibility.host,
+          meta
+        }
+      });
+      return;
+    }
+
+    statusStore.setCompatibility(props.remote, 'ok', {
+      required: compatibility.required,
+      host: compatibility.host
+    });
+
     const module = await Promise.race([
       loader(),
       new Promise((_, reject) =>
@@ -73,7 +120,6 @@ async function loadRemote() {
     const component = (module as { default?: unknown }).default ?? module;
     remoteComponent.value = component;
     state.value = 'loaded';
-    const meta = await loadRemoteMeta(props.remote);
     statusStore.markLoaded(props.remote, meta ?? undefined);
   } catch (error) {
     const rawMessage = (error as Error).message;

@@ -1,3 +1,2 @@
-import './tokens.css';
-import './fonts.css';
-import './base.css';
+import './tokens';
+import './base';
