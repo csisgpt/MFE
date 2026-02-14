@@ -25,11 +25,7 @@
   </div>
 
   <template v-else>
-    <div
-      class="flex flex-col h-full w-full"
-      :dir="direction"
-      ref="gridContainer"
-    >
+    <div class="flex flex-col h-full w-full" :dir="direction" ref="gridContainer">
       <!-- Toolbar -->
       <GridToolbar
         v-if="showToolbar"
@@ -98,9 +94,9 @@ import {
   defineOptions,
   nextTick,
   onMounted,
-  onBeforeMount,
-} from "vue";
-import { themeQuartz, TooltipModule } from "ag-grid-community";
+  onBeforeMount
+} from 'vue';
+import { themeQuartz, TooltipModule } from 'ag-grid-community';
 
 import type {
   GridApi,
@@ -110,28 +106,28 @@ import type {
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IDatasource,
-  IGetRowsParams,
-} from "ag-grid-community";
+  IGetRowsParams
+} from 'ag-grid-community';
 
 // @ts-ignore
-import { AG_GRID_LOCALE_IR } from "@ag-grid-community/locale";
+import { AG_GRID_LOCALE_IR } from '@ag-grid-community/locale';
 
-import { buildSortBy, buildTransportedFilters } from "./filters";
-import type { RequestPayload } from "./types";
-import GridToolbar from "./GridToolbar.vue";
-import GridPagination from "./GridPagination.vue";
-import { useGridFilters } from "./composables/useGridFilters";
-import { useGridData } from "./composables/useGridData";
-import GridTooltip from "./GridTooltip.vue";
+import { buildSortBy, buildTransportedFilters } from './filters';
+import type { RequestPayload } from './types';
+import GridToolbar from './GridToolbar.vue';
+import GridPagination from './GridPagination.vue';
+import { useGridFilters } from './composables/useGridFilters';
+import { useGridData } from './composables/useGridData';
+import GridTooltip from './GridTooltip.vue';
 
 defineOptions({ inheritAttrs: false });
 
 interface Props {
-  mode?: "server" | "local" | "infinite";
+  mode?: 'server' | 'local' | 'infinite';
   localData?: any[];
 
   apiUrl?: string;
-  apiMethod?: "get" | "post";
+  apiMethod?: 'get' | 'post';
   requestTransformer?: (payload: RequestPayload) => any;
   responseTransformer?: (response: any) => { data: any[]; totalCount: number };
   additionalPayload?: Record<string, any>;
@@ -147,7 +143,7 @@ interface Props {
   showRefreshButton?: boolean;
   refreshButtonText?: string;
   showPagination?: boolean;
-  direction?: "rtl" | "ltr";
+  direction?: 'rtl' | 'ltr';
   enableRtl?: boolean;
 
   pageSize?: number;
@@ -158,15 +154,15 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: "server",
+  mode: 'server',
   localData: () => [],
-  apiMethod: "post",
-  title: "جدول داده‌ها",
+  apiMethod: 'post',
+  title: 'جدول داده‌ها',
   showToolbar: false,
   showRefreshButton: true,
-  refreshButtonText: "بازنشانی",
+  refreshButtonText: 'بازنشانی',
   showPagination: false,
-  direction: "rtl",
+  direction: 'rtl',
   enableRtl: true,
   loading: false,
   pageSize: 20,
@@ -191,15 +187,15 @@ const props = withDefaults(defineProps<Props>(), {
       </div>
     </div>
   `,
-  additionalFilters: () => ({}),
+  additionalFilters: () => ({})
 });
 
 const emit = defineEmits<{
-  (e: "ready", api: GridApi): void;
-  (e: "data-loaded", data: any[]): void;
-  (e: "load-error", error: any): void;
-  (e: "row-data-updated"): void;
-  (e: "col-change"): void;
+  (e: 'ready', api: GridApi): void;
+  (e: 'data-loaded', data: any[]): void;
+  (e: 'load-error', error: any): void;
+  (e: 'row-data-updated'): void;
+  (e: 'col-change'): void;
 }>();
 
 /* ======================== Lazy Load ag-grid ======================== */
@@ -207,9 +203,9 @@ let AgGridVue: any = null;
 let autosizeTimer: ReturnType<typeof setTimeout> | null = null;
 
 const myTheme = themeQuartz.withParams({
-  backgroundColor : "var(--color-surface-muted)" ,
-  textColor : "var(--color-text)",
-  borderColor : "var(--color-border)"
+  backgroundColor: 'var(--color-surface-muted)',
+  textColor: 'var(--color-text)',
+  borderColor: 'var(--color-border)'
 }); // یا .withParams({...}) برای شخصی‌سازی
 
 const isGridLoaded = ref(false);
@@ -218,34 +214,36 @@ const loadAgGrid = async () => {
   if (AgGridVue) return;
 
   try {
-    const module = await import("ag-grid-vue3");
+    const module = await import('ag-grid-vue3');
     AgGridVue = module.AgGridVue;
 
     // ✅ ag-grid CSS را در اینجا لود کن (فقط زمانی که کامپوننت نیاز پیدا کند)
 
     // ✅ ModuleRegistry را صرفاً زمانی بارگذاری کن که ag-grid لود شود
-    const { ModuleRegistry, AllCommunityModule, TooltipModule } = await import(
-      "ag-grid-community"
-    );
+    const { ModuleRegistry, AllCommunityModule, TooltipModule } = await import('ag-grid-community');
 
     const { AllEnterpriseModule, LicenseManager, IntegratedChartsModule } =
-      await import("ag-grid-enterprise");
+      await import('ag-grid-enterprise');
 
-    const { AgChartsEnterpriseModule } = await import("ag-charts-enterprise");
+    const { AgChartsEnterpriseModule } = await import('ag-charts-enterprise');
 
     ModuleRegistry.registerModules([
       AllCommunityModule,
       AllEnterpriseModule,
       TooltipModule,
-      IntegratedChartsModule.with(AgChartsEnterpriseModule),
+      IntegratedChartsModule.with(AgChartsEnterpriseModule)
     ]);
 
-    LicenseManager.setLicenseKey("DownloadDevTools_COM_NDEwMjM0NTgwMDAwMA==59158b5225400879a12a96634544f5b6");
+    // LicenseManager.setLicenseKey("DownloadDevTools_COM_NDEwMjM0NTgwMDAwMA==59158b5225400879a12a96634544f5b6");
 
+    const key = import.meta.env.VITE_AG_GRID_LICENSE_KEY;
+    if (key) LicenseManager.setLicenseKey(key);
+    else if (import.meta.env.DEV) console.warn('VITE_AG_GRID_LICENSE_KEY is not set');
+    
     isGridLoaded.value = true;
   } catch (error) {
-    console.error("❌ خطا در بارگذاری ag-grid:", error);
-    emit("load-error", error);
+    console.error('❌ خطا در بارگذاری ag-grid:', error);
+    emit('load-error', error);
   }
 };
 
@@ -259,28 +257,22 @@ const pageIndex = ref(0);
 const totalCount = ref(0);
 const currentPageSize = ref(props.pageSize);
 const aborter = shallowRef<AbortController | null>(null);
-const searchText = ref("");
+const searchText = ref('');
 const isLoading = ref(false);
 
-const isLocalMode = computed(() => props.mode === "local");
-const isServerSide = computed(
-  () => resolvedRowModelType.value === "serverSide"
-);
+const isLocalMode = computed(() => props.mode === 'local');
+const isServerSide = computed(() => resolvedRowModelType.value === 'serverSide');
 
-const resolvedRowModelType = computed<NonNullable<GridOptions["rowModelType"]>>(
-  () => {
-    if (isLocalMode.value) return "clientSide";
-    // اگر کاربر مستقیماً rowModelType داد، همونو بگیر
-    const explicit = ($attrs.rowModelType as any) || undefined;
-    if (explicit) return explicit;
-    // وگرنه از mode نتیجه بگیر
-    return props.mode === "infinite" ? "infinite" : "serverSide";
-  }
-);
+const resolvedRowModelType = computed<NonNullable<GridOptions['rowModelType']>>(() => {
+  if (isLocalMode.value) return 'clientSide';
+  // اگر کاربر مستقیماً rowModelType داد، همونو بگیر
+  const explicit = ($attrs.rowModelType as any) || undefined;
+  if (explicit) return explicit;
+  // وگرنه از mode نتیجه بگیر
+  return props.mode === 'infinite' ? 'infinite' : 'serverSide';
+});
 
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalCount.value / currentPageSize.value))
-);
+const totalPages = computed(() => Math.max(1, Math.ceil(totalCount.value / currentPageSize.value)));
 
 /* ======================== Composables ======================== */
 const { normalizeFilter, toSafeString, faToEn, normalizeFa } = useGridFilters();
@@ -298,15 +290,15 @@ const mergedDefaultColDef = computed<ColDef>(() => ({
 
   suppressHeaderMenuButton: false,
   suppressSizeToFit: true,
-  headerClass: "!min-w-fit",
+  headerClass: '!min-w-fit',
   autoHeaderHeight: true,
   filterParams: {
     defaultToNothingSelected: true,
     suppressMultiSelect: false,
     suppressSelectAll: true,
-    buttons: ["clear", "apply"],
+    buttons: ['clear', 'apply']
   },
-  ...(props.defaultColDef ?? {}),
+  ...(props.defaultColDef ?? {})
 }));
 
 const gridOptions = computed<Partial<GridOptions>>(() => ({
@@ -317,30 +309,26 @@ const gridOptions = computed<Partial<GridOptions>>(() => ({
   cacheQuickFilter: true,
   tooltipShowDelay: 0,
   loading: props.loading,
-  theme : myTheme ,
+  theme: myTheme,
 
   components: {
-    GridTooltip,
+    GridTooltip
   },
 
   quickFilterParser: (q: string) => {
     const base = normalizeFa(q);
-    const both = (base + " " + faToEn(base)).trim();
+    const both = (base + ' ' + faToEn(base)).trim();
     return both ? both.split(/\s+/).filter(Boolean) : [];
   },
 
   quickFilterMatcher: (aggregate: any, parts: any) => {
-    const aggRaw = Array.isArray(aggregate)
-      ? aggregate.join(" ")
-      : toSafeString(aggregate);
+    const aggRaw = Array.isArray(aggregate) ? aggregate.join(' ') : toSafeString(aggregate);
 
     const aggNorm = normalizeFa(aggRaw);
-    const aggFull = (aggNorm + " " + faToEn(aggNorm)).trim();
+    const aggFull = (aggNorm + ' ' + faToEn(aggNorm)).trim();
 
     const tokens: string[] = Array.isArray(parts) ? parts : [parts];
-    const cleanTokens = tokens
-      .map((t) => normalizeFa(toSafeString(t)))
-      .filter(Boolean);
+    const cleanTokens = tokens.map((t) => normalizeFa(toSafeString(t))).filter(Boolean);
 
     return cleanTokens.every((p) => aggFull.includes(p));
   },
@@ -352,15 +340,15 @@ const gridOptions = computed<Partial<GridOptions>>(() => ({
     ...($attrs.defaultColDef as any),
     ...mergedDefaultColDef.value,
 
-    tooltipComponent: "GridTooltip",
+    tooltipComponent: 'GridTooltip',
     tooltipComponentParams: {
       // مثلا:
       // color: "#55AA77",
-    },
+    }
   },
 
   rowModelType: resolvedRowModelType.value,
-  rowData: isLocalMode.value ? props.localData : undefined,
+  rowData: isLocalMode.value ? props.localData : undefined
 }));
 
 /* ======================== API Methods ======================== */
@@ -372,18 +360,15 @@ async function fetchBlock(request: any, startRow: number, endRow: number) {
   try {
     isLoading.value = true;
     const payload = buildPayload(startRow, endRow, request);
-    const { data, totalCount: count } = await fetchServerData(
-      payload,
-      controller.signal
-    );
+    const { data, totalCount: count } = await fetchServerData(payload, controller.signal);
 
     totalCount.value = count;
     pageIndex.value = payload.pageIndex - 1;
-    emit("data-loaded", data);
+    emit('data-loaded', data);
 
     return {
       rows: data,
-      lastRow: count,
+      lastRow: count
     };
   } finally {
     isLoading.value = false;
@@ -392,38 +377,34 @@ async function fetchBlock(request: any, startRow: number, endRow: number) {
 
 async function onGridReady(e: GridReadyEvent) {
   gridApi.value = e.api as GridApi;
-  e.api.setGridOption("cacheBlockSize", currentPageSize.value);
-  emit("ready", e.api as GridApi);
+  e.api.setGridOption('cacheBlockSize', currentPageSize.value);
+  emit('ready', e.api as GridApi);
 
   if (isLocalMode.value) {
     totalCount.value = props.localData?.length || 0;
     return;
   }
 
-  if (resolvedRowModelType.value === "serverSide") {
+  if (resolvedRowModelType.value === 'serverSide') {
     const ds: IServerSideDatasource = {
       getRows: async (params: IServerSideGetRowsParams) => {
         try {
           const { startRow, endRow } = params.request as any;
-          const { rows, lastRow } = await fetchBlock(
-            params.request,
-            startRow,
-            endRow
-          );
+          const { rows, lastRow } = await fetchBlock(params.request, startRow, endRow);
           params.success({
             rowData: rows,
-            rowCount: lastRow || rows.length,
+            rowCount: lastRow || rows.length
           });
         } catch (err: any) {
-          if (err?.code !== "ERR_CANCELED" && err?.name !== "CanceledError") {
-            console.error("❌ Grid Data Error:", err);
+          if (err?.code !== 'ERR_CANCELED' && err?.name !== 'CanceledError') {
+            console.error('❌ Grid Data Error:', err);
             params.fail();
           }
         }
-      },
+      }
     };
-    e.api.setGridOption("serverSideDatasource", ds);
-  } else if (resolvedRowModelType.value === "infinite") {
+    e.api.setGridOption('serverSideDatasource', ds);
+  } else if (resolvedRowModelType.value === 'infinite') {
     const ds: IDatasource = {
       getRows: async (params: IGetRowsParams) => {
         try {
@@ -431,14 +412,14 @@ async function onGridReady(e: GridReadyEvent) {
           const { rows, lastRow } = await fetchBlock({}, startRow, endRow);
           params.successCallback(rows, lastRow || rows.length);
         } catch (err: any) {
-          if (err?.code !== "ERR_CANCELED" && err?.name !== "CanceledError") {
-            console.error("❌ Grid Infinite Error:", err);
+          if (err?.code !== 'ERR_CANCELED' && err?.name !== 'CanceledError') {
+            console.error('❌ Grid Infinite Error:', err);
             params.failCallback();
           }
         }
-      },
+      }
     };
-    e.api.setGridOption("datasource", ds);
+    e.api.setGridOption('datasource', ds);
   }
 }
 
@@ -461,16 +442,16 @@ function refreshAll() {
   if (!api) return;
 
   if (isLocalMode.value) {
-    api.setGridOption("rowData", props.localData);
+    api.setGridOption('rowData', props.localData);
     totalCount.value = props.localData?.length || 0;
     queueSmartFit(api.getColumnApi?.());
 
     return;
   }
 
-  if (resolvedRowModelType.value === "serverSide") {
+  if (resolvedRowModelType.value === 'serverSide') {
     api.refreshServerSide({ purge: true });
-  } else if (resolvedRowModelType.value === "infinite") {
+  } else if (resolvedRowModelType.value === 'infinite') {
     api.purgeInfiniteCache();
   }
 
@@ -485,7 +466,7 @@ function gotoPage(targetPage: number) {
   const startRow = pageIndex.value * currentPageSize.value;
   api.ensureIndexVisible?.(startRow);
 
-  if (resolvedRowModelType.value === "infinite" && !isLocalMode.value) {
+  if (resolvedRowModelType.value === 'infinite' && !isLocalMode.value) {
     api.purgeInfiniteCache();
   }
 }
@@ -502,10 +483,10 @@ function onSearchTextChange(value: any) {
   const api = gridApi.value;
   if (!api) return;
 
-  if (typeof (api as any).setGridOption === "function") {
-    api.setGridOption("quickFilterText", toSafeString(value));
+  if (typeof (api as any).setGridOption === 'function') {
+    api.setGridOption('quickFilterText', toSafeString(value));
   } else {
-    (api as any).setQuickFilter?.(value ?? "");
+    (api as any).setQuickFilter?.(value ?? '');
   }
 
   if (!isLocalMode.value) {
@@ -520,7 +501,7 @@ watch(
     await nextTick(() => {
       if (isLocalMode.value && gridApi.value) {
         totalCount.value = newData?.length || 0;
-        emit("row-data-updated");
+        emit('row-data-updated');
       }
     });
   },
@@ -533,7 +514,7 @@ watch(
     currentPageSize.value = newSize;
     if (gridApi.value) {
       gridApi.value.paginationSetPageSize?.(newSize);
-      if (!isLocalMode.value && resolvedRowModelType.value === "serverSide") {
+      if (!isLocalMode.value && resolvedRowModelType.value === 'serverSide') {
         gridApi.value.refreshServerSide({ purge: true });
       }
     }
@@ -541,8 +522,7 @@ watch(
 );
 
 function queueSmartFit(
-  columnApi = gridApi.value?.getColumnApi?.() ||
-    (gridApi.value as any)?.columnApi
+  columnApi = gridApi.value?.getColumnApi?.() || (gridApi.value as any)?.columnApi
 ) {
   if (!columnApi) return;
   if (autosizeTimer) clearTimeout(autosizeTimer);
@@ -567,10 +547,7 @@ function smartFitColumns(columnApi: any) {
     cols.reduce((sum: number, c: any) => sum + c.getActualWidth(), 0);
 
   // مجموع عرض فعلی ستون‌ها پس از autoSize
-  const totalWidth = cols.reduce(
-    (sum: number, c: any) => sum + c.getActualWidth(),
-    0
-  );
+  const totalWidth = cols.reduce((sum: number, c: any) => sum + c.getActualWidth(), 0);
 
   // 3) اگر فضای خالی داریم: flex بده، اما حداقل را پهنای autoSize قرار بده
   if (totalWidth < containerWidth) {
@@ -579,7 +556,7 @@ function smartFitColumns(columnApi: any) {
       // minWidth = عرض فعلی (نتیجه‌ی auto-size) => کوچک‌تر از هدر نشیم
       minWidth: c.getActualWidth(),
       flex: 1, // اجازه بده با هم عرض را پر کنند
-      width: undefined, // flex مدیریت می‌کند
+      width: undefined // flex مدیریت می‌کند
     }));
 
     columnApi.applyColumnState({ state, applyOrder: true });
@@ -591,15 +568,14 @@ function smartFitColumns(columnApi: any) {
       // عرض فعلی را (که همان auto-size است) نگه می‌داریم
       width: c.getActualWidth(),
       // برای پایداری: حداقل را هم کمتر از این نگذار
-      minWidth: Math.min(c.getActualWidth(), 10000),
+      minWidth: Math.min(c.getActualWidth(), 10000)
     }));
     columnApi.applyColumnState({ state, applyOrder: true });
   }
 }
 
 function queueAutoSize(
-  columnApi = gridApi.value?.getColumnApi?.() ||
-    (gridApi.value as any)?.columnApi
+  columnApi = gridApi.value?.getColumnApi?.() || (gridApi.value as any)?.columnApi
 ) {
   if (!columnApi) return;
   if (autosizeTimer) clearTimeout(autosizeTimer);
@@ -627,7 +603,7 @@ const onGridSizeChanged = (params: any) => {
 
 const onColumnsChanged = (params: any) => {
   queueSmartFit(params.columnApi);
-  emit('col-change')
+  emit('col-change');
 };
 
 /* ======================== Lifecycle ======================== */
@@ -652,7 +628,7 @@ defineExpose({
   setSearchText: (text: string) => {
     searchText.value = text;
   },
-  isLoading: () => isLoading.value,
+  isLoading: () => isLoading.value
 });
 </script>
 
