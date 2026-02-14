@@ -25,7 +25,7 @@
   </div>
 
   <template v-else>
-    <div class="flex flex-col h-full w-full ag-theme-quartz" :dir="direction" ref="gridContainer">
+    <div class="flex flex-col h-full w-full" :dir="direction" ref="gridContainer">
       <!-- Toolbar -->
       <GridToolbar
         v-if="showToolbar"
@@ -219,7 +219,7 @@ const myTheme = themeQuartz.withParams({
 const isGridLoaded = ref(false);
 
 const loadAgGrid = async () => {
-  await loadAgGridStyles();
+  // await loadAgGridStyles();
   if (AgGridVue) return;
 
   try {
